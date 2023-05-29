@@ -86,9 +86,15 @@ Content:
 - $S(a)=(y-\Phi(X)w)^T(y-\Phi(X)w)$
 ---
 # 4. Evaluation
-- TODO: Jerome
-- Scores
-- Performance test
+- For each model and dataset we will compare our implementation with the ones from the libraries
+- Model Scores:
+    - Mean Squared Error
+    $\text{MSE}(y, \hat{y}) = \frac{1}{n_\text{samples}} \sum_{i=0}^{n_\text{samples} - 1} (y_i - \hat{y}_i)^2$
+    - Mean Absolute Error
+    $\text{MAE}(y, \hat{y}) = \frac{1}{n_{\text{samples}}} \sum_{i=0}^{n_{\text{samples}}-1} \left| y_i - \hat{y}_i \right|$
+- Performance benchmarks:
+    - Runtime
+    - Memory
 ---
 # 5. Literature 
 - [Notes on Regularized Least-Squares](http://cbcl.mit.edu/publications/ps/MIT-CSAIL-TR-2007-025.pdf)
