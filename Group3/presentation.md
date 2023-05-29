@@ -37,7 +37,7 @@ Content:
  - Optimal line be reducing S(a)
 -  $a^*=arg\ \min_a{S(a)}\Rightarrow \nabla S(a)=0$ 
 - Problems:
-    - Heavily influcened by outlies
+    - Heavily influenced by outlies
     - Tends to overfit
 --- 
 # 2. Our Dataset
@@ -57,13 +57,17 @@ Content:
 ---
 # 3.ii Partial Least Squares
 ---
-# 3.iii Ridge Regression
-- TODO: Jerome
+# 3.iii Elastic Net
+- $\min_{w} { \frac{1}{2n_{\text{samples}}} ||X w - y||_2 ^ 2 + \alpha \rho ||w||_1 +
+\frac{\alpha(1-\rho)}{2} ||w||_2 ^ 2}$
+- based on Least Squares
+- combines penalties of the Lasso and Ridge regression
+- Lasso adds a penalty based on the $l_1$-norm of the trained coefficients
+- Ridge adds a penalty based on the $l_2$-norm of the trained coefficients
+- amount of penalty is controlled via the hyper-parameter $\alpha$
 ---
-# 3.iv Lasso
-- TODO: Jerome
 --- 
-# 3.v Locally Weighted Regression (LWR)
+# 3.iv Locally Weighted Regression (LWR)
 - Linear regression: $S(a)=(y-Xa)^T(y-Xa)$ 
 - weighted regression: 
     - certain data points get more weight than others
@@ -74,7 +78,7 @@ Content:
     - $S(a)=(y-Xa)^TW_E(y-Xa)$
     - e.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
 ---
-# 3.vi Radial Basis Function Regression (RBFR)
+# 3.v Radial Basis Function Regression (RBFR)
 - Idea: transform data into a higher dimension and then perform linear regression 
 - basis function: depends on distance to centre
 - radial basis function: $\phi(x) = \phi(||x||)$
@@ -87,3 +91,4 @@ Content:
 - Performance test
 ---
 # 5. Literature 
+- [Notes on Regularized Least-Squares](http://cbcl.mit.edu/publications/ps/MIT-CSAIL-TR-2007-025.pdf)
