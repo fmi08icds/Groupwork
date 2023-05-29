@@ -6,3 +6,7 @@ http://www.freekstulp.net/publications/pdfs/stulp15many.pdf
 The Elements of Statistical Learning: Data Mining, Inference, and Prediction.
 Second Edition
 https://hastie.su.domains/ElemStatLearn/printings/ESLII_print12_toc.pdf
+
+@Philipp
+Locally Weighted & Regression | Stanford CS229: Machine Learning - Lecture 3 (Autumn 2018) (Andrew Ng)
+https://www.youtube.com/watch?v=het9HFqo1TQ
