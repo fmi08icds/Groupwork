@@ -19,7 +19,6 @@ Content:
 
 ---
 
-
 # 1. Introduction
 - Our data set and model selection are based on the book ["The elements of statistical Learning"](https://hastie.su.domains/ElemStatLearn/)
 - Our group focuses on linear regression problems
@@ -65,7 +64,6 @@ Content:
 - Lasso adds a penalty based on the $l_1$-norm of the trained coefficients
 - Ridge adds a penalty based on the $l_2$-norm of the trained coefficients
 - amount of penalty is controlled via the hyper-parameter $\alpha$
----
 --- 
 # 3.iv Locally Weighted Regression (LWR)
 - Linear regression: $S(a)=(y-Xa)^T(y-Xa)$ 
