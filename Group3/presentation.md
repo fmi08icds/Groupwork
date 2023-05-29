@@ -18,9 +18,7 @@ Content:
     5. Lasso
 
 ---
-<!-- 
-footer: ""
- -->
+
 
 # 1. Introduction
 - Our data set and model selection are based on the book ["The elements of statistical Learning"](https://hastie.su.domains/ElemStatLearn/)
@@ -31,34 +29,41 @@ footer: ""
 - Benefits:
     - The trained models are interpretable
     - Reasonable performance on problems with sparse or low signal-to-noise data
-
---- 
-# 2. Our Dataset
-- [Prostate cancer](https://hastie.su.domains/ElemStatLearn/)
-- 8 variables
-- 67 observations
-
 ---
-# 3. Comparison of Regression Models
----
-# 3.i Least Squares
+# 1.i Basic idea behind regression
+- $S(a)$: Sum of squared residuals
 - $S(a) = \Sigma_{i=1}^N(y_i-a^Tx_i)^2$<img src="residual_square.png" style="height:500px; width:500px;float: right; margin-right: 10px;" />
     $=(y-Xa)^t(y-Xa)$
  - Optimal line be reducing S(a)
 -  $a^*=arg\ \min_a{S(a)}\Rightarrow \nabla S(a)=0$ 
 - Problems:
     - Heavily influcened by outlies
-    - tends to overfit
----
-# 3.ii Least Angle
----
-# 3.iii Partial Least Squares
----
-# 3.iv Ridge Regression
----
-# 3.v Lasso
+    - Tends to overfit
 --- 
-# 3.vi Locally Weighted Regression (LWR)
+# 2. Our Dataset
+- Generate data set
+- TODO: Jonny
+ <!--[Prostate cancer](https://hastie.su.domains/ElemStatLearn/)
+ <!--8 variables
+ <!--67 observations-->
+
+---
+# 3. Comparison of Regression Models
+1. Implement models using python libraries
+2. Implement selected models from scratch
+3. Evaluate and compare the implemented models
+---
+# 3.i Least Angle
+---
+# 3.ii Partial Least Squares
+---
+# 3.iii Ridge Regression
+- TODO: Jerome
+---
+# 3.iv Lasso
+- TODO: Jerome
+--- 
+# 3.v Locally Weighted Regression (LWR)
 - Linear regression: $S(a)=(y-Xa)^T(y-Xa)$ 
 - weighted regression: 
     - certain data points get more weight than others
@@ -69,9 +74,16 @@ footer: ""
     - $S(a)=(y-Xa)^TW_E(y-Xa)$
     - e.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
 ---
-# 3.vii Radial Basis Fucntion Regression (RBFR)
+# 3.vi Radial Basis Function Regression (RBFR)
 - Idea: transform data into a higher dimension and then perform linear regression 
 - basis function: depends on distance to centre
 - radial basis function: $\phi(x) = \phi(||x||)$
 - linearly combine set of linear basis functions
 - $S(a)=(y-\Phi(X)w)^T(y-\Phi(X)w)$
+---
+# 4. Evaluation
+- TODO: Jerome
+- Scores
+- Performance test
+---
+# 5. Literature 
