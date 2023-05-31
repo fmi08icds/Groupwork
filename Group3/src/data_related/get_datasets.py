@@ -26,3 +26,6 @@ with zipfile.ZipFile(filename, 'r') as zip_ref:
 ## remove zip file
 os.remove(filename)
 
+## remove duplicate
+os.remove("./Groupwork/Group3/data/realworld/AirQualityUCI/AirQualityUCI.csv")
+
