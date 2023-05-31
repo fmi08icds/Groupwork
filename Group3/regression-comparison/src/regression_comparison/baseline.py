@@ -141,10 +141,18 @@ class RegressionBaseline:
 if __name__ == "__main__":
     data_dir = "./Groupwork/Group3/data/realworld"
     dependent_indices = {
+<<<<<<< HEAD:Group3/regression-comparison/src/regression_comparison/baseline.py
         "winequality-red.csv": "quality",
         "AirQualityUCI.csv": "CO(GT)",
         "AirQualityUCI.xlsx": "CO(GT)",
         "real_estate.xlsx": "Y house price of unit area",
+=======
+        'winequality-red.csv': 'quality',
+        'AirQualityUCI.csv': 'CO(GT)',
+        'AirQualityUCI.xlsx': 'CO(GT)',
+        'real_estate.xlsx': 'Y house price of unit area',
+        'prostate.xlsx': 'lpsa'
+>>>>>>> b783824 (working on an easy synth data set for):Group3/src/baseline.py
         # add more dependent indices for other datasets here
     }
 
