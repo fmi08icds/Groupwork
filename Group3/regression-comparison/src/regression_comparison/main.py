@@ -5,6 +5,7 @@ import typer
 from regression_comparison import __title__
 from regression_comparison import __version__
 from regression_comparison import util
+from regression_comparison.dataset.download_data import load_data
 
 logger = logging.getLogger("regression_comparison")
 
@@ -41,8 +42,8 @@ def main(config_file: str = ConfigOption, version: bool = VersionOption):
     """
     config = util.load_config(config_file)
     util.logging_setup(config)
-    logger.info("Looks like you're all set up. Let's get going!")
-    # TODO your journey starts here
+
+    datasets = load_data(config.get("datasets_to_load"))
 
 
 if __name__ == "__main__":
