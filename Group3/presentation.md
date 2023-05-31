@@ -54,7 +54,17 @@ Content:
 ---
 # 3.i Least Angle
 ---
-# 3.ii Partial Least Squares
+# 3.ii Partial Least Squares (PLS)
+- Supervised learning method, related to PCA
+- Key Steps:
+    - Standardize predictors and responses
+    - Compute PLS direction: $Z_1 = \Sigma c_{jk} X_k$
+    - Obtain PLS loadings ($\gamma_{1j}$) and weights ($\delta_{1k}$) by regressing responses and predictors on $Z_1$
+    - Deflate predictors and responses, repeat for more PLS directions
+- Key Equations:
+    - PLS Direction: $Z_1 = \Sigma c_{jk} X_k$
+    - PLS Loadings: $\gamma_{1j}$
+    - PLS Weights: $\delta_{1k}$
 ---
 # 3.iii Elastic Net
 - $\min_{w} { \frac{1}{2n_{\text{samples}}} ||X w - y||_2 ^ 2 + \alpha \rho ||w||_1 +
