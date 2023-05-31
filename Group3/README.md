@@ -8,6 +8,12 @@ Our groups task is the implementation of one or more regression models using exi
 ## Tools 🧰
  - Our primary communication channel is a [Telegram](https://telegram.org/k/) group
  - Our presentations are written in markdown to fulfill the requirement that it is tracked in the version control. For rendering the file `presentation.md` use [Marp](https://marp.app/) in specific, the [Marp VSCode extension](https://marketplace.visualstudio.com/items?itemName=marp-team.marp-vscode)
+ - For our project we use a python [cookie cutter template](https://github.com/at-gmbh/at-python-template)
+
+## Structure 🏗️
+- `notes` contains general notes and brain dumps of our meetings or of the members of the group
+- `presentation` contains slide decks for presenting our progress in class
+- `regression-comparison` contains our project's source code, please take a look to the [`Readme`](regression-comparison/README.md) in this directory
 
 
 ## Members 👯

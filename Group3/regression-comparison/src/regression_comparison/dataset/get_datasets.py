@@ -15,12 +15,14 @@ filename = "./Groupwork/Group3/data/realworld/winequality-red.csv"
 urllib.request.urlretrieve(url, filename)
 
 ## 3. Air Quality Data Set
-url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00360/AirQualityUCI.zip"
+url = (
+    "https://archive.ics.uci.edu/ml/machine-learning-databases/00360/AirQualityUCI.zip"
+)
 filename = "./Groupwork/Group3/data/realworld/AirQualityUCI.zip"
 urllib.request.urlretrieve(url, filename)
 
 # unpack air quality data
-with zipfile.ZipFile(filename, 'r') as zip_ref:
+with zipfile.ZipFile(filename, "r") as zip_ref:
     zip_ref.extractall("./Groupwork/Group3/data/realworld/")
 
 ## remove zip file
@@ -28,4 +30,3 @@ os.remove(filename)
 
 ## remove duplicate
 os.remove("./Groupwork/Group3/data/realworld/AirQualityUCI/AirQualityUCI.csv")
-
