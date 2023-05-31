@@ -54,7 +54,7 @@ Content:
 ---
 # 3.i Least Angle
 ---
-# 3.ii Partial Least Squares (PLS)
+# 3.ii Partial Least Squares (PLS) - OPEN TO EDIT
 - Supervised learning method, related to PCA
 - Key Steps:
     - Standardize predictors and responses
@@ -66,7 +66,10 @@ Content:
     - PLS Loadings: $\gamma_{1j}$
     - PLS Weights: $\delta_{1k}$
 ---
-# 3.iii Elastic Net
+# 3.iii Principal Component Regression (PCR)
+- todo: Pierre
+---
+# 3.iv Elastic Net
 - $\min_{w} { \frac{1}{2n_{\text{samples}}} ||X w - y||_2 ^ 2 + \alpha \rho ||w||_1 +
 \frac{\alpha(1-\rho)}{2} ||w||_2 ^ 2}$
 - based on Least Squares
@@ -75,7 +78,7 @@ Content:
 - Ridge adds a penalty based on the $l_2$-norm of the trained coefficients
 - amount of penalty is controlled via the hyper-parameter $\alpha$
 --- 
-# 3.iv Locally Weighted Regression (LWR)
+# 3.v Locally Weighted Regression (LWR)
 - Linear regression: $S(a)=(y-Xa)^T(y-Xa)$ 
 - weighted regression: 
     - certain data points get more weight than others
@@ -86,7 +89,7 @@ Content:
     - $S(a)=(y-Xa)^TW_E(y-Xa)$
     - e.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
 ---
-# 3.v Radial Basis Function Regression (RBFR)
+# 3.vi Radial Basis Function Regression (RBFR)
 - Idea: transform data into a higher dimension and then perform linear regression 
 - basis function: depends on distance to centre
 - radial basis function: $\phi(x) = \phi(||x||)$
