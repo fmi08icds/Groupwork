@@ -3,7 +3,7 @@ marp: true
 slideNumber: true
 markdown.marp.enableHtml: true
 title: Group 3 - Regression
-footer: 02.06.2023 - Pieer A., Philipp R., Jerome W.,Johannes T., Tomislav P. 
+footer: "02.06.2023 - Pieer A. | Philipp R. | Jerome W. | Johannes T. | Tomislav P."
 transition: fade
 paginate: true
 ---
@@ -28,11 +28,11 @@ Content:
 # 1. Introduction
 
 - Our group focuses on **linear regression** problems
-- data and method selection based on [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
+- Data and method selection based on [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
 - The goal of a regression is to inspcet a possible dependency of $Y$ given $X$
     - $Y \in  \mathbb{R}$ dependent variable
-    - $X \in \mathbb{R}^p$ independent variable 
-        - where an instance is a vector $x$ containing $p$ measurements
+    - $X \in \mathbb{R}^p$ independent variable
+        - Where an instance is a vector $x$ containing $p$ measurements
 <!--- Benefits:
     - The trained models *(coefficients)* are interpretable
     - Reasonable performance on problems with sparse or low signal-to-noise data-->
@@ -42,13 +42,13 @@ Content:
 ## Basic idea behind any regression
 Optimize the following problem:
 - $\underset{f}{argmin}\ L(Y-f(X))$
-<!--Quadratic function hence minimum always exists. 
+<!--Quadratic function hence minimum always exists.
  Function is called squared error loss and is a loss function-->
 Example - Linear Regression
-- minimize $\epsilon^t \epsilon = (y-X\beta)^t(y-X\beta)$
+- Minimize $\epsilon^t \epsilon = (y-X\beta)^t(y-X\beta)$
 - $\underset{\beta}{argmin}\ (y-X\beta)^t(y-X\beta)$
 
-leads to the Ordinary Least Square Estimtor: 
+Leads to the Ordinary Least Square Estimtor:
 - $\hat{\beta} = (X^t X)^{−1}X^t y$
 
 ---
@@ -68,22 +68,22 @@ leads to the Ordinary Least Square Estimtor:
 1. Implement regression methods using python libraries
 2. Implement selected models from scratch
 3. Evaluate and compare the implemented models
-    - metric-performance (with default parameters)
-    - speed-performance
-    - memory-performance
+    - Metric-performance (with default parameters)
+    - Speed-performance
+    - Memory-performance
 ---
 # 3. Comparison of Regression Models
 ## i. Ordinary Least Squared
-Idea: find best-fitting line $f(x)=m + xb$ for $Y$ given $X$. 
+Idea: find best-fitting line $f(x)=m + xb$ for $Y$ given $X$.
 
 
 $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
 
-- good baseline with zero estimation bias
+- Good baseline with zero estimation bias
  $\mathbb{E}[\hat{\beta}] =~.._{mathemagic}..~= \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
  since $\mathbb{E}[\epsilon]= 0$ since $\epsilon\sim N(0, \sigma^2)$ it follows $\mathbb{E}[\hat{\beta}] = \beta$
-- simple linear Algebra
-- more complex methods trade off for benefits of reduced variance
+- Simple linear Algebra
+- More complex methods trade off for benefits of reduced variance
 
 
 ---
@@ -91,22 +91,22 @@ $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
 ## ii. Elastic Net (Lasso & Ridge)
 Idea: tune down dimensions of $X$ that have little to no influence on $Y$.
 <!--basically some kind of variable selection-->
-Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$ 
+Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$
 - $\underset{\beta}{argmin}\ ||y-X\beta||^2 + \lambda_1||\beta||^2 + \lambda_2||\beta||_1$
 - Elastic Net extends Ordinary Least Squares
 - **Lasso** adds a penalty based on the $l_1$-norm of the coefficients
 - **Ridge** adds a penalty based on the $l_2$-norm of the coefficients
-- choice of $\lambda_1$ and $\lambda_2$ are additional constraints for optimization problem
+- Choice of $\lambda_1$ and $\lambda_2$ are additional constraints for optimization problem
 
 ---
 # 3. Comparison of Regression Models
 ## iii. Least Angle Regression
 - **LAR** is a relative newcome *(Efron et al., 2004)*
-- “democratic” version of forward stepwise regression
-- extremely efficient algorithm for computing the entire lasso path ($\lambda_1$  $\rightarrow \infty$ until convergence).
+- “Democratic” version of forward stepwise regression
+- Extremely efficient algorithm for computing the entire lasso path ($\lambda_1$  $\rightarrow \infty$ until convergence).
 ---
 # 3. Comparison of Regression Models
-## iv. Principal Component Regression 
+## iv. Principal Component Regression
 Idea: Combine PCA and Linear Regression
 Approach: Reduce complexity and dimensionality
 - Perform PCA to obtain Principal Components (PCs)
@@ -147,10 +147,10 @@ Approach: Construct weights (Matrix $W$)
 - $S_{weighted}(\beta)=(y-X\beta)^T \ W(y-X\beta)$
 
 Locally weighted regression:
-- locally put emphasis on points in low proximity
-- in total E independent weighted regressions
+- Locally put emphasis on points in low proximity
+- In total E independent weighted regressions
 - $S_{weighted}(\beta)=(y-X\beta)^T \ W_E(y-X\beta)$
-- e.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
+- E.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
 ---
 <!-- rausgekickt.
 # 3. Comparison of Regression Models
@@ -164,14 +164,14 @@ Locally weighted regression:
 -->
 # 4. Evaluation
 Comparison with standard libraries / procedures
-- scikit-learn
+- `scikit-learn`
     - [Ordinary Least Squares](https://scikit-learn.org/stable/modules/linear_model.html#ordinary-least-squares)
     - [Elastic Net](https://scikit-learn.org/stable/modules/linear_model.html#elastic-net)
     - [Lasso LARS](https://scikit-learn.org/stable/modules/linear_model.html#lars-lasso)
     - [PCA Regression](https://scikit-learn.org/stable/auto_examples/cross_decomposition/plot_pcr_vs_pls.html)
-- public libraries 
-    - [localreg](https://pypi.org/project/localreg/) (locally weighted regression)
-    
+- Public libraries
+    - [`localreg`](https://pypi.org/project/localreg/) (locally weighted regression)
+
 
 
 ---
@@ -189,13 +189,13 @@ For each method and dataset we compute ...
 ---
 # 5.  Remarks and Outlook
 - Usage of "default" settings method (hyper-)parameters
-- future work: tuning methods for better results
-    - by variable/feature selection
-    - by engineering new features
-    - estimating hyperparameters
+- Future work: tuning methods for better results
+    - By variable / feature selection
+    - By engineering new features
+    - Estimating hyperparameters
 
 ---
-# 6. Literature 
+# 6. Literature
 - [Notes on Regularized Least-Squares](http://cbcl.mit.edu/publications/ps/MIT-CSAIL-TR-2007-025.pdf)
 
 - [Elements of Statistical Learning (Hastie et al.)](https://hastie.su.domains/Papers/ESLII.pdf)
