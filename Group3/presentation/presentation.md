@@ -1,5 +1,6 @@
 ---
 marp: true
+slideNumber: true
 markdown.marp.enableHtml: true
 title: Group 3 - Regression
 ---
@@ -9,6 +10,7 @@ footer: Members: Achka Pieer, Rickayzen Philipp, Würf Jerome, Tauscher Johannes
 15 Minuten Zeitlimit + 5 Minuten fragen
  -->
 
+---
 # Group 3: Regression
 Content:
 1. Introduction
@@ -57,7 +59,25 @@ Content:
 ---
 # 3.i Least Angle
 ---
-# 3.ii Partial Least Squares (PLS) - OPEN TO EDIT
+# 3.ii Principal Component Regression (PCR)
+- Combines Principal Component Analysis (PCA) and Linear Regression
+- Reduces complexity and dimensionality
+- Process:
+    - Standardize predictors
+    - Perform PCA on predictors to obtain Principal Components (PCs)
+    - Select a subset of PCs based on explained variance
+    - Regress response on selected PCs, treating each as an univariate regression
+- Key Equations:
+    - PCA: $Z_m = Xv_m$
+    - PCR: $\hat{y}^{pcr}_{(M)} = \bar{y}1 + \sum_{m=1}^{M} \hat{\theta}_m z_m$
+    - Coefficients: $\hat{\beta}^{pcr}(M) = \sum_{m=1}^{M} \hat{\theta}_m v_m$
+- Considerations:
+    - Selected PCs might lack physical interpretability
+    - Standardization of predictors is necessary
+    - The choice of M (number of PCs) affects model complexity
+
+---
+# 3.iii Partial Least Squares (PLS) - OPEN TO EDIT
 - Supervised learning method, related to PCA
 - Key Steps:
     - Standardize predictors and responses
@@ -68,9 +88,7 @@ Content:
     - PLS Direction: $Z_1 = \Sigma c_{jk} X_k$
     - PLS Loadings: $\gamma_{1j}$
     - PLS Weights: $\delta_{1k}$
----
-# 3.iii Principal Component Regression (PCR)
-- todo: Pierre
+
 ---
 # 3.iv Elastic Net
 - $\min_{w} { \frac{1}{2n_{\text{samples}}} ||X w - y||_2 ^ 2 + \alpha \rho ||w||_1 +
