@@ -14,7 +14,6 @@ paginate: true
  -->
 ![bg right:40% 180%](regression_intro.png)
 # Group 3: Regression
-Content:
 1. Introduction
 2. Our Datasets
 3. Comparison of Regression Models
@@ -23,6 +22,8 @@ Content:
     3. Least Angle Regression
     4. PCA Regression
     5. Locally Weighted Regression
+4. Evaluation
+5. Remarks and Outlook
 ---
 
 # 1. Introduction
