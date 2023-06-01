@@ -41,7 +41,7 @@ Content:
 # 1. Introduction
 ## Basic idea behind any regression
 Optimize the following problem:
-- $\underset{f}{argmin}\  \Sigma_{i=1}^n(y_i-f(x_i))^2$
+- $\underset{f}{argmin}\ L(Y-f(X))$
 <!--Quadratic function hence minimum always exists. 
  Function is called squared error loss and is a loss function-->
 Example - Linear Regression
@@ -68,19 +68,20 @@ leads to the Ordinary Least Square Estimtor:
 1. Implement regression methods using python libraries
 2. Implement selected models from scratch
 3. Evaluate and compare the implemented models
+    - metric-performance (with default parameters)
     - speed-performance
     - memory-performance
-    - metric-performance (with default parameters)
 ---
 # 3. Comparison of Regression Models
 ## i. Ordinary Least Squared
+Idea: find best-fitting line $f(x)=m + xb$ for $Y$ given $X$. 
 
 
 $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
 
-- baseline with zero estimation bias
- $\mathbb{E}[\hat{\beta}] =\ .._{mathemagic}..\ = \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
- Since $\mathbb{E}[\epsilon]= 0$ by , it follows $\mathbb{E}[\hat{\beta}] = \beta$
+- good baseline with zero estimation bias
+ $\mathbb{E}[\hat{\beta}] =~.._{mathemagic}..~= \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
+ since $\mathbb{E}[\epsilon]= 0$ since $\epsilon\sim N(0, \sigma^2)$ it follows $\mathbb{E}[\hat{\beta}] = \beta$
 - simple linear Algebra
 - more complex methods trade off for benefits of reduced variance
 
