@@ -16,7 +16,7 @@ paginate: true
 # Group 3: Regression
 Content:
 1. Introduction
-2. Our Dataset
+2. Our Datasets
 3. Comparison of Regression Models
     1. Ordinary Least Squares
     2. Elastic Net (Ridge & Lasso Regression)
@@ -29,7 +29,7 @@ Content:
 
 - Our group focuses on **linear regression** problems
 - Data and method selection based on [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
-- The goal of a regression is to inspcet a possible dependency of $Y$ given $X$
+- The goal of a regression is to inspect a possible dependency of $Y$ given $X$
     - $Y \in  \mathbb{R}$ dependent variable
     - $X \in \mathbb{R}^p$ independent variable
         - Where an instance is a vector $x$ containing $p$ measurements
@@ -48,7 +48,7 @@ Example - Linear Regression
 - Minimize $\epsilon^t \epsilon = (y-X\beta)^t(y-X\beta)$
 - $\underset{\beta}{argmin}\ (y-X\beta)^t(y-X\beta)$
 
-Leads to the Ordinary Least Square Estimtor:
+Leads to the Ordinary Least Square Estimator:
 - $\hat{\beta} = (X^t X)^{−1}X^t y$
 
 ---
@@ -80,7 +80,7 @@ Idea: find best-fitting line $f(x)=m + xb$ for $Y$ given $X$.
 $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
 
 - Good baseline with zero estimation bias
- $\mathbb{E}[\hat{\beta}] =~.._{mathemagic}..~= \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
+ $\mathbb{E}[\hat{\beta}] =.._{math-magic🧙}..~= \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
  since $\mathbb{E}[\epsilon]= 0$ since $\epsilon\sim N(0, \sigma^2)$ it follows $\mathbb{E}[\hat{\beta}] = \beta$
 - Simple linear Algebra
 - More complex methods trade off for benefits of reduced variance
@@ -188,11 +188,11 @@ For each method and dataset we compute ...
     - Memory
 ---
 # 5.  Remarks and Outlook
-- Usage of "default" settings method (hyper-)parameters
+- Usage of "default" settings method hyper-parameters
 - Future work: tuning methods for better results
     - By variable / feature selection
     - By engineering new features
-    - Estimating hyperparameters
+    - Estimating hyper-parameters
 
 ---
 # 6. Literature
