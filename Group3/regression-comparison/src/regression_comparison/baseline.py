@@ -38,14 +38,11 @@ class RegressionBaseline:
 
         ## list of models to benchmark / baseline for.
         self.models = [
-            make_pipeline(linear_model.LinearRegression()),
-            make_pipeline(linear_model.Ridge(alpha=0.5)),
-            make_pipeline(linear_model.Lasso(alpha=0.1)),
-            make_pipeline(linear_model.BayesianRidge()),
-            make_pipeline(
-                StandardScaler(),
-                linear_model.SGDRegressor(random_state=0, max_iter=1000, tol=1e-3),
-            ),
+            make_pipeline(StandardScaler(), linear_model.LinearRegression()),
+            make_pipeline(StandardScaler(), linear_model.Ridge(alpha=0.5)),
+            make_pipeline(StandardScaler(), linear_model.Lasso(alpha=0.1)),
+            make_pipeline(StandardScaler(), linear_model.BayesianRidge()),
+            make_pipeline(StandardScaler(), linear_model.SGDRegressor(random_state=0, max_iter=1000, tol=1e-3),),
         ]
         ## can be extended to other models
 
