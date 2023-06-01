@@ -38,16 +38,21 @@ class RegressionBaseline:
 
         ## list of models to benchmark / baseline for.
         self.models = [
-            make_pipeline(StandardScaler(), linear_model.LinearRegression()),
-            make_pipeline(StandardScaler(), linear_model.Ridge(alpha=0.5)),
-            make_pipeline(StandardScaler(), linear_model.Lasso(alpha=0.1)),
-            make_pipeline(StandardScaler(), linear_model.BayesianRidge()),
+            make_pipeline(linear_model.LinearRegression()),
+            make_pipeline(linear_model.Ridge(alpha=0.5)),
+            make_pipeline(linear_model.Lasso(alpha=0.1)),
+            make_pipeline(linear_model.BayesianRidge()),
             make_pipeline(
                 StandardScaler(),
                 linear_model.SGDRegressor(random_state=0, max_iter=1000, tol=1e-3),
             ),
         ]
         ## can be extended to other models
+
+        # default test size
+        self.test_size = 0.2
+        # default random state for reproducibility (change to - None - for randomness)
+        self.random_state = 0
 
         self.data_name = name
         self.dependent_index = dependent_index
@@ -80,7 +85,7 @@ class RegressionBaseline:
                 self.data = self.data.drop(col, axis=1)
         return self.data
 
-    def split_data(self):
+    def split_data(self) -> "tuple[list, list, list, list]":
         """
         Split the data into training and testing sets.
 
@@ -90,7 +95,11 @@ class RegressionBaseline:
         X = self.data.drop(self.dependent_index, axis=1)
         y = self.data[self.dependent_index]
         X_train, X_test, y_train, y_test = model_selection.train_test_split(
-            X, y, test_size=0.2, random_state=0
+            X,
+            y,
+            test_size=self.test_size,
+            train_size=1 - self.test_size,
+            random_state=self.random_state,
         )
         return X_train, X_test, y_train, y_test
 
@@ -118,7 +127,10 @@ class RegressionBaseline:
         return pd.DataFrame(
             {
                 "Model": [
-                    f"Model {self.models[i][1]}" for i in range(len(self.models))
+                    f"Model {self.models[i][1]}"
+                    for i in range(
+                        len(self.models)
+                    )  ## toDO: fix if pipeline looks different it breaks.
                 ],
                 "Score": self.scores,
                 "MSE": self.mses,
