@@ -3,7 +3,8 @@ marp: true
 slideNumber: true
 markdown.marp.enableHtml: true
 title: Group 3 - Regression
-footer: "02.06.2023 - Pieer A. | Philipp R. | Jerome W. | Johannes T. | Tomislav P."
+header: "02.06.2023 | Group 3 | Regression"
+footer: "Pieer A. | Philipp R. | Jerome W. | Johannes T. | Tomislav P."
 transition: fade
 paginate: true
 ---
