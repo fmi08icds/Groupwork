@@ -5,7 +5,10 @@ title: Group 3 - Regression
 ---
 <!--
 footer: Members: Achka Pieer, Rickayzen Philipp, Würf Jerome, Tauscher Johannes, Popov Tomislav
+
+15 Minuten Zeitlimit + 5 Minuten fragen
  -->
+
 # Group 3: Regression
 Content:
 1. Introduction
@@ -40,12 +43,12 @@ Content:
     - Tends to overfit
 ---
 # 2. Our Dataset
-- Generate data set
-- TODO: Jonny
- <!--[Prostate cancer](https://hastie.su.domains/ElemStatLearn/)
- <!--8 variables
- <!--67 observations-->
+- UCI Data Repository
+- Data proposed in Elements of Statistical Learning
+    - [Prostate cancer](https://hastie.su.domains/ElemStatLearn/)
+- Synthetic Data
 
+- Training & Test Datasets (80/20)
 ---
 # 3. Comparison of Regression Models
 1. Implement models using python libraries
@@ -107,5 +110,14 @@ Content:
     - Runtime
     - Memory
 ---
-# 5. Literature
+# 5.  Remarks and Outlook
+- Currently we use "default" settings for the regression (hyper-)parameters
+- in the future more work could be put into tuning the methods for better results.
+    - by excluding specific features
+    - by engineering new features
+
+---
+# 6. Literature 
 - [Notes on Regularized Least-Squares](http://cbcl.mit.edu/publications/ps/MIT-CSAIL-TR-2007-025.pdf)
+
+- [Elements of Statistical Learning (Hastie et al.)](https://hastie.su.domains/Papers/ESLII.pdf)
