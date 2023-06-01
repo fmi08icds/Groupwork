@@ -1,11 +1,14 @@
 import logging
+from pathlib import Path
 
 import typer
 
 from regression_comparison import __title__
 from regression_comparison import __version__
 from regression_comparison import util
+from regression_comparison.baseline import run_baseline
 from regression_comparison.dataset.download_data import load_data
+from regression_comparison.io import save_results
 
 logger = logging.getLogger("regression_comparison")
 
@@ -43,7 +46,16 @@ def main(config_file: str = ConfigOption, version: bool = VersionOption):
     config = util.load_config(config_file)
     util.logging_setup(config)
 
-    datasets = load_data(config.get("datasets_to_load"))
+    paths = config.get("paths")
+    datasets = load_data(
+        config.get("datasets_to_load"),
+        Path(paths["non_generated"]),
+        Path(paths["generated"]),
+    )
+
+    if config.get("baseline"):
+        baseline_results = run_baseline(datasets, config.get("dependent_variables"))
+        save_results(baseline_results, Path(paths["results"], "baseline.csv"))
 
 
 if __name__ == "__main__":

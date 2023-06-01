@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("regression_comparison")
 
 
 ## naive baseline for comparison:
@@ -111,11 +111,11 @@ class RegressionBaseline:
             mses.append(mse)
         return scores, mses
 
-    def save_results(self):
+    def get_results(self):
         """
-        Save the results of the regression to a CSV file.
+        Gets the results of the regression.
         """
-        results_df = pd.DataFrame(
+        return pd.DataFrame(
             {
                 "Model": [
                     f"Model {self.models[i][1]}" for i in range(len(self.models))
@@ -124,56 +124,21 @@ class RegressionBaseline:
                 "MSE": self.mses,
             }
         )
-        results_df.to_csv(
-            f"./Groupwork/Group3/data/results/baseline_results_{self.data_name}.csv",
-            index=False,
-        )
-        print("\nResults saved to baseline_results.csv")
 
     def verbose_results(self):
-        print(f"Baseline Regression Models for {self.data_name}:")
+        logger.info(f"Baseline Regression Models for {self.data_name}:")
         for i, model in enumerate(self.models):
-            print(f"Model {i+1}: {model}")
-            print(f"\nScores: {self.scores[i]}")
-            print(f"MSEs: {self.mses[i]}")
+            logger.info(f"Model {i+1}: {model}")
+            logger.info(f"\nScores: {self.scores[i]}")
+            logger.info(f"MSEs: {self.mses[i]}")
 
 
-if __name__ == "__main__":
-    data_dir = "./Groupwork/Group3/data/realworld"
-    dependent_indices = {
-        "winequality-red.csv": "quality",
-        "AirQualityUCI.csv": "CO(GT)",
-        "AirQualityUCI.xlsx": "CO(GT)",
-        "real_estate.xlsx": "Y house price of unit area",
-        # add more dependent indices for other datasets here
-    }
-
-    ## run regressions for all datasets in data_dir
-
-    for filename in os.scandir(data_dir):
-        if (
-            filename.name.endswith(".xlsx") or filename.name.endswith(".csv")
-        ) and filename.is_file():
-            dependent_index = dependent_indices.get(filename.name)
-            logging.info(
-                f"Running baseline regressions for {filename.name} and variable {dependent_index}."
-            )
-            if dependent_index is not None:
-                try:
-                    if filename.name.endswith(".xlsx"):
-                        data = pd.read_excel(filename.path)
-                    else:
-                        data = pd.read_csv(
-                            filename.path,
-                            sep=";",
-                            engine="python",
-                            encoding="utf-8-sig",
-                        )
-                        if len(data.columns) <= 1:
-                            data = pd.read_csv(filename.path, sep=",")
-                except Exception as e:
-                    logging.error(f"Error reading file {filename.name}: {e}")
-                    continue
-                baseline = RegressionBaseline(data, dependent_index, name=filename.name)
-                baseline.verbose_results()
-                baseline.save_results()
+def run_baseline(datasets, dependent_variables):
+    for dataset_name, dataset in datasets.items():
+        dependent_variable = dependent_variables.get(dataset_name)
+        logging.info(
+            f"Running baseline regressions for {dataset_name} and variable {dependent_variable}."
+        )
+        baseline = RegressionBaseline(dataset, dependent_variable, name=dataset_name)
+        baseline.verbose_results()
+        return baseline.get_results()
