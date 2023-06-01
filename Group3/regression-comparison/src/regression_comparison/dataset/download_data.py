@@ -26,7 +26,7 @@ def load_data(datasets_to_load):
     return read_data(data)
 
 
-def read_data(data_path: Path) -> dict[str, pd.DataFrame]:
+def read_data(data_path: Path) -> 'dict[str, pd.DataFrame]':
     files = [x for x in list(data_path.rglob("*")) if x.is_file() and x.name[0] != "."]
     datasets = {}
 

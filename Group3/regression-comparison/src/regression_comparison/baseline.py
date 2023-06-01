@@ -49,6 +49,12 @@ class RegressionBaseline:
         ]
         ## can be extended to other models
 
+        # default test size
+        self.test_size = 0.2
+        # default random state for reproducibility (change to - None - for randomness)
+        self.random_state = 0
+
+
         self.data_name = name
         self.dependent_index = dependent_index
         self.data = input_data
@@ -57,6 +63,7 @@ class RegressionBaseline:
         self.scores, self.mses = self.get_scores()
         self.scores = self.get_scores()[0]
         self.mses = self.get_scores()[1]
+
 
     def preprocess_data(self):
         """
@@ -80,7 +87,7 @@ class RegressionBaseline:
                 self.data = self.data.drop(col, axis=1)
         return self.data
 
-    def split_data(self):
+    def split_data(self)-> 'tuple[list, list, list, list]':
         """
         Split the data into training and testing sets.
 
@@ -90,7 +97,7 @@ class RegressionBaseline:
         X = self.data.drop(self.dependent_index, axis=1)
         y = self.data[self.dependent_index]
         X_train, X_test, y_train, y_test = model_selection.train_test_split(
-            X, y, test_size=0.2, random_state=0
+            X, y, test_size=self.test_size, train_size=1-self.test_size, random_state=self.random_state
         )
         return X_train, X_test, y_train, y_test
 
@@ -125,7 +132,7 @@ class RegressionBaseline:
             }
         )
         results_df.to_csv(
-            f"./Groupwork/Group3/data/results/baseline_results_{self.data_name}.csv",
+            f"./Group3/data/results/baseline_results_{self.data_name}.csv",
             index=False,
         )
         print("\nResults saved to baseline_results.csv")
@@ -139,26 +146,20 @@ class RegressionBaseline:
 
 
 if __name__ == "__main__":
-    data_dir = "./Groupwork/Group3/data/realworld"
+    data_dir = "./Group3/data/realworld"
     dependent_indices = {
-<<<<<<< HEAD:Group3/regression-comparison/src/regression_comparison/baseline.py
-        "winequality-red.csv": "quality",
-        "AirQualityUCI.csv": "CO(GT)",
-        "AirQualityUCI.xlsx": "CO(GT)",
-        "real_estate.xlsx": "Y house price of unit area",
-=======
         'winequality-red.csv': 'quality',
-        'AirQualityUCI.csv': 'CO(GT)',
-        'AirQualityUCI.xlsx': 'CO(GT)',
+        'AirQualityUCI.csv': 'CO(GT)', 
+        ## 'AirQualityUCI.xlsx': 'CO(GT)', ## somehow the data is not read in correctly, skip for now
         'real_estate.xlsx': 'Y house price of unit area',
         'prostate.xlsx': 'lpsa'
->>>>>>> b783824 (working on an easy synth data set for):Group3/src/baseline.py
         # add more dependent indices for other datasets here
     }
 
     ## run regressions for all datasets in data_dir
 
     for filename in os.scandir(data_dir):
+        logging.info(f"Running baseline regressions for {filename.name}.")
         if (
             filename.name.endswith(".xlsx") or filename.name.endswith(".csv")
         ) and filename.is_file():
