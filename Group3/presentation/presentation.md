@@ -3,14 +3,16 @@ marp: true
 slideNumber: true
 markdown.marp.enableHtml: true
 title: Group 3 - Regression
+footer: 02.06.2023 - Pieer A., Philipp R., Jerome W.,Johannes T., Tomislav P. 
+transition: fade
+paginate: true
 ---
+
 <!--
-footer: Members: Achka Pieer, Rickayzen Philipp, Würf Jerome, Tauscher Johannes, Popov Tomislav
 
 15 Minuten Zeitlimit + 5 Minuten fragen
  -->
-
----
+![bg right:40% 180%](regression_intro.png)
 # Group 3: Regression
 Content:
 1. Introduction
@@ -20,8 +22,7 @@ Content:
     2. Elastic Net (Ridge & Lasso Regression)
     3. Least Angle Regression
     4. PCA Regression
-    5. Splines
-
+    5. Locally Weighted Regression
 ---
 
 # 1. Introduction
@@ -44,9 +45,10 @@ Optimize the following problem:
 <!--Quadratic function hence minimum always exists. 
  Function is called squared error loss and is a loss function-->
 Example - Linear Regression
-- $\underset{\beta}{argmin}\ =(y-X\beta)^t(y-X\beta)$
+- minimize $\epsilon^t \epsilon = (y-X\beta)^t(y-X\beta)$
+- $\underset{\beta}{argmin}\ (y-X\beta)^t(y-X\beta)$
 
-Ordinary Least Square Estimtor: 
+leads to the Ordinary Least Square Estimtor: 
 - $\hat{\beta} = (X^t X)^{−1}X^t y$
 
 ---
@@ -74,38 +76,56 @@ Ordinary Least Square Estimtor:
 ## i. Ordinary Least Squared
 
 
-Ordinary Least Square Estimtor:  
-
 $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
 
 - baseline with zero estimation bias
  $\mathbb{E}[\hat{\beta}] =\ .._{mathemagic}..\ = \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
  Since $\mathbb{E}[\epsilon]= 0$ by , it follows $\mathbb{E}[\hat{\beta}] = \beta$
 - simple linear Algebra
-- straight forward implementation
-- more complex model trade it off for benefits of reduced variance
+- more complex methods trade off for benefits of reduced variance
 
 
 ---
-# 3.ii Principal Component Regression (PCR)
-- Combines Principal Component Analysis (PCA) and Linear Regression
-- Reduces complexity and dimensionality
-- Process:
-    - Standardize predictors
-    - Perform PCA on predictors to obtain Principal Components (PCs)
-    - Select a subset of PCs based on explained variance
-    - Regress response on selected PCs, treating each as an univariate regression
-- Key Equations:
-    - PCA: $Z_m = Xv_m$
-    - PCR: $\hat{y}^{pcr}_{(M)} = \bar{y}1 + \sum_{m=1}^{M} \hat{\theta}_m z_m$
-    - Coefficients: $\hat{\beta}^{pcr}(M) = \sum_{m=1}^{M} \hat{\theta}_m v_m$
+# 3. Comparison of Regression Models
+## ii. Elastic Net (Lasso & Ridge)
+Idea: tune down dimensions of $X$ that have little to no influence on $Y$.
+<!--basically some kind of variable selection-->
+Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$ 
+- $\underset{\beta}{argmin}\ ||y-X\beta||^2 + \lambda_1||\beta||^2 + \lambda_2||\beta||_1$
+- Elastic Net extends Ordinary Least Squares
+- **Lasso** adds a penalty based on the $l_1$-norm of the coefficients
+- **Ridge** adds a penalty based on the $l_2$-norm of the coefficients
+- choice of $\lambda_1$ and $\lambda_2$ are additional constraints for optimization problem
+
+---
+# 3. Comparison of Regression Models
+## iii. Least Angle Regression
+- **LAR** is a relative newcome *(Efron et al., 2004)*
+- “democratic” version of forward stepwise regression
+- extremely efficient algorithm for computing the entire lasso path ($\lambda_1$  $\rightarrow \infty$ until convergence).
+---
+# 3. Comparison of Regression Models
+## iv. Principal Component Regression 
+Idea: Combine PCA and Linear Regression
+Approach: Reduce complexity and dimensionality
+- Perform PCA to obtain Principal Components (PCs)
+- Choose subset of PCs *(explained variance)*
+- Regress response on selected PCs treating each as an univariate regression
+
+Key Equations:
+    - PCA : $Z_m = Xv_m$
+    - PCR : $\hat{y}^{pcr}_{(M)} = \bar{y}1 + \sum_{m=1}^{M} \hat{\theta}_m z_m$
+    - Coefficients : $\hat{\beta}^{pcr}(M) = \sum_{m=1}^{M} \hat{\theta}_m v_m$
+<!--
 - Considerations:
     - Selected PCs might lack physical interpretability
     - Standardization of predictors is necessary
     - The choice of M (number of PCs) affects model complexity
-
+-->
+<!-- rausgekickt, oder??
 ---
-# 3.iii Partial Least Squares (PLS) - OPEN TO EDIT
+# 3. Comparison of Regression Models
+## iv. Partial Least Squares (PLS) - OPEN TO EDIT
 - Supervised learning method, related to PCA
 - Key Steps:
     - Standardize predictors and responses
@@ -116,54 +136,67 @@ $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
     - PLS Direction: $Z_1 = \Sigma c_{jk} X_k$
     - PLS Loadings: $\gamma_{1j}$
     - PLS Weights: $\delta_{1k}$
+-->
+---
 
+# 3. Comparison of Regression Models
+## v. Locally Weighted Regression (LWR)
+Idea: Ordinary Least Squares but now certain data points get more weight than others
+Approach: Construct weights (Matrix $W$)
+- $S_{weighted}(\beta)=(y-X\beta)^T \ W(y-X\beta)$
+
+Locally weighted regression:
+- locally put emphasis on points in low proximity
+- in total E independent weighted regressions
+- $S_{weighted}(\beta)=(y-X\beta)^T \ W_E(y-X\beta)$
+- e.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
 ---
-# 3.iv Elastic Net
-- $\min_{w} { \frac{1}{2n_{\text{samples}}} ||X w - y||_2 ^ 2 + \alpha \rho ||w||_1 +
-\frac{\alpha(1-\rho)}{2} ||w||_2 ^ 2}$
-- based on Least Squares
-- combines penalties of the Lasso and Ridge regression
-- Lasso adds a penalty based on the $l_1$-norm of the trained coefficients
-- Ridge adds a penalty based on the $l_2$-norm of the trained coefficients
-- amount of penalty is controlled via the hyper-parameter $\alpha$
----
-# 3.v Locally Weighted Regression (LWR)
-- Linear regression: $S(a)=(y-Xa)^T(y-Xa)$
-- weighted regression:
-    - certain data points get more weight than others
-    - $S(a)=(y-Xa)^TW(y-Xa)$
-- Locally weighted regression:
-    - Idea: local points weight points in proximity higher
-    - in total E independent weighted regressions
-    - $S(a)=(y-Xa)^TW_E(y-Xa)$
-    - e.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
----
-# 3.vi Radial Basis Function Regression (RBFR)
+<!-- rausgekickt.
+# 3. Comparison of Regression Models
+## vi. Radial Basis Function Regression (RBFR)
 - Idea: transform data into a higher dimension and then perform linear regression
 - basis function: depends on distance to centre
 - radial basis function: $\phi(x) = \phi(||x||)$
 - linearly combine set of linear basis functions
-- $S(a)=(y-\Phi(X)w)^T(y-\Phi(X)w)$
+- $S(\phi_w)=(y-\Phi(X)w)^T(y-\Phi(X)w)$
 ---
+-->
 # 4. Evaluation
-- For each model and dataset we will compare our implementation with the ones from the libraries
+Comparison with standard libraries / procedures
+- scikit-learn
+    - [Ordinary Least Squares](https://scikit-learn.org/stable/modules/linear_model.html#ordinary-least-squares)
+    - [Elastic Net](https://scikit-learn.org/stable/modules/linear_model.html#elastic-net)
+    - [Lasso LARS](https://scikit-learn.org/stable/modules/linear_model.html#lars-lasso)
+    - [PCA Regression](https://scikit-learn.org/stable/auto_examples/cross_decomposition/plot_pcr_vs_pls.html)
+- public libraries 
+    - [localreg](https://pypi.org/project/localreg/) (locally weighted regression)
+    
+
+
+---
+
+# 4. Evaluation
+For each method and dataset we compute ...
 - Model Scores:
     - Mean Squared Error
-    $\text{MSE}(y, \hat{y}) = \frac{1}{n_\text{samples}} \sum_{i=0}^{n_\text{samples} - 1} (y_i - \hat{y}_i)^2$
+    $\text{MSE}(y, \hat{y}) = \frac{1}{n} \sum_{i=0}^{n-1} (y_i - \hat{y}_i)^2$
     - Mean Absolute Error
-    $\text{MAE}(y, \hat{y}) = \frac{1}{n_{\text{samples}}} \sum_{i=0}^{n_{\text{samples}}-1} \left| y_i - \hat{y}_i \right|$
+    $\text{MAE}(y, \hat{y}) = \frac{1}{n} \sum_{i=0}^{n-1} \left| y_i - \hat{y}_i \right|$
 - Performance benchmarks:
     - Runtime
     - Memory
 ---
 # 5.  Remarks and Outlook
-- Currently we use "default" settings for the regression (hyper-)parameters
-- in the future more work could be put into tuning the methods for better results.
-    - by excluding specific features
+- Usage of "default" settings method (hyper-)parameters
+- future work: tuning methods for better results
+    - by variable/feature selection
     - by engineering new features
+    - estimating hyperparameters
 
 ---
 # 6. Literature 
 - [Notes on Regularized Least-Squares](http://cbcl.mit.edu/publications/ps/MIT-CSAIL-TR-2007-025.pdf)
 
 - [Elements of Statistical Learning (Hastie et al.)](https://hastie.su.domains/Papers/ESLII.pdf)
+
+- [Scikit-Learn Documentation](https://scikit-learn.org/)
