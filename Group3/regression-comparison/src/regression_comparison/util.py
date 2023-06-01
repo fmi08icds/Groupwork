@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union
 
-import pkg_resources
+import pkg_resources  # type: ignore
 from pyhocon import ConfigTree, ConfigFactory
 
 logger = logging.getLogger("regression_comparison")
@@ -21,7 +21,7 @@ def get_resource_string(path: str, decode=True) -> Union[str, bytes]:
     return s.decode(errors="ignore") if decode else s
 
 
-def load_config(config_file: Union[str, Path] = None) -> ConfigTree:
+def load_config(config_file: Union[str, Path] | None = None) -> ConfigTree:
     """
     Load the config from the specified file and use it to override fields in the default config.
     If no config file is specified, only the default config is loaded.

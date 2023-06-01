@@ -17,7 +17,7 @@ def read_datasets(file_paths: list[Path]) -> dict[str, pd.DataFrame]:
 
     for file_path in file_paths:
         separator = ";" if file_path.stem == "wine_quality" else ","
-        index_col = "No" if file_path.stem == "real_estate" else None
+        index_col = 0 if file_path.stem == "real_estate" else None
         if file_path.suffix == ".xlsx":
             datasets[file_path.stem] = pd.read_excel(file_path, index_col=index_col)
         elif file_path.suffix == ".csv":
