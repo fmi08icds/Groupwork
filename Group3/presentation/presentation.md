@@ -103,7 +103,7 @@ Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$
 ---
 # 3. Comparison of Regression Models
 ## iii. Least Angle Regression
-- **LAR** is a relative newcome *(Efron et al., 2004)*
+- **LAR** is a relative newcomer *(Efron et al., 2004)*
 - “Democratic” version of forward stepwise regression
 - Extremely efficient algorithm for computing the entire lasso path ($\lambda_1$  $\rightarrow \infty$ until convergence).
 ---
@@ -201,5 +201,7 @@ For each method and dataset we compute ...
 - [Notes on Regularized Least-Squares](http://cbcl.mit.edu/publications/ps/MIT-CSAIL-TR-2007-025.pdf)
 
 - [Elements of Statistical Learning (Hastie et al.)](https://hastie.su.domains/Papers/ESLII.pdf)
+
+- [Many Regression Algorithms, One Unified Model (Stulp, Signaud)](http://www.freekstulp.net/publications/pdfs/stulp15many.pdf)
 
 - [Scikit-Learn Documentation](https://scikit-learn.org/)
