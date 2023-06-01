@@ -16,48 +16,76 @@ Content:
 1. Introduction
 2. Our Dataset
 3. Comparison of Regression Models
-    1. Least Squares
-    2. Least Angle
-    3. Partial Least Squares
-    4. Ridge Regression
-    5. Lasso
+    1. Ordinary Least Squares
+    2. Elastic Net (Ridge & Lasso Regression)
+    3. Least Angle Regression
+    4. PCA Regression
+    5. Splines
 
 ---
 
 # 1. Introduction
-- Our data set and model selection are based on the book ["The elements of statistical Learning"](https://hastie.su.domains/ElemStatLearn/)
-- Our group focuses on linear regression problems
-- A linear regression model is denoted function as $E(Y|X)$
-    - $Y$ is the continuous output space on $R$
-    - $X$ is the input space where an instance is a vector $\textbf{x}$ containing multiple measurements
-- Benefits:
-    - The trained models are interpretable
-    - Reasonable performance on problems with sparse or low signal-to-noise data
----
-# 1.i Basic idea behind regression
-- $S(a)$: Sum of squared residuals
-- $S(a) = \Sigma_{i=1}^N(y_i-a^Tx_i)^2$<img src="residual_square.png" style="height:500px; width:500px;float: right; margin-right: 10px;" />
-    $=(y-Xa)^t(y-Xa)$
- - Optimal line be reducing S(a)
--  $a^*=arg\ \min_a{S(a)}\Rightarrow \nabla S(a)=0$
-- Problems:
-    - Heavily influenced by outlies
-    - Tends to overfit
----
-# 2. Our Dataset
-- UCI Data Repository
-- Data proposed in Elements of Statistical Learning
-    - [Prostate cancer](https://hastie.su.domains/ElemStatLearn/)
-- Synthetic Data
 
-- Training & Test Datasets (80/20)
+- Our group focuses on **linear regression** problems
+- data and method selection based on [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
+- The goal of a regression is to inspcet a possible dependency of $Y$ given $X$
+    - $Y \in  \mathbb{R}$ dependent variable
+    - $X \in \mathbb{R}^p$ independent variable 
+        - where an instance is a vector $x$ containing $p$ measurements
+<!--- Benefits:
+    - The trained models *(coefficients)* are interpretable
+    - Reasonable performance on problems with sparse or low signal-to-noise data-->
 ---
+![bg right:35% 100%](residual_square.png)
+# 1. Introduction
+## Basic idea behind any regression
+Optimize the following problem:
+- $\underset{f}{argmin}\  \Sigma_{i=1}^n(y_i-f(x_i))^2$
+<!--Quadratic function hence minimum always exists. 
+ Function is called squared error loss and is a loss function-->
+Example - Linear Regression
+- $\underset{\beta}{argmin}\ =(y-X\beta)^t(y-X\beta)$
+
+Ordinary Least Square Estimtor: 
+- $\hat{\beta} = (X^t X)^{−1}X^t y$
+
+---
+# 2. Our Datasets
+![bg right 90%](prostate.png)
+- UCI Data Repository
+    - [real_estate](https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set)
+    - [winequality-red](https://archive-beta.ics.uci.edu/dataset/186/wine+quality)
+    - [AirQualityUCI](https://archive-beta.ics.uci.edu/dataset/360/air+quality)
+- Data proposed in Elements of Statistical Learning
+    - [Prostate cancer](https://hastie.su.domains/ElemStatLearn/data.html)
+
+---
+![bg right:33% 90%](workflow.svg)
 # 3. Comparison of Regression Models
-1. Implement models using python libraries
+## Workflow
+1. Implement regression methods using python libraries
 2. Implement selected models from scratch
 3. Evaluate and compare the implemented models
+    - speed-performance
+    - memory-performance
+    - metric-performance (with default parameters)
 ---
-# 3.i Least Angle
+# 3. Comparison of Regression Models
+## i. Ordinary Least Squared
+
+
+Ordinary Least Square Estimtor:  
+
+$\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
+
+- baseline with zero estimation bias
+ $\mathbb{E}[\hat{\beta}] =\ .._{mathemagic}..\ = \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
+ Since $\mathbb{E}[\epsilon]= 0$ by , it follows $\mathbb{E}[\hat{\beta}] = \beta$
+- simple linear Algebra
+- straight forward implementation
+- more complex model trade it off for benefits of reduced variance
+
+
 ---
 # 3.ii Principal Component Regression (PCR)
 - Combines Principal Component Analysis (PCA) and Linear Regression
