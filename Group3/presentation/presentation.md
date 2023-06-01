@@ -108,7 +108,7 @@ Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$
 - Extremely efficient algorithm for computing the entire lasso path ($\lambda_1$  $\rightarrow \infty$ until convergence).
 ---
 # 3. Comparison of Regression Models
-## iv. Principal Component Regression
+## iv. Principal Component Regression (PCR)
 Idea: Combine PCA and Linear Regression
 Approach: Reduce complexity and dimensionality
 - Perform PCA to obtain Principal Components (PCs)
