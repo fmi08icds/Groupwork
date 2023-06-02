@@ -108,17 +108,16 @@ Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$
 - Extremely efficient algorithm for computing the entire lasso path ($\lambda_1$  $\rightarrow \infty$ until convergence).
 ---
 # 3. Comparison of Regression Models
-## iv. Principal Component Regression (PCR)
-Idea: Combine PCA and Linear Regression
-Approach: Reduce complexity and dimensionality
-- Perform PCA to obtain Principal Components (PCs)
-- Choose subset of PCs *(explained variance)*
-- Regress response on selected PCs treating each as an univariate regression
-
-Key Equations:
-    - PCA : $Z_m = Xv_m$
-    - PCR : $\hat{y}^{pcr}_{(M)} = \bar{y}1 + \sum_{m=1}^{M} \hat{\theta}_m z_m$
-    - Coefficients : $\hat{\beta}^{pcr}(M) = \sum_{m=1}^{M} \hat{\theta}_m v_m$
+## iv. Locally Weighted Regression (LWR)
+Idea: Ordinary Least Squares but now certain data points get more weight than others
+Approach: Construct weights (Matrix $W$)
+- $\cal{L}_{weighted}(\beta)=(y-X\beta)^T \ W(y-X\beta)$
+Locally weighted regression:
+- Locally put emphasis on points in low proximity
+- In total E independent weighted regressions
+- $\cal{L}_{weighted}(\beta)=(y-X\beta)^T \ W_E(y-X\beta)$
+- E.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
+---
 <!--
 - Considerations:
     - Selected PCs might lack physical interpretability
@@ -140,19 +139,19 @@ Key Equations:
     - PLS Loadings: $\gamma_{1j}$
     - PLS Weights: $\delta_{1k}$
 -->
----
-
 # 3. Comparison of Regression Models
-## v. Locally Weighted Regression (LWR)
-Idea: Ordinary Least Squares but now certain data points get more weight than others
-Approach: Construct weights (Matrix $W$)
-- $\cal{L}_{weighted}(\beta)=(y-X\beta)^T \ W(y-X\beta)$
+## v. Principal Component Regression (PCR)
+Idea: Combine PCA and Linear Regression
+Approach: Reduce complexity and dimensionality
+- Perform PCA to obtain Principal Components (PCs)
+- Choose subset of PCs *(explained variance)*
+- Regress response on selected PCs treating each as an univariate regression
 
-Locally weighted regression:
-- Locally put emphasis on points in low proximity
-- In total E independent weighted regressions
-- $\cal{L}_{weighted}(\beta)=(y-X\beta)^T \ W_E(y-X\beta)$
-- E.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
+Key Equations:
+    - PCA : $Z_m = Xv_m$
+    - PCR : $\hat{y}^{pcr}_{(M)} = \bar{y}1 + \sum_{m=1}^{M} \hat{\theta}_m z_m$
+    - Coefficients : $\hat{\beta}^{pcr}(M) = \sum_{m=1}^{M} \hat{\theta}_m v_m$
+
 ---
 <!-- rausgekickt.
 # 3. Comparison of Regression Models
