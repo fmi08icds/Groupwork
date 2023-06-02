@@ -82,9 +82,9 @@ Idea: find best-fitting line $f(x)=m + xb$ for $Y$ given $X$.
 $\hat{\beta} = (X^t X)^{−1}X^t y = (X^t X)^{−1}X^t (X\beta+\epsilon)$
 
 - Good baseline with zero estimation bias
- $\mathbb{E}[\hat{\beta}] =.._{math-magic🧙}..~= \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
- since $\mathbb{E}[\epsilon]= 0$ since $\epsilon\sim N(0, \sigma^2)$ it follows $\mathbb{E}[\hat{\beta}] = \beta$
-- Simple linear Algebra
+ $\mathbb{E}[\hat{\beta}] = \mathbb{E}[(X^t X)^{−1}X^t (X\beta+\epsilon)]= \mathbb{E}[X^t (X\beta+\epsilon)] = \beta + (X^t X)^{-1}X^t \mathbb{E}[\epsilon]$
+- in the last step we multiply from the left with $(X^t X)^{-1}X^t$ after distributing $X^t$.
+ - since $\mathbb{E}[\epsilon]= 0$ since $\epsilon\sim N(0, \sigma^2)$ it follows $\mathbb{E}[\hat{\beta}] = \beta$
 - More complex methods trade off for benefits of reduced variance
 
 
