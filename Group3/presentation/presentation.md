@@ -111,11 +111,12 @@ Approach: Regularize Estimator $\hat{\beta}$ with respect to $|\ \hat{\beta}\ |$
 ## iv. Locally Weighted Regression (LWR)
 Idea: Ordinary Least Squares but now certain data points get more weight than others
 Approach: Construct weights (Matrix $W$)
-- $\cal{L}_{weighted}(\beta)=(y-X\beta)^T \ W(y-X\beta)$
+- $\cal{L}$$_{weighted}(\beta)=(y-X\beta)^T \ W(y-X\beta)$
+
 Locally weighted regression:
 - Locally put emphasis on points in low proximity
 - In total E independent weighted regressions
-- $\cal{L}_{weighted}(\beta)=(y-X\beta)^T \ W_E(y-X\beta)$
+- $\cal{L}$$_{weighted}(\beta)=(y-X\beta)^T \ W_E(y-X\beta)$
 - E.g. $w_i = e^{\frac{-(x_i-x)^2}{2\tau^2}}$
 ---
 <!--
