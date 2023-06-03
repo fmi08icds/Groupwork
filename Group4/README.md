@@ -14,24 +14,34 @@ conda env create --file environment.yml --prefix ./env
 conda activate ./env
 
 # The shell prompt will now show the complete path to the conda environment which can be pretty long.
-# Hence, it is recommended to adjust the prompt to only show the name. This command must only be executed once.
+# Hence, it is recommended to adjust the prompt to only show the directory name. This must only be configured once.
 # You may need to deactivate and activate the conda env for changes to take effect.
 conda config --set env_prompt '({name}) '
 
-# In case more packages are needed, install them using conda and update the `environment.yml` file.
-# These commands must be executed while the local conda env is active.
+# In case more packages are needed, install them using conda or pip
+# Make sure to update the `environment.yml` file, so that others can update their conda env
 conda install scikit-learn
-conda env export | grep -vEe '^(name|prefix)' > environment.yml
 
 # If the `environment.yml` has been changed by others, you can update your own env using
 conda env update --file environment.yml --prefix ./env
 ```
 
-### Nox
+### Tooling
 
-TODO
+The conda setup will also install some tools to increase productivity. As of now, they are `pytest` for running unit tests and `black` for automatically formatting Python code. Feel free to suggest other helpful tools.
 
+It is recommended to run both tools before committing to ensure a consistent formatting and to avoid broken code.
 
+``` bash
+# Format all scripts in the `clustering` folder
+black clustering/
+# Format a single file specifically
+black clustering/dbscan.py
+
+# Run all tests scripts in the `tests` folder
+pytest
+```
+The configuration of these tools is part of the `pyproject.toml` file.
 
 ## Project goals
 
