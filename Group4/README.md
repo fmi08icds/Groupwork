@@ -1,5 +1,38 @@
 # Group 4 - Clustering
 
+## Getting started
+
+### Conda
+
+This project uses a local conda environment. It isolates the Python runtime and the required packages from the rest of the system where the code is run. To setup your local development environment, consider the following commands:
+
+``` bash
+# Create a conda environment based on the `environment.yml`. It will be stored in a local folder called `env`.
+conda env create --file environment.yml --prefix ./env
+
+# To activate the new conda environment, use
+conda activate ./env
+
+# The shell prompt will now show the complete path to the conda environment which can be pretty long.
+# Hence, it is recommended to adjust the prompt to only show the name. This command must only be executed once.
+# You may need to deactivate and activate the conda env for changes to take effect.
+conda config --set env_prompt '({name}) '
+
+# In case more packages are needed, install them using conda and update the `environment.yml` file.
+# These commands must be executed while the local conda env is active.
+conda install scikit-learn
+conda env export | grep -vEe '^(name|prefix)' > environment.yml
+
+# If the `environment.yml` has been changed by others, you can update your own env using
+conda env update --file environment.yml --prefix ./env
+```
+
+### Nox
+
+TODO
+
+
+
 ## Project goals
 
 TODO
