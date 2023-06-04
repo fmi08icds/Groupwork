@@ -1,0 +1,10 @@
+name: env
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - scikit-learn
+  - black
+  - pytest
+
