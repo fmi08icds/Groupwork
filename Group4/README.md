@@ -33,27 +33,47 @@ The conda setup will also install some tools to increase productivity. As of now
 It is recommended to run both tools before committing to ensure a consistent formatting and to avoid broken code.
 
 ``` bash
-# Format all scripts in the `clustering` folder
-black clustering/
+# Format all scripts in the `clustering` and `tests` folder
+black clustering/ tests/
 # Format a single file specifically
 black clustering/dbscan.py
 
 # Run all tests scripts in the `tests` folder
 pytest
 ```
-The configuration of these tools is part of the `pyproject.toml` file.
+These tools are configured by the `pyproject.toml` file.
+
+## Project structure
+
+``` plain
+├── 📁 clustering         <-- Package that contains implementations of clustering algorithms
+│   ├── __init__.py
+│   ├── dbscan.py
+│   ├── utils.py
+│   └── ...
+│
+├── 📁 env                <-- Local conda environment (not part of version control)
+│
+├── 📁 tests              <-- Unit tests scripts
+│   ├── __init__.py
+│   ├── test_dbscan.py
+│   ├── test_utils.py
+│   └── ...
+│
+├── 📃 .gitignore         <-- List of files and folders that should be ignored by git
+│
+├── 📃 environment.yml    <-- List of python dependencies for the conda environment
+│
+├── 📃 main.ipynb         <-- Project results, visualizations and documentation
+│
+├── 📃 pyproject.toml     <-- Configuration file
+│
+└── 📃 README.md          <-- Project documentation
+```
 
 ## Project goals
 
 TODO
-
-## Members
-
-- Ralf König
-- Marcel Lehmann
-- Clara Leidhold
-- Sebastian Schmidt
-- Florian Winkler (group leader)
 
 ## Workflow
 
@@ -109,3 +129,9 @@ We should add more samples to the dataset that show cats with different colored 
 Issues are organized in a [Kanban board](https://github.com/orgs/fmi08icds/projects/4). The board consists of three columns that represent the statuses *Todo*, *Work in progress* and *Done*. The status can be changed by simply dragging the cards into another column.
 
 If you want to work on a task, look for unassigned issues in the *Todo* column. Read the description and acceptance criteria of the issue. If you feel like you are able to work on this task, assign it to yourself and change the status to *Work in progress*. In case the goal of the task is unclear, ask the creator of the issue for clarification. Once you have completed the task, congratulations, you can change the status to *Done* :+1:
+
+## Members
+
+| Florian Winkler<br>(Group Leader) | Ralf König | Sebastian Schmidt | Clara Leidhold | Marcel Lehmann |
+|:---------------------------------:|:----------:|:-----------------:|:--------------:|:--------------:|
+| <img width="96" src="https://github.com/Fju.png?size=96"> | <img width="96" src="https://github.com/ralf-koenig.png?size=96"> | <img width="96" src="https://github.com/schmiseb.png?size=96"> | <img width="96" src="https://github.com/claraldh.png?size=96"> | <img width="96" src="https://github.com/Lehmsen.png?size=96"> |
