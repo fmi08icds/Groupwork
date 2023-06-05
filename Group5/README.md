@@ -1,6 +1,6 @@
 #Members:
 1. Hagen Paula
-2. Huhle Paul Morizt  
+2. Huhle Paul Moritz
 3. Kaviapoor Esfahani Sepideh
 4. Kuhnel Paul
 5. Schuster Karoline
