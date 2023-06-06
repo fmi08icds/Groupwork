@@ -1,5 +1,9 @@
 import numpy as np
 from numpy.typing import NDArray
+from typing import Optional
+
+from utils import squared_euclidean_distance
+
 
 def compute_responsibility(similarities_mat: NDArray,
                            responsibilities_mat: NDArray,
@@ -41,9 +45,9 @@ def compute_responsibility(similarities_mat: NDArray,
     return (1 - damping) * new_responsibility_mat + damping * responsibilities_mat
 
 
-def compute_availability(responsibilities_mat: np.ndarray,
-                         availabilities_mat: np.ndarray,
-                         damping: float = 0.5) -> np.ndarray:
+def compute_availability(responsibilities_mat: NDArray,
+                         availabilities_mat: NDArray,
+                         damping: float = 0.5) -> NDArray:
     """ Computes values for the availability messages for the next iteration.
         Parameters:
             responsibilities_mat:   Array of responsibilities from previous iteration; Shape `(n, n)`
@@ -61,7 +65,7 @@ def compute_availability(responsibilities_mat: np.ndarray,
     tmp = responsibilities_mat.copy()
     tmp = np.where(tmp < 0, 0, tmp)
     np.fill_diagonal(tmp, 0)
-    responsibilities_sum = np.sum(tmp, axis=0)      # Shape (n, )
+    responsibilities_sum = np.sum(tmp, axis=0)  # Shape (n, )
 
     # 2. Get self responsibilities; Shape (n, )
     self_responsibilities = np.diag(responsibilities_mat).copy()
@@ -75,3 +79,42 @@ def compute_availability(responsibilities_mat: np.ndarray,
     # 4. Set self availabilities (Sum of non-negative responsibilities to other points) and return update after damping
     np.fill_diagonal(availabilities_mat_new, np.sum(tmp, axis=0))
     return (1 - damping) * availabilities_mat_new + damping * availabilities_mat
+
+
+def compute_similarity(X: np.ndarray, precomputed: Optional[NDArray] = None) -> NDArray:
+    """Compute similarity values between points in array X. Default are negative Euclidean distances
+    Parameters:
+        X:              Array with n rows (i.e. points)
+        precomputed:    Optional array of shape (n, n) to provide precomputed similarities
+
+    Returns:
+        Array of shape `(n, n)` containing similarity values.
+    """
+    if precomputed is not None:
+        n = X.shape[0]
+        assert precomputed.shape == (n, n), \
+            print(f'The precomputed similarities need to be of shape ({n}, {n})')
+        return precomputed
+
+    return squared_euclidean_distance(X)
+
+
+def set_preferences(similarities_mat: np.ndarray, preferences: Optional[NDArray] = None) -> NDArray:
+    """Updates the similarity_matrix with preferences values
+    Parameters:
+        similarities_mat:  Array of shape (n, n) containing similarities between n points
+        preferences:        Optional array of shape (n, ); If None, the median of all similarities is used
+
+    Returns:
+        Array of updated similarity values; Shape (n, n)
+    """
+    # Calculate the median similarity or confirm correct input of preferences vector
+    if preferences is None:
+        preferences = np.median(similarities_mat)
+    else:
+        n = similarities_mat.shape[0]
+        assert preferences.shape == (n,), print(f'Preferences must be None or an array of shape ({n},)')
+
+    # Update self similarity values and return updated matrix
+    np.fill_diagonal(similarities_mat, preferences)
+    return similarities_mat
