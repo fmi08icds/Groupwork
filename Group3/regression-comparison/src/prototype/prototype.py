@@ -1,8 +1,7 @@
-
-## in this prototype i want to show and suggest  
+## in this prototype i want to show and suggest
 ## building a little interactive teaching tool
 ## that shows the different aspects of regression
-## given a synthetic dataset that can be 
+## given a synthetic dataset that can be
 ## adjusted by the user
 
 # Define the synthetic dataset with adjustable parameters.
@@ -11,9 +10,9 @@
 # Display the different aspects of regression, such as the regression line, residuals, and R-squared value.
 
 
-import numpy as np 
+import numpy as np
 from numpy import random
-import pandas as pd 
+import pandas as pd
 import plotly.express as px
 from dash import Dash, html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
@@ -44,8 +43,10 @@ CONTENT_STYLE = {
 }
 
 
-## header 
-header = dbc.Col(html.H1('Regression: Prototype Teaching Tool', style={'textAlign':'center'}))
+## header
+header = dbc.Col(
+    html.H1("Regression: Prototype Teaching Tool", style={"textAlign": "center"})
+)
 
 
 ## mega unschön, refactor later.
@@ -53,109 +54,130 @@ sidebar = html.Div(
     [
         html.H2("Sidebar", className="display-4"),
         html.Hr(),
-        html.P(
-            "A simple sidebar layout sliders", className="lead"
+        html.P("A simple sidebar layout sliders", className="lead"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Label("Sample Size", style={"textAlign": "left"}), width=3
+                ),
+                dbc.Col(
+                    dcc.Slider(
+                        id="sample-size-slider",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=250,
+                        step=1,
+                        updatemode="drag",
+                        value=25,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                    width=9,
+                ),
+                dbc.Col(html.Label("sigma X1", style={"textAlign": "left"}), width=3),
+                dbc.Col(
+                    dcc.Slider(
+                        id="sigma-X1-slider",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=10,
+                        step=0.1,
+                        updatemode="drag",
+                        value=1,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                    width=9,
+                ),
+                dbc.Col(html.Label("mean X1", style={"textAlign": "left"}), width=3),
+                dbc.Col(
+                    dcc.Slider(
+                        id="mean-X1-slider",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=10,
+                        step=0.1,
+                        updatemode="drag",
+                        value=1,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                    width=9,
+                ),
+                dbc.Col(html.Label("mean X2", style={"textAlign": "left"}), width=3),
+                dbc.Col(
+                    dcc.Slider(
+                        id="mean-X2-slider",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=10,
+                        step=0.1,
+                        updatemode="drag",
+                        value=1,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                    width=9,
+                ),
+                dbc.Col(html.Label("Sigma X2", style={"textAlign": "left"}), width=3),
+                dbc.Col(
+                    dcc.Slider(
+                        id="sigma-X2-slider",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=10,
+                        step=0.1,
+                        updatemode="drag",
+                        value=1,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                    width=9,
+                ),
+                dbc.Col(
+                    html.Label("Correlation X1~X2", style={"textAlign": "left"}),
+                    width=3,
+                ),
+                dbc.Col(
+                    dcc.Slider(
+                        id="corr-X1-X2-slider",
+                        className="slider",  ## for css reasons
+                        min=-1,
+                        max=1,
+                        step=0.1,
+                        updatemode="drag",
+                        value=0,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                    width=9,
+                ),
+            ]
         ),
-        dbc.Row([
-            dbc.Col(html.Label('Sample Size', style={'textAlign':'left'}), width=3),
-            dbc.Col(dcc.Slider(id='sample-size-slider',
-                className='slider', ## for css reasons
-                min=0,
-                max=250,
-                step=1,
-                updatemode='drag',
-                value=25,
-                marks=None,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ), width=9),
-            dbc.Col(html.Label('sigma X1', style={'textAlign':'left'}), width=3),
-            dbc.Col(dcc.Slider(id='sigma-X1-slider',
-                className='slider', ## for css reasons
-                min=0,
-                max=10,
-                step=0.1,
-                updatemode='drag',
-                value=1,
-                marks=None,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ), width=9),
-            dbc.Col(html.Label('mean X1', style={'textAlign':'left'}), width=3),
-            dbc.Col(dcc.Slider(id='mean-X1-slider',
-                className='slider', ## for css reasons
-                min=0,
-                max=10,
-                step=0.1,
-                updatemode='drag',
-                value=1,
-                marks=None,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ), width=9),
-            dbc.Col(html.Label('mean X2', style={'textAlign':'left'}), width=3),
-            dbc.Col(dcc.Slider(id='mean-X2-slider',
-                className='slider', ## for css reasons
-                min=0,
-                max=10,
-                step=0.1,
-                updatemode='drag',
-                value=1,
-                marks=None,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ), width=9),
-            dbc.Col(html.Label('Sigma X2', style={'textAlign':'left'}), width=3),
-            dbc.Col(dcc.Slider(id='sigma-X2-slider',
-                className='slider', ## for css reasons
-                min=0,
-                max=10,
-                step=0.1,
-                updatemode='drag',
-                value=1,
-                marks=None,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ), width=9),
-            dbc.Col(html.Label('Correlation X1~X2', style={'textAlign':'left'}), width=3),
-            dbc.Col(dcc.Slider(id='corr-X1-X2-slider',
-                className='slider', ## for css reasons
-                min=-1,
-                max=1,
-                step=0.1,
-                updatemode='drag',
-                value=0,
-                marks=None,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ), width=9),
-        ])
     ],
     style=SIDEBAR_STYLE,
 )
 
-content = html.Div(id="page-content", style=CONTENT_STYLE,
-                   children=[
-                                html.H2('Regression', style={'textAlign':'left'}),
-                                dcc.Graph(figure={}, id='interactive-regression')
-                    ]
+content = html.Div(
+    id="page-content",
+    style=CONTENT_STYLE,
+    children=[
+        html.H2("Regression", style={"textAlign": "left"}),
+        dcc.Graph(figure={}, id="interactive-regression"),
+    ],
 )
 
 
-app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+app.layout = html.Div(
+    [
+        dcc.Location(id="url"),
+        sidebar,
+        content,
+        dcc.Store(id="initial_points"),
+    ]
+)
 ## create an app layout with a sidebar and a main content area
 
-
-
-
-
-@callback(
-    ## section 1: Data Generation
-    Output('interactive-regression', 'figure'),
-
-    # Synthesize the data
-    ## controlling the distribution of X1 and X2
-    Input('sample-size-slider', 'value'),
-    Input('mean-X1-slider', 'value'),
-    Input('mean-X2-slider', 'value'),
-    Input('sigma-X1-slider', 'value'),
-    Input('sigma-X2-slider', 'value'),
-    Input('corr-X1-X2-slider', 'value'),
-)
 
 #    Input('x1-x2-correlation-type', 'value'),
 #    Input('x1-distribution', 'value'),
@@ -164,43 +186,65 @@ app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 #    Input('noise-correlation-slider', 'value'),
 #    Input('noise-correlation-type', 'value'),
 #    Input('noise-sigma-slider', 'value'),
-#    Input('noise-mean-slider', 'value') 
+#    Input('noise-mean-slider', 'value')
 
 ## multivariate gaussian distribution
 ## https://en.wikipedia.org/wiki/Multivariate_normal_distribution
 
 
-
 ## Jonny: okay - die lageparameter machen übertrieben keinen sinn. die daten sehen immer gleich aus,
 ## egal wo sie liegen. wobei .. wäre interessant zu sehen, wie sich MSE usw. verhält, wenn man
-## die daten skaliert oder nicht, weil dann der wertebereich zw. [0,1] und sonst ja nicht ist. 
+## die daten skaliert oder nicht, weil dann der wertebereich zw. [0,1] und sonst ja nicht ist.
 ## --> radiobuttons :P ...
 
 
 ## auserdem radiobutton für "eigene Linie"
 ## oder "Linie aus Daten berechnen"
 ## und das dann für alle verfahren, also basic ols
-## ElasticNet und local linear regression. 
+## ElasticNet und local linear regression.
 
-def update_graph(samplesize,
-X1_mean,
-X2_mean,
-X1_sigma,
-X2_sigma,
-x1_x2_correlation):
-    
+
+@callback(
+    Output("interactive-regression", "figure"),
+    Output("initial_points", "data"),
+    Input("initial_points", "data"),
+    ## section 1: Data Generation
+    # Synthesize the data
+    ## controlling the distribution of X1 and X2
+    Input("sample-size-slider", "value"),
+    Input("mean-X1-slider", "value"),
+    Input("mean-X2-slider", "value"),
+    Input("sigma-X1-slider", "value"),
+    Input("sigma-X2-slider", "value"),
+    Input("corr-X1-X2-slider", "value"),
+)
+def update_graph(
+    initial_points, samplesize, X1_mean, X2_mean, X1_sigma, X2_sigma, x1_x2_correlation
+):
     ## generate covariance matrix from inputs
-    cov_mat = np.array([[X1_sigma**2, x1_x2_correlation*X1_sigma*X2_sigma], [x1_x2_correlation*X1_sigma*X2_sigma, X2_sigma**2]])
+    cov_mat = np.array(
+        [
+            [X1_sigma**2, x1_x2_correlation * X1_sigma * X2_sigma],
+            [x1_x2_correlation * X1_sigma * X2_sigma, X2_sigma**2],
+        ]
+    )
 
-    mult_norm=np.random.multivariate_normal(mean=[X1_mean,X2_mean], cov=cov_mat, size=samplesize)
-    
-    ## trendline ... 
+    points = None
+    if initial_points == None:
+        initial_points = np.random.multivariate_normal(
+            mean=[X1_mean, X2_mean], cov=cov_mat, size=samplesize
+        )
+        points = initial_points
+    else:
+        points = np.array(initial_points) * np.array([X1_sigma, X2_sigma]) + np.array(
+            [X1_mean, X2_mean]
+        )
+
+    ## trendline ...
     ## regression call
 
-    fig = px.scatter(x=mult_norm.T[0], y=mult_norm.T[1])
-    return fig
-
-
+    fig = px.scatter(x=points.T[0], y=points.T[1])
+    return fig, initial_points
 
 
 ## das mit dem callback ... wir haben ja nur eine url, das pathing kann noch weg.
@@ -224,9 +268,5 @@ def render_page_content(pathname):
     )
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)
-
-
-
