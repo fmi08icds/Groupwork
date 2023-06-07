@@ -73,7 +73,15 @@ These tools are configured by the `pyproject.toml` file.
 
 ## Project goals
 
-TODO
+**Dataset:**
+
+- [Spotify Tracks DB](https://www.kaggle.com/datasets/zaheenhamidani/ultimate-spotify-tracks-db) from Kaggle
+- has 232,725 tracks from 26 different genres (~8,000 tracks per genre)
+- each sample has 18 attributes including names (e. g. track, artists, genre), confidence measures (e. g. acousticness, instrumentalness), perceptual measures (e. g. energy, loudness) and other descriptors (e. g. tempo, duration)
+
+**Goal:**
+
+Find clusters of tracks with similar audio features based on the available attributes. Our hypothesis is that songs that have the same genre should also be assigned to the same cluster by the algorithm. The accuracy will be evaluated by comparing the clustering labels with the ground truth of the genre attribute.
 
 ## Workflow
 
