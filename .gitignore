@@ -1,5 +1,1 @@
-.*
-!.gitignore
-*.png
-*_random.csv
-__pycache__
+Group3/.vscode/launch.json
