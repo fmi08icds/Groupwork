@@ -1,12 +1,17 @@
 import numpy as np
 from numpy.typing import NDArray
+from numpy.random import RandomState
 from typing import Optional, Tuple
 
-from utils import squared_euclidean_distance
+from clustering.utils import squared_euclidean_distance
+
+# TODO: For a lower number of centers, my implementation returns more centers
+#  - Check sklearn https://github.com/scikit-learn/scikit-learn/blob/364c77e04/sklearn/cluster/_affinity_propagation.py#L181
 
 def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, convergence_iter: int = 15,
-                         precomputed: Optional[NDArray] = None, preferences: Optional[NDArray] = None,
-                         verbose: bool = False) -> Tuple[NDArray, NDArray, NDArray]:
+                         affinity: Optional[NDArray] = None, preferences: Optional[NDArray] = None,
+                         verbose: bool = False, random_state: Optional[int] = None) \
+        -> Tuple[NDArray, NDArray, NDArray]:
     """Perform clustering on the point array `X` using the Affinity Propagation [1] algorithm.
     Parameters:
         X:                      Two-dimensional array of shape `(n_samples, n_features)`
@@ -16,9 +21,11 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
                                 Recommended interval is [0.5, 1.0)
         max_iter:               Upper limit for number iterations for message passing
         convergence_iter:       Upper limit for number of iterations without change in labels
-        precomputed:            Optional array of shape (n, n) to provide precomputed similarities
+        affinity:               Optional array of shape (n, n) to provide precomputed similarities
         preferences:            Optional array of shape (n, ); If None, the median of all similarities is used
         verbose:                True: Print number of iterations
+        random_state:           Integer to initialize an instance of numpy.random.RandomState
+                                (Used to remove degeneracies in the similarity matrix)
 
     Returns:
         cluster_centers_indices:    Array of indices of the points used as cluster centers (exemplars)
@@ -29,10 +36,12 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
             In: Science 315, pp. 972-976 (2007).DOI:10.1126/science.1136800
     """
     assert 0 <= damping <= 1, print('The damping factor must be in [0, 1]; The recommended interval is [0.5, 1.0)')
+    random_state = RandomState(seed=random_state)
 
     # 1. Preparation: Calculate similarities, set optional preferences, and initialize message values
     similarities_mat, responsibilities_mat, availabilities_mat = prepare_matrices(X=X,
-                                                                                  precomputed=precomputed,
+                                                                                  random_state=random_state,
+                                                                                  affinity=affinity,
                                                                                   preferences=preferences)
 
     # 2. Loop for max iterations or until no change was recorded for convergence_iter
@@ -95,28 +104,25 @@ def update_responsibility(similarities_mat: NDArray,
     Returns:
         Array of shape `(n, n)` containing the new responsibility values.
     """
-    # 1. Add availability and similarity for all exemplars (excluding self-reference [the diagonal])
+    row_index = np.arange(availabilities_mat.shape[0])
+
+    # 1. Compute competing responsibilities
     sum_mat = availabilities_mat + similarities_mat
-    np.fill_diagonal(sum_mat, -np.inf)
 
     # 2. Select the column with the maximum value (best suited exemplar) for each row (point to be assigned an exemplar)
-    row_indices = np.arange(sum_mat.shape[0])
-    max_indices = np.argmax(sum_mat, axis=1)
-    row_max = sum_mat[row_indices, max_indices]
+    max_index = np.argmax(sum_mat, axis=1)
+    row_max = sum_mat[row_index, max_index]
 
     # 3. Update row_max to -np.inf to get second-best exemplar (That competes with the best exemplar)
-    sum_mat[row_indices, max_indices] = -np.inf
-    secondary_row_max = sum_mat[row_indices, np.argmax(sum_mat, axis=1)]
+    sum_mat[row_index, max_index] = -np.inf
+    competing_resp = np.max(sum_mat, axis=1)
 
-    # 4. Create a matrix with the maximum sum of availability and responsibility;
-    # Set values for max_indices to secondary_row_max (Will be subtracted from similarity values)
-    max_sum = np.zeros_like(similarities_mat) + row_max.reshape(-1, 1)
-    max_sum[row_indices, max_indices] = secondary_row_max
+    # 4. Calculate the new responsibility values
+    responsibilities_mat_new = similarities_mat - row_max[:, None]
+    responsibilities_mat_new[row_index, max_index] = similarities_mat[row_index, max_index] - competing_resp
 
-    # 5. Calculate new responsibility values and return update after damping
-    new_responsibility_mat = similarities_mat - max_sum
-    return (1 - damping) * new_responsibility_mat + damping * responsibilities_mat
-
+    # 5. Return result after damping
+    return (1 - damping) * responsibilities_mat_new + damping * responsibilities_mat
 
 def update_availability(responsibilities_mat: NDArray,
                         availabilities_mat: NDArray,
@@ -154,20 +160,20 @@ def update_availability(responsibilities_mat: NDArray,
     return (1 - damping) * availabilities_mat_new + damping * availabilities_mat
 
 
-def compute_similarity(X: np.ndarray, precomputed: Optional[NDArray] = None) -> NDArray:
+def compute_similarity(X: np.ndarray, affinity: Optional[NDArray] = None) -> NDArray:
     """Compute similarity values between points in array X. Default are negative Euclidean distances
     Parameters:
-        X:              Two-dimensional array of shape `(n, m)` (n = number of points; m = number of features)
-        precomputed:    Optional array of shape (n, n) to provide precomputed similarities
+        X:           Two-dimensional array of shape `(n, m)` (n = number of points; m = number of features)
+        affinity:    Optional array of shape (n, n) to provide precomputed similarities
 
     Returns:
         Array of shape `(n, n)` containing similarity values.
     """
-    if precomputed is not None:
+    if affinity is not None:
         n = X.shape[0]
-        assert precomputed.shape == (n, n), \
-            print(f'The precomputed similarities need to be of shape ({n}, {n})')
-        return precomputed
+        assert affinity.shape == (n, n), \
+            print(f'The provided affinity matrix need to be of shape ({n}, {n})')
+        return affinity
 
     return squared_euclidean_distance(X)
 
@@ -192,21 +198,23 @@ def set_preferences(similarities_mat: np.ndarray, preferences: Optional[NDArray]
     np.fill_diagonal(similarities_mat, preferences)
     return similarities_mat
 
-def prepare_matrices(X: NDArray, precomputed: Optional[NDArray] = None,
+def prepare_matrices(X: NDArray, random_state: RandomState, affinity: Optional[NDArray] = None,
                      preferences: Optional[NDArray] = None) -> Tuple[NDArray, NDArray, NDArray]:
     """Prepare the matrices for similarity, responsibility, and availability
     Parameters:
         X:              Two-dimensional array of shape `(n, m)` (n = number of points; m = number of features)
-        precomputed:    Optional array of shape (n, n) to provide precomputed similarities
+        random_state:   Instance of numpy.random.RandomState (Used to remove degeneracies in the similarity matrix)
+        affinity:       Optional array of shape (n, n) to provide precomputed similarities
         preferences:    Optional array of shape (n, ); If None, the median of all similarities is used
 
     Returns:
                 Three arrays of shape (n, n): Similarities, Responsibilities, Availabilities
     """
-    similarities_mat = compute_similarity(X, precomputed)
-    similarities_mat = set_preferences(similarities_mat, preferences=preferences)
-    # Adapt similarity_mat to remove any degeneracies that might cause oscillation
-    similarities_mat = similarities_mat + 1e-12 * np.random.normal(size=similarities_mat.shape) \
-                     * (np.max(similarities_mat) - np.min(similarities_mat))
+    S = compute_similarity(X, affinity)
+    S = set_preferences(S, preferences=preferences)
 
-    return similarities_mat, np.zeros_like(similarities_mat), np.zeros_like(similarities_mat)
+    # Adapt similarity_mat to remove any degeneracies that might cause oscillation
+    S += (np.finfo(S.dtype).eps * S + np.finfo(S.dtype).tiny * 100) \
+         * random_state.standard_normal(size=(S.shape[0], S.shape[0]))
+
+    return S, np.zeros_like(S), np.zeros_like(S)
