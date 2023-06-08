@@ -14,9 +14,26 @@ import numpy as np
 from numpy import random
 import pandas as pd
 import plotly.express as px
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, callback, Output, Input, ctx
 import dash_bootstrap_components as dbc
+from dash import dash_table
+from dataclasses import dataclass
+from dash.exceptions import PreventUpdate
+## constants
 
+MAX_SAMPLE_SIZE = 250
+
+## init widgets with initial data
+@dataclass
+class InitVal:
+    sample_size= 25
+    sigma_X1= 1
+    mean_X1= 0
+    sigma_X2= 1
+    mean_X2= 0
+    corr=0
+
+init_val = InitVal()
 
 app = Dash(external_stylesheets=[dbc.themes.SPACELAB])
 
@@ -43,6 +60,41 @@ CONTENT_STYLE = {
 }
 
 
+## create synthetic data via numpy
+"""
+the idea is not to sample from a distribution but to create a
+simple linear model with some noise drawn from a certain distribution.
+therefore we just need 2 points to draw a line and then add some noise.
+toDo: outsource to own file. 
+future features:
+                1. not only have a linear model but also any polynomial.
+                [checkbox for term of degree n up to... maybe 5?]
+                2. add other distributions for noise.
+                [dropdown menu?]
+                3. heteroscedasticity and homoscedasticity.
+                [can be added as checkbox buttons?]
+
+"""
+
+
+## construct y.
+
+## by drawing X1,X2 from multivariate normal distribution
+def generate_init_data(sigma_X1, sigma_X2, x1_x2_correlation, mean_X1, mean_X2, size):
+    ## per default generate 250 (max) samples, so we never have to redraw because of sample_size changes
+    ## just redraw if necessary, and that is only if, e.g., the correlation term changes.
+    cov_mat = np.array(
+            [
+                [sigma_X1**2, x1_x2_correlation * sigma_X1 * sigma_X2],
+                [x1_x2_correlation * sigma_X1 * sigma_X2, sigma_X2**2],
+            ]
+        )
+    data = np.random.multivariate_normal(
+                mean=[mean_X1, mean_X2], cov=cov_mat, size=size)
+    return data 
+
+
+
 ## header
 header = dbc.Col(
     html.H1("Regression: Prototype Teaching Tool", style={"textAlign": "center"})
@@ -65,10 +117,10 @@ sidebar = html.Div(
                         id="sample-size-slider",
                         className="slider",  ## for css reasons
                         min=0,
-                        max=250,
+                        max=MAX_SAMPLE_SIZE,
                         step=1,
                         updatemode="drag",
-                        value=25,
+                        value=init_val.sample_size,
                         marks=None,
                         tooltip={"placement": "bottom", "always_visible": True},
                     ),
@@ -83,7 +135,7 @@ sidebar = html.Div(
                         max=10,
                         step=0.1,
                         updatemode="drag",
-                        value=1,
+                        value=init_val.sigma_X1,
                         marks=None,
                         tooltip={"placement": "bottom", "always_visible": True},
                     ),
@@ -98,7 +150,7 @@ sidebar = html.Div(
                         max=10,
                         step=0.1,
                         updatemode="drag",
-                        value=1,
+                        value=init_val.mean_X2,
                         marks=None,
                         tooltip={"placement": "bottom", "always_visible": True},
                     ),
@@ -113,7 +165,7 @@ sidebar = html.Div(
                         max=10,
                         step=0.1,
                         updatemode="drag",
-                        value=1,
+                        value=init_val.mean_X2,
                         marks=None,
                         tooltip={"placement": "bottom", "always_visible": True},
                     ),
@@ -128,7 +180,7 @@ sidebar = html.Div(
                         max=10,
                         step=0.1,
                         updatemode="drag",
-                        value=1,
+                        value=init_val.sigma_X2,
                         marks=None,
                         tooltip={"placement": "bottom", "always_visible": True},
                     ),
@@ -146,7 +198,7 @@ sidebar = html.Div(
                         max=1,
                         step=0.1,
                         updatemode="drag",
-                        value=0,
+                        value=init_val.corr,
                         marks=None,
                         tooltip={"placement": "bottom", "always_visible": True},
                     ),
@@ -164,6 +216,7 @@ content = html.Div(
     children=[
         html.H2("Regression", style={"textAlign": "left"}),
         dcc.Graph(figure={}, id="interactive-regression"),
+        dash_table.DataTable(data=[{}], id="table"),
     ],
 )
 
@@ -173,7 +226,8 @@ app.layout = html.Div(
         dcc.Location(id="url"),
         sidebar,
         content,
-        dcc.Store(id="initial_points"),
+        dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
+        dcc.Store(id="cur_data"),
     ]
 )
 ## create an app layout with a sidebar and a main content area
@@ -204,10 +258,10 @@ app.layout = html.Div(
 ## ElasticNet und local linear regression.
 
 
-@callback(
-    Output("interactive-regression", "figure"),
-    Output("initial_points", "data"),
-    Input("initial_points", "data"),
+@app.callback(
+    Output("cur_data", "data"),
+    Input("initial_data", "data"), ## dont ever touch initial data.
+    
     ## section 1: Data Generation
     # Synthesize the data
     ## controlling the distribution of X1 and X2
@@ -216,35 +270,53 @@ app.layout = html.Div(
     Input("mean-X2-slider", "value"),
     Input("sigma-X1-slider", "value"),
     Input("sigma-X2-slider", "value"),
-    Input("corr-X1-X2-slider", "value"),
 )
-def update_graph(
-    initial_points, samplesize, X1_mean, X2_mean, X1_sigma, X2_sigma, x1_x2_correlation
-):
-    ## generate covariance matrix from inputs
-    cov_mat = np.array(
-        [
-            [X1_sigma**2, x1_x2_correlation * X1_sigma * X2_sigma],
-            [x1_x2_correlation * X1_sigma * X2_sigma, X2_sigma**2],
-        ]
-    )
+def update_data(current_data,
+                sample_size,
+                X1_mean, X2_mean,
+                X1_sigma, X2_sigma):
+    if ctx.triggered_id == None or ctx.triggered_id != "initial_data.data":
+        current_data = np.array(current_data[:sample_size])
+        sigma = np.array([X1_sigma, X2_sigma])
+        updated_data = current_data * sigma + np.array([X1_mean, X2_mean])
+        return updated_data
 
-    points = None
-    if initial_points == None:
-        initial_points = np.random.multivariate_normal(
-            mean=[X1_mean, X2_mean], cov=cov_mat, size=samplesize
-        )
-        points = initial_points
+@app.callback(Output('table', 'data'),Input('cur_data','data'))
+def update_table(data):
+    return pd.DataFrame(data, columns=['x1','x2']).to_dict('records')
+
+
+@app.callback(Output('interactive-regression', 'figure'),
+              Input('cur_data', 'data'))
+def update_scatter(data):
+    fig = px.scatter(data)
+    return fig
+
+@app.callback(Output('initial_data', 'data'),
+              Input('sigma-X1-slider', 'value'),
+              Input('sigma-X2-slider', 'value'),
+              Input('corr-X1-X2-slider', 'value'),
+              Input('mean-X1-slider', 'value'),
+              Input('mean-X2-slider', 'value'),
+              prevent_initial_call=True)
+def reinit_data(sigma_X1, sigma_X2, x1_x2_correlation, mean_X1, mean_X2):
+    
+    ## per default generate 250 (max) samples, so we never have to redraw because of sample_size changes
+    ## just redraw if necessary, and that is only if, e.g., the correlation term changes.
+    print(ctx.triggered_id)
+    if ctx.triggered_id == 'corr-X1-X2-slider':
+        print('triggered')
+        cov_mat = np.array(
+                [
+                    [sigma_X1**2, x1_x2_correlation * sigma_X1 * sigma_X2],
+                    [x1_x2_correlation * sigma_X1 * sigma_X2, sigma_X2**2],
+                ]
+            )
+        data = np.random.multivariate_normal(
+                    mean=[mean_X1, mean_X2], cov=cov_mat, size=MAX_SAMPLE_SIZE)
+        return data
     else:
-        points = np.array(initial_points) * np.array([X1_sigma, X2_sigma]) + np.array(
-            [X1_mean, X2_mean]
-        )
-
-    ## trendline ...
-    ## regression call
-
-    fig = px.scatter(x=points.T[0], y=points.T[1])
-    return fig, initial_points
+        raise PreventUpdate
 
 
 ## das mit dem callback ... wir haben ja nur eine url, das pathing kann noch weg.
