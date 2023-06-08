@@ -5,13 +5,10 @@ from typing import Optional, Tuple
 
 from clustering.utils import squared_euclidean_distance
 
-# TODO: For a lower number of centers, my implementation returns more centers
-#  - Check sklearn https://github.com/scikit-learn/scikit-learn/blob/364c77e04/sklearn/cluster/_affinity_propagation.py#L181
-
 def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, convergence_iter: int = 15,
                          affinity: Optional[NDArray] = None, preferences: Optional[NDArray] = None,
                          verbose: bool = False, random_state: Optional[int] = None) \
-        -> Tuple[NDArray, NDArray, NDArray]:
+        -> Tuple[NDArray, NDArray]:
     """Perform clustering on the point array `X` using the Affinity Propagation [1] algorithm.
     Parameters:
         X:                      Two-dimensional array of shape `(n_samples, n_features)`
@@ -29,14 +26,14 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
 
     Returns:
         cluster_centers_indices:    Array of indices of the points used as cluster centers (exemplars)
-        cluster_centers             Array of coordinates of the points used as cluster centers (exemplars)
-        final_labels                Array of shape `(n, )` with each point being assigned a cluster center (exemplar)
+        labels                      Array of shape `(n, )` with each point being assigned a cluster center (exemplar)
     References:
         [1] B. J. Frey and D. Dueck. Clustering by Passing Messages Between Data Points.
             In: Science 315, pp. 972-976 (2007).DOI:10.1126/science.1136800
     """
     assert 0 <= damping <= 1, print('The damping factor must be in [0, 1]; The recommended interval is [0.5, 1.0)')
     random_state = RandomState(seed=random_state)
+    n = X.shape[0]
 
     # 1. Preparation: Calculate similarities, set optional preferences, and initialize message values
     similarities_mat, responsibilities_mat, availabilities_mat = prepare_matrices(X=X,
@@ -44,8 +41,10 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
                                                                                   affinity=affinity,
                                                                                   preferences=preferences)
 
-    # 2. Loop for max iterations or until no change was recorded for convergence_iter
-    i, iter_no_change = 0, 0
+    # 2. Loop for max iterations or until no change was recorded for convergence_iter;
+    # Track convergence with array that stores if a point already qualifies as an exemplar for a given convergence iter
+    convergence_progress = np.zeros((n, convergence_iter))
+
     for i in range(max_iter):
         # Calculate the scores to find current labels
         score = responsibilities_mat + availabilities_mat
@@ -56,37 +55,56 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
                                                      damping=damping)
         availabilities_mat = update_availability(responsibilities_mat, availabilities_mat, damping=damping)
 
-        # Update labels and iterations without a change
-        new_score = responsibilities_mat + availabilities_mat
-        new_labels = np.argmax(new_score, axis=1)
+        # Check if exemplars were found; Create boolean array of shape (n,) for positive diagonal elements
+        exemplars_found = (np.diag(availabilities_mat) + np.diag(responsibilities_mat)) > 0
 
-        if np.all(new_labels == labels):
-            iter_no_change += 1
-        else:
-            iter_no_change = 0
+        # Store the exemplars for the current iteration and count how many currently exist
+        convergence_progress[:, i % convergence_iter] = exemplars_found
+        current_num_exemplars = np.sum(exemplars_found, axis=0)
 
-        # If the convergence iterations are reached, break the loop
-        if iter_no_change >= convergence_iter:
-            break
+        if i >= convergence_iter:
+            # Check if all rows are either 0 or 1 (no change over the last convergence_iter iterations)
+            row_sum = np.sum(convergence_progress, axis=1)
+            converged = True if np.sum((row_sum == convergence_iter) + (row_sum == 0)) == n else False
+
+            # Break if converged or maximum number of iterations reached
+            if (converged and (current_num_exemplars > 0)) or (i == max_iter):
+                break
 
     if verbose:
-        msg = f"Converged after {i} iterations." if i < (max_iter - 1) else \
-            f"Reached {max_iter} iterations without convergence."
+        msg = f'Affinity propagation was stopped after {max_iter} iterations.' if (i == max_iter - 1) \
+            else f'Converged after {i} iterations.'
         print(msg)
 
-    # 3. Finalize
-    # 3a. Assign points to the final cluster_centers (exemplars)
-    final_scores = responsibilities_mat + availabilities_mat
-    final_labels = np.argmax(final_scores, axis=1)
-    cluster_centers_indices = np.unique(final_labels)
-    cluster_centers = X[cluster_centers_indices]
+    # Get the indices of points used as exemplars
+    exemplar_indices = np.flatnonzero(exemplars_found)
+    num_exemplars = exemplar_indices.size
 
-    # 3b. Replace cluster_center_indices by integers from 0 to num_centers - 1; Update labels
-    mapping = np.arange(0, max(final_labels) + 1)
-    mapping[list(cluster_centers_indices)] = list(range(len(cluster_centers_indices)))
-    final_labels = mapping[final_labels]
+    if num_exemplars > 0:
+        # Assign each point to an exemplar (using the maximum similarity) and give exemplars their number
+        clusters = np.argmax(similarities_mat[:, exemplar_indices], axis=1)
+        clusters[exemplar_indices] = np.arange(num_exemplars)
 
-    return cluster_centers_indices, cluster_centers, final_labels
+        # For each cluster, change the exemplar to the point with the highest similarity to all points in that cluster
+        for k in range(num_exemplars):
+            cluster_members = np.where(clusters == k)[0]
+            new_exemplar = np.argmax(np.sum(similarities_mat[cluster_members[:, np.newaxis], cluster_members], axis=0))
+            exemplar_indices[k] = cluster_members[new_exemplar]
+
+        # Reassign points to clusters to get the final results
+        clusters = np.argmax(similarities_mat[:, exemplar_indices], axis=1)
+        clusters[exemplar_indices] = np.arange(num_exemplars)
+        labels = exemplar_indices[clusters]
+
+        cluster_centers_indices = np.unique(labels)
+        labels = np.searchsorted(cluster_centers_indices, labels)
+
+    # If no exemplars were found, return an empty array for the cluster indices and -1 for labels
+    else:
+        labels = np.array([-1] * n)
+        cluster_centers_indices = np.empty(0)
+
+    return cluster_centers_indices, labels
 
 def update_responsibility(similarities_mat: NDArray,
                           responsibilities_mat: NDArray,
@@ -187,15 +205,15 @@ def set_preferences(similarities_mat: np.ndarray, preferences: Optional[NDArray]
     Returns:
         Array of updated similarity values; Shape (n, n)
     """
+    n = similarities_mat.shape[0]
     # Calculate the median similarity or confirm correct input of preferences vector
     if preferences is None:
         preferences = np.median(similarities_mat)
     else:
-        n = similarities_mat.shape[0]
         assert preferences.shape == (n,), print(f'Preferences must be None or an array of shape ({n},)')
 
     # Update self similarity values and return updated matrix
-    np.fill_diagonal(similarities_mat, preferences)
+    similarities_mat.flat[:: n + 1] = preferences
     return similarities_mat
 
 def prepare_matrices(X: NDArray, random_state: RandomState, affinity: Optional[NDArray] = None,
