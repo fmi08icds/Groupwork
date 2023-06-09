@@ -18,8 +18,9 @@ def test_affinity_propagation_compare_results(n_centers: int, n_features: int, d
     # Run own implementation and scikit-learn version with the same parameters and compare the results
     computed_indices, computed_labels = affinity_propagation(X=X, damping=damping, random_state=random_state)
 
-    expected_indices, expected_labels = sklearn_affinity_propagation(S=compute_similarity(X), damping=damping,
-                                                                     random_state=random_state)
+    expected_indices, expected_labels = sklearn_affinity_propagation(
+        S=compute_similarity(X), damping=damping, random_state=random_state
+    )
 
     # Confirm that the results are identical
     assert_array_equal(computed_indices, expected_indices)

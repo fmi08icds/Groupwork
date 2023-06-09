@@ -5,10 +5,17 @@ from typing import Optional, Tuple
 
 from clustering.utils import squared_euclidean_distance
 
-def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, convergence_iter: int = 15,
-                         affinity: Optional[NDArray] = None, preferences: Optional[NDArray] = None,
-                         verbose: bool = False, random_state: Optional[int] = None) \
-        -> Tuple[NDArray, NDArray]:
+
+def affinity_propagation(
+    X: NDArray,
+    damping: float = 0.5,
+    max_iter: int = 200,
+    convergence_iter: int = 15,
+    affinity: Optional[NDArray] = None,
+    preferences: Optional[NDArray] = None,
+    verbose: bool = False,
+    random_state: Optional[int] = None,
+) -> Tuple[NDArray, NDArray]:
     """Perform clustering on the point array `X` using the Affinity Propagation [1] algorithm.
     Parameters:
         X:                      Two-dimensional array of shape `(n_samples, n_features)`
@@ -31,15 +38,14 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
         [1] B. J. Frey and D. Dueck. Clustering by Passing Messages Between Data Points.
             In: Science 315, pp. 972-976 (2007).DOI:10.1126/science.1136800
     """
-    assert 0 <= damping <= 1, print('The damping factor must be in [0, 1]; The recommended interval is [0.5, 1.0)')
+    assert 0 <= damping <= 1, print("The damping factor must be in [0, 1]; The recommended interval is [0.5, 1.0)")
     random_state = RandomState(seed=random_state)
     n = X.shape[0]
 
     # 1. Preparation: Calculate similarities, set optional preferences, and initialize message values
-    similarities_mat, responsibilities_mat, availabilities_mat = prepare_matrices(X=X,
-                                                                                  random_state=random_state,
-                                                                                  affinity=affinity,
-                                                                                  preferences=preferences)
+    similarities_mat, responsibilities_mat, availabilities_mat = prepare_matrices(
+        X=X, random_state=random_state, affinity=affinity, preferences=preferences
+    )
 
     # 2. Loop for max iterations or until no change was recorded for convergence_iter;
     # Track convergence with array that stores if a point already qualifies as an exemplar for a given convergence iter
@@ -51,8 +57,9 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
         labels = np.argmax(score, axis=1)
 
         # Update message values
-        responsibilities_mat = update_responsibility(similarities_mat, responsibilities_mat, availabilities_mat,
-                                                     damping=damping)
+        responsibilities_mat = update_responsibility(
+            similarities_mat, responsibilities_mat, availabilities_mat, damping=damping
+        )
         availabilities_mat = update_availability(responsibilities_mat, availabilities_mat, damping=damping)
 
         # Check if exemplars were found; Create boolean array of shape (n,) for positive diagonal elements
@@ -72,8 +79,11 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
                 break
 
     if verbose:
-        msg = f'Affinity propagation was stopped after {max_iter} iterations.' if (i == max_iter - 1) \
-            else f'Converged after {i} iterations.'
+        msg = (
+            f"Affinity propagation was stopped after {max_iter} iterations."
+            if (i == max_iter - 1)
+            else f"Converged after {i} iterations."
+        )
         print(msg)
 
     # Get the indices of points used as exemplars
@@ -106,10 +116,10 @@ def affinity_propagation(X: NDArray, damping: float = 0.5, max_iter: int = 200, 
 
     return cluster_centers_indices, labels
 
-def update_responsibility(similarities_mat: NDArray,
-                          responsibilities_mat: NDArray,
-                          availabilities_mat: NDArray,
-                          damping: float = 0.5) -> NDArray:
+
+def update_responsibility(
+    similarities_mat: NDArray, responsibilities_mat: NDArray, availabilities_mat: NDArray, damping: float = 0.5
+) -> NDArray:
     """Compute values for the responsibility messages for the next iteration.
     Parameters:
         similarities_mat:       Array of similarity values; Shape `(n, n)`
@@ -142,9 +152,8 @@ def update_responsibility(similarities_mat: NDArray,
     # 5. Return result after damping
     return (1 - damping) * responsibilities_mat_new + damping * responsibilities_mat
 
-def update_availability(responsibilities_mat: NDArray,
-                        availabilities_mat: NDArray,
-                        damping: float = 0.5) -> NDArray:
+
+def update_availability(responsibilities_mat: NDArray, availabilities_mat: NDArray, damping: float = 0.5) -> NDArray:
     """Compute values for the availability messages for the next iteration.
     Parameters:
         responsibilities_mat:   Array of responsibilities from previous iteration; Shape `(n, n)`
@@ -189,8 +198,7 @@ def compute_similarity(X: np.ndarray, affinity: Optional[NDArray] = None) -> NDA
     """
     if affinity is not None:
         n = X.shape[0]
-        assert affinity.shape == (n, n), \
-            print(f'The provided affinity matrix need to be of shape ({n}, {n})')
+        assert affinity.shape == (n, n), print(f"The provided affinity matrix need to be of shape ({n}, {n})")
         return affinity
 
     return squared_euclidean_distance(X)
@@ -210,14 +218,16 @@ def set_preferences(similarities_mat: np.ndarray, preferences: Optional[NDArray]
     if preferences is None:
         preferences = np.median(similarities_mat)
     else:
-        assert preferences.shape == (n,), print(f'Preferences must be None or an array of shape ({n},)')
+        assert preferences.shape == (n,), print(f"Preferences must be None or an array of shape ({n},)")
 
     # Update self similarity values and return updated matrix
     similarities_mat.flat[:: n + 1] = preferences
     return similarities_mat
 
-def prepare_matrices(X: NDArray, random_state: RandomState, affinity: Optional[NDArray] = None,
-                     preferences: Optional[NDArray] = None) -> Tuple[NDArray, NDArray, NDArray]:
+
+def prepare_matrices(
+    X: NDArray, random_state: RandomState, affinity: Optional[NDArray] = None, preferences: Optional[NDArray] = None
+) -> Tuple[NDArray, NDArray, NDArray]:
     """Prepare the matrices for similarity, responsibility, and availability
     Parameters:
         X:              Two-dimensional array of shape `(n, m)` (n = number of points; m = number of features)
@@ -232,7 +242,8 @@ def prepare_matrices(X: NDArray, random_state: RandomState, affinity: Optional[N
     S = set_preferences(S, preferences=preferences)
 
     # Adapt similarity_mat to remove any degeneracies that might cause oscillation
-    S += (np.finfo(S.dtype).eps * S + np.finfo(S.dtype).tiny * 100) \
-         * random_state.standard_normal(size=(S.shape[0], S.shape[0]))
+    S += (np.finfo(S.dtype).eps * S + np.finfo(S.dtype).tiny * 100) * random_state.standard_normal(
+        size=(S.shape[0], S.shape[0])
+    )
 
     return S, np.zeros_like(S), np.zeros_like(S)

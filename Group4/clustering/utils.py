@@ -21,8 +21,6 @@ def distance_to_reference(points: NDArray, reference: NDArray) -> NDArray:
     return np.sqrt(np.sum((points - reference.reshape(1, -1)) ** 2, axis=1))
 
 
-
-
 def squared_euclidean_distance(matrix: NDArray) -> NDArray:
     """Calculate the pairwise row-distances of a matrix.
     Parameters:
@@ -35,5 +33,5 @@ def squared_euclidean_distance(matrix: NDArray) -> NDArray:
     dot_product = np.dot(matrix, matrix.T)
 
     # Binomial equation: (a - b)^2 = a^2 - 2ab + b^2
-    row_distances = column_vector - 2*dot_product + row_sums_of_squares
+    row_distances = column_vector - 2 * dot_product + row_sums_of_squares
     return -1 * row_distances
