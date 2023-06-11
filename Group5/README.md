@@ -4,4 +4,4 @@
 3. Kaviapoor Esfahani Sepideh
 4. Kuhnel Paul
 5. Schuster Karoline
-6. Int-veen Harpeet
+6. Int-Veen Harpreet
