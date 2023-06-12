@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os  # operating system
+import numpy as np
 
 
 def data_preparation():
@@ -70,3 +71,40 @@ def data_preparation():
     plt.plot()
     plt.savefig('Density plot of the mean M of all the genes.png')
     plt.show()
+
+
+def get_df_merged_with_labels():
+    # Task 1: Load data sets
+    data_directory = "data"
+    dataframe = pd.read_csv(os.path.join(data_directory, "data.csv"))
+
+    dataframe_labels = pd.read_csv(os.path.join(data_directory, "labels.csv"))
+
+    # Task 2: Merge the data sets
+    dataframe = dataframe_labels.merge(dataframe, how='inner', on='Unnamed: 0')
+    # Remove first column (Unnamed: 0)
+    dataframe = dataframe.iloc[:, 1:]
+
+    return dataframe
+
+
+def create_random_sample(labeled=False, number_of_rows=5, number_of_genes=None):
+    """
+    Creates a random sample data set and saves it as csv.
+    Names of the csv have to end with _random so that they are ignored
+    (see .gitignore).
+    :param labeled:
+    :param number_of_rows:
+    :param number_of_genes:
+    :return: None
+    """
+    df = get_df_merged_with_labels()
+    if not number_of_genes:
+        number_of_genes = df.shape[1]
+
+    # TODO implement
+    #
+    # so in der Art:
+    rand_sample = np.random.randint(low=0, high=df.shape[0], size=3)
+    df = df.iloc[rand_sample, :]
+    df.to_csv("data/test_data_random.csv")
