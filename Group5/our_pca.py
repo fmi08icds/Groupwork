@@ -8,7 +8,6 @@ def run_pca():
     pca(data, n_components)
 
 
-
 def pca(data, n_components):
     # centering the data
     mean = np.mean(data, axis=0)
