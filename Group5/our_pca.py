@@ -1,14 +1,8 @@
-import pandas as pd
+from pandas import DataFrame
 import numpy as np
 
 
-def run_pca():
-    data = pd.read_csv('standard_test_data.csv')
-    n_components = 2
-    pca(data, n_components)
-
-
-def pca(data, n_components):
+def our_pca(data: DataFrame, n_components):
     # centering the data
     mean = np.mean(data, axis=0)
     centered_data = data - mean
@@ -28,7 +22,7 @@ def pca(data, n_components):
     selected_eigenvectors = sorted_eigenvectors[:, :n_components]
 
     # Transforming the data
-    transformed_data = np.dot(centered_data, selected_eigenvectors)
+    transformed_data = np.dot(centered_data.transpose(), selected_eigenvectors)
 
     return transformed_data
 
