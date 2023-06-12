@@ -7,4 +7,3 @@ def lib_pca():
     data = pd.read_csv('dataset.csv')
     pca = PCA(n_components=2)  # Anzahl der gewünschten Hauptkomponenten
     principal_components = pca.fit_transform(data)
-
