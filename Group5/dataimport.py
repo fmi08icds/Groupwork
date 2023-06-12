@@ -10,12 +10,13 @@ def get_test_data(labeled: bool, random=False):
     :return: pandas dataframe containing test data
     """
     if labeled and not random:
-        df = pd.read_csv("data/standard_test_data_labeled.csv")
-    elif labeled:
-        df = pd.read_csv("data/standard_test_data.csv")
+        df = pd.read_csv("data/standard_test_data_labeled.csv", index_col=0)
+    elif not labeled:
+        df = pd.read_csv("data/standard_test_data.csv", index_col=0)
     else:
-        create_random_sample(file_name="data/test_data_random.csv")
-        df = pd.read_csv("data/test_data_random.csv")
+        create_random_sample(file_name="data/test_data_random.csv",
+                             labeled=labeled)
+        df = pd.read_csv("data/test_data_random.csv", index_col=0)
     return df
 
 
