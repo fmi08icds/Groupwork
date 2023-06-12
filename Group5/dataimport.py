@@ -4,6 +4,21 @@ import os  # operating system
 import numpy as np
 
 
+def get_test_data(labeled: bool, random=False):
+    """
+    Returns a pandas dataframe for testing
+    :return: pandas dataframe containing test data
+    """
+    if labeled and not random:
+        df = pd.read_csv("data/standard_test_data_labeled.csv")
+    elif labeled:
+        df = pd.read_csv("data/standard_test_data.csv")
+    else:
+        create_random_sample(file_name="data/test_data_random.csv")
+        df = pd.read_csv("data/test_data_random.csv")
+    return df
+
+
 def data_preparation():
     # Task 1: Load data sets
     data_directory = "data"
@@ -88,16 +103,22 @@ def get_df_merged_with_labels():
     return dataframe
 
 
-def create_random_sample(labeled=False, number_of_rows=5, number_of_genes=None):
+def create_random_sample(file_name="data/test_data_random.csv",
+                         labeled=False, number_of_rows=5, number_of_genes=None):
     """
     Creates a random sample data set and saves it as csv.
     Names of the csv have to end with _random so that they are ignored
     (see .gitignore).
+    :param file_name: name of the file (has to end with "_random.csv"
     :param labeled:
     :param number_of_rows:
     :param number_of_genes:
     :return: None
     """
+    if not file_name[-11:] == "_random.csv":
+        print("Please enter a valid file_name (has to end on '_random.csv'")
+        file_name = "data/test_data_random.csv"
+
     df = get_df_merged_with_labels()
     if not number_of_genes:
         number_of_genes = df.shape[1]
@@ -107,4 +128,4 @@ def create_random_sample(labeled=False, number_of_rows=5, number_of_genes=None):
     # so in der Art:
     rand_sample = np.random.randint(low=0, high=df.shape[0], size=3)
     df = df.iloc[rand_sample, :]
-    df.to_csv("data/test_data_random.csv")
+    df.to_csv(file_name)
