@@ -20,6 +20,9 @@ df = dataimport.get_random_sample(labeled=True,
                                   nr_cols=nr_c)
 print("df:\n", df)
 
+print("Remove labels for the application")
+df = df.iloc[:, 1:]
+
 print("Preprocessing..")
 clean_data = preprocessing(df)
 print("cleaned data:\n", clean_data)

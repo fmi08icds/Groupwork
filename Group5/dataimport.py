@@ -121,7 +121,7 @@ def get_df_merged_with_labels():
     # Task 2: Merge the data sets
     dataframe = dataframe_labels.merge(dataframe, how='inner', on='Unnamed: 0')
     # Remove first column (Unnamed: 0)
-    dataframe = dataframe.iloc[:, 1:]
+
 
     return dataframe
 
