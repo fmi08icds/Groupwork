@@ -31,12 +31,13 @@ def our_pca(data: DataFrame, n_components):
     return selected_eigenvalues, selected_eigenvectors
 
 
-def apply_components(data, eigenvalues):
+def apply_components(data, eigenvectors):
     """
-    Apply the eigenvalues to data (project the data into the eigen-space.
+    Apply the eigenvectors to data (project the data into the eigen-space.
     :param data: data to be projected into the eigen-space
-    :param eigenvalues: components (eigenvectors from PCA)
+    :param eigenvectors: components (eigenvectors from PCA)
     :return: projected data
     """
-    transformed_data = np.dot(data, eigenvalues)
+    # Transforming the data
+    transformed_data = np.dot(data, eigenvectors)
     return transformed_data
