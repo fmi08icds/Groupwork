@@ -15,7 +15,7 @@ except:
     nr_c = 2000
     print("The input was not valid! ..continue with nr_rows=300, nr_cols=2000")
 
-df = dataimport.get_random_sample(labeled=False,
+df = dataimport.get_random_sample(labeled=True,
                                   nr_rows=nr_r,
                                   nr_cols=nr_c)
 print("df:\n", df)
@@ -24,7 +24,7 @@ print("Preprocessing..")
 clean_data = preprocessing(df)
 print("cleaned data:\n", clean_data)
 
-n_components = input("How many compnents do you want the PCA to find?")
+n_components = input("How many components do you want the PCA to find?")
 try:
     n_components = int(n_components)
     print("Okay")

@@ -25,15 +25,18 @@ def get_random_sample(labeled: bool, nr_rows: int, nr_cols: int):
     """
     Returns a pandas DataFrame containing a sample of the whole dataset of
     data/data.csv
+    :param labeled: True if data has to come with labels
     :param nr_rows: number of rows (objects) to be kept
     :param nr_cols: number of columns (attributes) to be kept
     :return: pandas dataframe containing test data
     """
     if labeled:
-        df = pd.read_csv("data/data.csv", index_col=0)
+        df = get_df_merged_with_labels()
+        print(df)
     else:
         df = pd.read_csv("data/data.csv", index_col=0)
-    df = random_sample(df, nr_rows, nr_cols)
+        df = df.iloc[:, 1:]
+    df = random_sample(df, nr_rows, nr_cols, labeled=labeled)
     return df
 
 
@@ -114,9 +117,7 @@ def get_df_merged_with_labels():
     # Task 1: Load data sets
     data_directory = "data"
     dataframe = pd.read_csv(os.path.join(data_directory, "data.csv"))
-
     dataframe_labels = pd.read_csv(os.path.join(data_directory, "labels.csv"))
-
     # Task 2: Merge the data sets
     dataframe = dataframe_labels.merge(dataframe, how='inner', on='Unnamed: 0')
     # Remove first column (Unnamed: 0)
@@ -177,9 +178,10 @@ def create_random_sample(file_name="data/test_data_random.csv",
 # create_random_sample(labeled=False, number_of_rows=5, number_of_genes=20)
 
 
-def random_sample(df: pd.DataFrame, nr_rows: int, nr_cols: int):
+def random_sample(df: pd.DataFrame, nr_rows: int, nr_cols: int, labeled=False):
     """
     Returns a random sample DataFrame of the input DataFrame df
+    :param labeled: True if data contains labels
     :param df: input DataFrame
     :param nr_rows: number of rows (objects) to be kept
     :param nr_cols: number of columns (attributes) to be kept
@@ -187,4 +189,8 @@ def random_sample(df: pd.DataFrame, nr_rows: int, nr_cols: int):
     """
     rand_sample_rows = random.sample(range(df.shape[0]), nr_rows)
     rand_sample_cols = random.sample(range(df.shape[1]), nr_cols)
+    if labeled:
+        print(rand_sample_cols)
+        if 0 not in rand_sample_cols:
+            rand_sample_cols.append(0)
     return df.iloc[rand_sample_rows, rand_sample_cols]
