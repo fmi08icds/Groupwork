@@ -116,17 +116,37 @@ def create_random_sample(file_name="data/test_data_random.csv",
     :param number_of_genes:
     :return: None
     """
+    # Ueberpruefen ob der File_name korrekt ist, falls nicht wird er auf den Standardwert gesetzt
     if not file_name[-11:] == "_random.csv":
         print("Please enter a valid file_name (has to end on '_random.csv'")
         file_name = "data/test_data_random.csv"
 
-    df = get_df_merged_with_labels()
+    df = get_df_merged_with_labels()  #Dataframe erhalten
     if not number_of_genes:
         number_of_genes = df.shape[1]
 
     # TODO implement
-    #
-    # so in der Art:
-    rand_sample = np.random.randint(low=0, high=df.shape[0], size=3)
-    df = df.iloc[rand_sample, :]
-    df.to_csv(file_name)
+
+    # Generate random sample
+    r = np.random.randint(low=0, high=df.shape[0], size=number_of_rows) #erstellt number of rows int Zahlen zwischen 0
+    # und Anzahl der Zeilen, size = array länge - anzahl der reihen
+    s = np.random.randint(low=1, high=df.shape[1], size=number_of_genes)
+    s = np.insert(s, 0, 0) # füge 0 an index 0 hinzu, um Klassen nicht zu verlieren
+
+    random_sample = df.iloc[r, s] #teilt das Dataframe in r reihen und s Spalten
+
+
+    # Falls labeled = True, entferne es auf dem random Beispiel
+    if not labeled:
+        labels_column_name = 'Class'
+        random_sample = random_sample.drop(columns=[labels_column_name]) # Spalte löschen
+
+        # Speicher random sample as a CSV file
+        random_sample.to_csv(file_name, index=False)
+        print("random sample saved as", file_name)
+
+    else:
+        random_sample.to_csv(file_name, index=False)
+        print("random sample saved as", file_name)
+
+create_random_sample(labeled=False, number_of_rows=5, number_of_genes=20)
