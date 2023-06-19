@@ -28,7 +28,7 @@ def our_pca(data: DataFrame, n_components):
     # eigenvalue decomposition of the covariance matrix
     eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix, )
 
-    # Sorting of the eigenvalues and vectors in descending order
+    # Sorting the eigenvalues and vectors in descending order
     idx = np.argsort(eigenvalues)[::-1]
     sorted_eigenvalues = eigenvalues[idx]
     sorted_eigenvectors = eigenvectors[:, idx]
