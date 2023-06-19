@@ -12,16 +12,16 @@ def our_pca(data: DataFrame, n_components):
 
 
     # Computing the covariance matrix
-    ### covariance_matrix = np.cov(data, rowvar=False)
+    covariance_matrix = np.cov(data, rowvar=False)
 
     # Computing the covariance matrix in smaller steps
-    n_samples, n_features = data.shape
-    covariance_matrix = np.zeros((n_features, n_features))
+    # n_samples, n_features = data.shape
+    # covariance_matrix = np.zeros((n_features, n_features))
 
-    for i in range(n_samples):
-        covariance_matrix += np.outer(data[i], data[i])
+    # for i in range(n_samples):
+    #     covariance_matrix += np.outer(data[i], data[i])
 
-    covariance_matrix /= n_samples
+    # covariance_matrix /= n_samples
 
 
 
