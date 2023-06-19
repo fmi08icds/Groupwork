@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os  # operating system
 import numpy as np
+import random
 
 
 def get_test_data(labeled: bool, random=False):
@@ -17,6 +18,22 @@ def get_test_data(labeled: bool, random=False):
         create_random_sample(file_name="data/test_data_random.csv",
                              labeled=labeled)
         df = pd.read_csv("data/test_data_random.csv", index_col=0)
+    return df
+
+
+def get_random_sample(labeled: bool, nr_rows: int, nr_cols: int):
+    """
+    Returns a pandas DataFrame containing a sample of the whole dataset of
+    data/data.csv
+    :param nr_rows: number of rows (objects) to be kept
+    :param nr_cols: number of columns (attributes) to be kept
+    :return: pandas dataframe containing test data
+    """
+    if labeled:
+        df = pd.read_csv("data/data.csv", index_col=0)
+    else:
+        df = pd.read_csv("data/data.csv", index_col=0)
+    df = random_sample(df, nr_rows, nr_cols)
     return df
 
 
@@ -50,17 +67,20 @@ def data_preparation():
     # Bar plot of the five different types of cancer
 
     dataframe['Class'].value_counts().plot(kind='bar', xlabel='cancer types',
-                                           ylabel='frequency', title='Distribution of cancer types',
+                                           ylabel='frequency',
+                                           title='Distribution of cancer types',
                                            color='green', figsize=(6, 7))
     plt.plot()
     plt.savefig('Distribution of cancer types.png')
     plt.show()
 
     # Relative distribution of the five different cancer types
-    (dataframe['Class'].value_counts() / len(dataframe)).plot(kind='bar', xlabel='cancer types',
+    (dataframe['Class'].value_counts() / len(dataframe)).plot(kind='bar',
+                                                              xlabel='cancer types',
                                                               ylabel='frequency',
                                                               title='Relative distribution of cancer types',
-                                                              color='green', figsize=(6, 7))
+                                                              color='green',
+                                                              figsize=(6, 7))
 
     plt.plot()
     plt.savefig('Relative distribution of cancer types.png')
@@ -75,7 +95,8 @@ def data_preparation():
     # plotting the density of the mean values of all genes
     fig, ax = plt.subplots(figsize=(8, 6))
     df = pd.DataFrame({'Class': dataframe['Class'],
-                       'Density': dataframe.iloc[:, 2:].sum(axis=1) / len(dataframe.columns[2:])})
+                       'Density': dataframe.iloc[:, 2:].sum(axis=1) / len(
+                           dataframe.columns[2:])})
     labels = []
     for label, df_grouped in df.groupby('Class'):
         labels.append(label)
@@ -121,25 +142,28 @@ def create_random_sample(file_name="data/test_data_random.csv",
         print("Please enter a valid file_name (has to end on '_random.csv'")
         file_name = "data/test_data_random.csv"
 
-    df = get_df_merged_with_labels()  #Dataframe erhalten
+    df = get_df_merged_with_labels()  # Dataframe erhalten
     if not number_of_genes:
         number_of_genes = df.shape[1]
 
     # TODO implement
 
     # Generate random sample
-    r = np.random.randint(low=0, high=df.shape[0], size=number_of_rows) #erstellt number of rows int Zahlen zwischen 0
+    r = np.random.randint(low=0, high=df.shape[0],
+                          size=number_of_rows)  # erstellt number of rows int Zahlen zwischen 0
     # und Anzahl der Zeilen, size = array länge - anzahl der reihen
     s = np.random.randint(low=1, high=df.shape[1], size=number_of_genes)
-    s = np.insert(s, 0, 0) # füge 0 an index 0 hinzu, um Klassen nicht zu verlieren
+    s = np.insert(s, 0,
+                  0)  # füge 0 an index 0 hinzu, um Klassen nicht zu verlieren
 
-    random_sample = df.iloc[r, s] #teilt das Dataframe in r reihen und s Spalten
-
+    random_sample = df.iloc[
+        r, s]  # teilt das Dataframe in r reihen und s Spalten
 
     # Falls labeled = True, entferne es auf dem random Beispiel
     if not labeled:
         labels_column_name = 'Class'
-        random_sample = random_sample.drop(columns=[labels_column_name]) # Spalte löschen
+        random_sample = random_sample.drop(
+            columns=[labels_column_name])  # Spalte löschen
 
         # Speicher random sample as a CSV file
         random_sample.to_csv(file_name, index=False)
@@ -149,4 +173,18 @@ def create_random_sample(file_name="data/test_data_random.csv",
         random_sample.to_csv(file_name, index=False)
         print("random sample saved as", file_name)
 
-create_random_sample(labeled=False, number_of_rows=5, number_of_genes=20)
+
+# create_random_sample(labeled=False, number_of_rows=5, number_of_genes=20)
+
+
+def random_sample(df: pd.DataFrame, nr_rows: int, nr_cols: int):
+    """
+    Returns a random sample DataFrame of the input DataFrame df
+    :param df: input DataFrame
+    :param nr_rows: number of rows (objects) to be kept
+    :param nr_cols: number of columns (attributes) to be kept
+    :return: the sample DataFrame
+    """
+    rand_sample_rows = random.sample(range(df.shape[0]), nr_rows)
+    rand_sample_cols = random.sample(range(df.shape[1]), nr_cols)
+    return df.iloc[rand_sample_rows, rand_sample_cols]

@@ -4,10 +4,10 @@ import numpy as np
 
 def our_pca(data: DataFrame, n_components):
     """
-
+    Own implementation of pca.
     :param data: pandas DataFrame
     :param n_components: number of components
-    :return: (best n eigenvalues, selected_eigenvectors)
+    :return: (eigenvalues, eigenvectors)
     """
     # Computing the covariance matrix
     covariance_matrix = np.cov(data, rowvar=False)
