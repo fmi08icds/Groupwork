@@ -23,7 +23,7 @@ def our_pca(data: DataFrame, n_components):
     # Selecting the principal components
     selected_eigenvectors = sorted_eigenvectors[:, :n_components]
     # Selecting the eigenvalues
-    selected_eigenvalues = sorted_eigenvalues[:, :n_components]
+    selected_eigenvalues = sorted_eigenvalues[:n_components]
 
     # Transforming the data
     # transformed_data = np.dot(centered_data, selected_eigenvectors)
