@@ -24,7 +24,7 @@ print("Preprocessing..")
 clean_data = preprocessing(df)
 print("cleaned data:\n", clean_data)
 
-n_components = input("How many compnents do you want the PCA to find?")
+n_components = input("How many components do you want the PCA to find?")
 try:
     n_components = int(n_components)
     print("Okay")
