@@ -51,6 +51,10 @@ def apply_components(data, eigenvectors):
     :param eigenvectors: components (eigenvectors from PCA)
     :return: projected data
     """
+    eigen_matrix = np.array(eigenvectors)
+    if data.shape[1] != eigen_matrix.shape[0]:
+        eigen_matrix = eigen_matrix.transpose()
     # Transforming the data
-    transformed_data = np.dot(data, eigenvectors)
+    transformed_data = np.dot(data, eigen_matrix)
+
     return transformed_data

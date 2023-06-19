@@ -21,8 +21,8 @@ df = dataimport.get_random_sample(labeled=False,
 print("df:\n", df)
 
 print("Preprocessing..")
-data = preprocessing(df)
-print("cleaned data:\n", data)
+clean_data = preprocessing(df)
+print("cleaned data:\n", clean_data)
 
 n_components = input("How many compnents do you want the PCA to find?")
 try:
@@ -38,12 +38,14 @@ if n_components > nr_r:
 
 print(f"PCA with {n_components} components..")
 # Get eigenvectors
-eigenvalues, eigenvectors = our_pca.our_pca(data, n_components)
+eigenvalues, eigenvectors = our_pca.our_pca(clean_data, n_components)
 
 print("eigenvalues:\n", eigenvalues)
-print("eigenvectors with shape", eigenvectors.shape, ":\n", eigenvectors)
+print("eigenvectors with shape", eigenvectors.shape)
+for ev in eigenvectors:
+    print(ev)
 
 print("Apply components to data (projection)..")
-projected_df = our_pca.apply_components(df, eigenvectors)
+projected_df = our_pca.apply_components(clean_data, eigenvectors)
 print("Projected data:\n", projected_df)
 print("FIN")
