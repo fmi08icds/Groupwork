@@ -9,8 +9,21 @@ def our_pca(data: DataFrame, n_components):
     :param n_components: number of components
     :return: (eigenvalues, eigenvectors)
     """
+
+
     # Computing the covariance matrix
-    covariance_matrix = np.cov(data, rowvar=False)
+    ### covariance_matrix = np.cov(data, rowvar=False)
+
+    # Computing the covariance matrix in smaller steps
+    n_samples, n_features = data.shape
+    covariance_matrix = np.zeros((n_features, n_features))
+
+    for i in range(n_samples):
+        covariance_matrix += np.outer(data[i], data[i])
+
+    covariance_matrix /= n_samples
+
+
 
     # eigenvalue decomposition of the covariance matrix
     eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix)
