@@ -13,7 +13,7 @@ def accuracy(predicted_y: ndarray, y: ndarray):
 if __name__ == "__main__":
     # Load the data
     df = pd.read_csv("Group2/data/diabetes_prediction_dataset.csv")
-    df = df.sample(100)
+    df = df.sample(1000)
     df["diabetes"].replace(0, -1, inplace=True)
 
     train_df, test_df = train_test_split(df, test_size=0.2)
