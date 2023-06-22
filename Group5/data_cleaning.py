@@ -65,6 +65,7 @@ def preprocessing(df: DataFrame, scaling="center", threshold=0):
     # Drop NaN values
     df = df.dropna(how='any', axis=1)
     # Feature scaling
+    print(f"Feature scaling: {scaling} data..")
     if scaling == "standardize":
         # Standardize the data
         df = standardize_data(df)

@@ -28,9 +28,9 @@ df = dataimport.get_random_sample(labeled=False, nr_rows=nr_r, nr_cols=nr_c)
 # df = df_labeled.iloc[:, :-1].copy()
 # print("DataFrame without labels:\n", df)
 
-print("Preprocessing..")
-clean_data = preprocessing(df)
-print("cleaned data:\n", clean_data)
+print("\nPreprocessing..")
+clean_data = preprocessing(df, scaling="standardize")
+print("\nCleaned data:\n", clean_data)
 
 # Ask the user how many components she wants to extract
 n_components = input("How many components do you want the PCA to find?")
@@ -46,18 +46,18 @@ if n_components > nr_r:
     n_components = nr_r
     print("n_components is too big! ..continue with n_components=nr_rows")
 
-print(f"PCA with {n_components} components..")
+print(f"\nPCA with {n_components} components..")
 
 # Get eigenvectors
 eigenvalues, eigenvectors = our_pca.our_pca(clean_data, n_components)
 
-print("eigenvalues:\n", eigenvalues)
-print("eigenvectors with shape", eigenvectors.shape)
-for ev in eigenvectors:
-    print(ev)
+print("\neigenvalues:\n", eigenvalues)
+print("\neigenvectors with shape", eigenvectors.shape, "\n")
+for ev in eigenvectors.transpose():
+    print("EV:   ", *ev)
 
 # Apply the pca-components to data
-print("Apply components to data (projection)..")
+print("\nApply components to data (projection)..")
 projected_df = our_pca.apply_components(clean_data, eigenvectors)
-print("Projected data:\n", projected_df)
-print("FIN")
+print("\nProjected data:\n", projected_df)
+print("\nFIN")
