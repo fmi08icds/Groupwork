@@ -9,6 +9,7 @@ Our groups task is the implementation of one or more regression models using exi
  - Our primary communication channel is a [Telegram](https://telegram.org/k/) group
  - Our presentations are written in markdown to fulfill the requirement that it is tracked in the version control. For rendering the file `presentation.md` use [Marp](https://marp.app/) in specific, the [Marp VSCode extension](https://marketplace.visualstudio.com/items?itemName=marp-team.marp-vscode)
  - For our project we use a python [cookie cutter template](https://github.com/at-gmbh/at-python-template)
+ - Project milestones are tracked using the GitHub project tool and scrumboard
 
 ## Structure 🏗️
 - `notes` contains general notes and brain dumps of our meetings or of the members of the group
