@@ -120,7 +120,7 @@ def get_df_merged_with_labels():
     dataframe_labels = pd.read_csv(os.path.join(data_directory, "labels.csv"))
     # Task 2: Merge the data sets
     dataframe = dataframe_labels.merge(dataframe, how='inner', on='Unnamed: 0')
-    # Remove first column (Unnamed: 0)
+    # Remove the "Unnamed: 0" column
     dataframe = dataframe.iloc[:, 1:]
 
     return dataframe

@@ -1,5 +1,6 @@
 from pandas import DataFrame
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 
 def center_data(df: DataFrame, axis=0):
@@ -20,10 +21,8 @@ def normalize_data(df: DataFrame, axis=0):
     :param axis: axis to be used
     :return: pandas DataFrame
     """
-    # Normalize objects (rows) using the maximum absolute scaling
-    # return (df - df.mean(axis=0)) / df.std(axis=0)
-    # Normalize the data in pandas using Z-Score
-    return df / df.std(axis=axis)
+    # Normalize objects/rows (axis=0) using min-max feature scaling
+    return (df - np.min(df, axis)) / (np.max(df, axis) - np.min(df, axis))
 
 
 def standardize_data(df: DataFrame, axis=0):
@@ -33,8 +32,8 @@ def standardize_data(df: DataFrame, axis=0):
     :param df: DataFrame to be standardized
     :return: pandas DataFrame
     """
-    # Standardize the data in pandas using Z-Score
-    return (df - df.mean(axis=axis)) / df.std(axis=axis)
+    # Standardize the data
+    return (df - np.mean(df, axis=0)) / np.std(df, axis=0)
 
 
 def drop_insignificant_data(df: DataFrame, threshold=0):
@@ -52,39 +51,28 @@ def drop_insignificant_data(df: DataFrame, threshold=0):
     return df
 
 
-def preprocessing(df: DataFrame, threshold=0):
+def preprocessing(df: DataFrame, scaling="center", threshold=0):
     """
     The preprocessing includes:
     - dropping of columns that contain None/NaN values
     - normalization of object values (rows)
     - dropping columns with variance less than min_variance value
-    :param threshold: the minimum variance of an attribute to be kept in df
     :param df: pandas DataFrame to be pre-processed
+    :param scaling: options are "standardize", "normalize", "center" (default)
+    :param threshold: the minimum variance of an attribute to be kept in df
     :return: preprocessed pandas DataFrame
     """
     # Drop NaN values
     df = df.dropna(how='any', axis=1)
-    # Standardize the data
-    df = standardize_data(df)
-    # Drop insignificant
-    df = drop_insignificant_data(df, threshold=threshold)
-    return df
-
-
-def preprocessing_sklearn(df: DataFrame, threshold=0):
-    """
-    The preprocessing includes:
-    - dropping of columns that contain None/NaN values
-    - normalization of object values (rows)
-    - dropping columns with variance less than min_variance value
-    :param threshold: the minimum variance of an attribute to be kept in df
-    :param df: pandas DataFrame to be pre-processed
-    :return: preprocessed pandas DataFrame
-    """
-    # Drop NaN values
-    df = df.dropna(how='any', axis=1)
-    # Standardize the data
-    df = StandardScaler().fit_transform(df)
-    # Drop insignificant
+    # Feature scaling
+    print(f"Feature scaling: {scaling} data..")
+    if scaling == "standardize":
+        # Standardize the data
+        df = standardize_data(df)
+    elif scaling == "normalize":
+        df = normalize_data(df)
+    else:
+        df = center_data(df)
+    # Drop insignificant (columns/attributes with little variance)
     df = drop_insignificant_data(df, threshold=threshold)
     return df

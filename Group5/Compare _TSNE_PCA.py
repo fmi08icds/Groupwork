@@ -6,6 +6,7 @@ import seaborn as sns
 
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+#
 
 colors = ['royalblue','red','deeppink', 'maroon', 'mediumorchid', 'tan', 'forestgreen', 'olive', 'goldenrod', 'lightcyan', 'navy']
 vectorizer = np.vectorize(lambda x: colors[x % len(colors)])
