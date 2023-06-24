@@ -82,11 +82,6 @@ def load_X_y(path=None, attribute_list: Union[str, List[str]] = None, sample_siz
     data["genre_numeric"] = label_encoder.fit_transform(data["genre"])
     y = data["genre_numeric"].values.reshape(-1, 1)
 
-    print(y.shape)
-    print(y)
-    print(X.shape)
-    print(X)
-
     return X, y
 
 
