@@ -5,15 +5,24 @@ from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 
-# load the dataset and eparate target from the rest:
+# load the dataset and separate target from the rest:
 
-# data = pd.read_csv('diabetes.csv')
-# X = data.drop('target_variable', axis=1) 
-# y = data['target_variable']
+data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
+data.replace("Female", 0, inplace=True)
+data.replace("Male", 1, inplace=True)
+data.replace("Other", 2, inplace=True)
+data.replace("No Info", 0, inplace=True)
+data.replace("not current", 2, inplace=True)
+data.replace("current", 1, inplace=True)
+data.replace("former", 3, inplace=True)
+data.replace("never", 4, inplace=True)
+data.replace("ever", 5, inplace=True)
+X = data.drop('diabetes', axis=1)
+y = data['diabetes']
 
-iris = datasets.load_breast_cancer()
-X = iris.data
-y = iris.target
+#iris = datasets.load_breast_cancer()
+#X = iris.data
+#y = iris.target
 
 # scale the data
 scaler = StandardScaler()
