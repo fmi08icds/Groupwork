@@ -2,24 +2,29 @@ import numpy as np
 
 from collections import deque
 
-# from typing import Optional
+from typing import Tuple
 from numpy.typing import NDArray
 
 from clustering.utils import distance_to_reference
 
 
-def dbscan(X: NDArray, epsilon: float = 0.5, min_points: int = 5) -> NDArray:
+def dbscan(X: NDArray, epsilon: float = 0.5, min_points: int = 5) -> Tuple[NDArray, NDArray]:
     """Perform clustering on the point array `X` using the Density-Based Spatial Clustering for Applications with
     Noise (DBSCAN) [1] algorithm.
 
     Parameters:
         X: Two-dimensional array of shape `(n_samples, n_features)`
-        epsilon: Maximum euclidean distance between two points to consider one in the neighborhood of the other
+        epsilon: Maximum Euclidean distance between two points to consider one in the neighborhood of the other
         min_points: Defines how many points (including itself) must be in the neighborhood to consider the point a
-            core point. A common heuristik is to pick `2 * n_features` [2]
+            core point. A common heuristic is to pick `2 * n_features` [2]
 
-    Returns: Array of shape `(n_samples,)` with the cluster index for each sample. If the index is `-1`, the point
-        is considered an outlier.
+    Returns:
+        core_sample_indices:    Array of shape `(n_core_samples,)` with indices of core samples.
+                                Difference to sklearn implementation: Only previously not visited points are recorded.
+                                Hence, this output is equal to the "actual" cluster centers
+        labels                  Array of shape `(n_samples,)` with the cluster index for each sample.
+                                If the index is `-1`, the point is considered an outlier.
+
 
     References:
         [1] M. Ester, H. Kriegel, J. Sander and X. Xu. A density-based algorithm for discovering clusters in large
@@ -35,8 +40,9 @@ def dbscan(X: NDArray, epsilon: float = 0.5, min_points: int = 5) -> NDArray:
 
     n_samples = X.shape[0]
 
-    # Mark all points as outliers until the are assigned a cluster index (starting with 0)
-    cluster_indices = np.full(n_samples, fill_value=-1, dtype=np.int32)
+    # Mark all points as outliers until they are assigned a cluster index (starting with 0)
+    labels = np.full(n_samples, fill_value=-1, dtype=np.int32)
+    core_samples = np.full(n_samples, fill_value=-1, dtype=np.int32)
     cluster_index = 0
 
     # Keep track of points that have already been visited
@@ -65,8 +71,8 @@ def dbscan(X: NDArray, epsilon: float = 0.5, min_points: int = 5) -> NDArray:
             j = reachable.popleft()
 
             # Assign reachable point to current cluster if it does not already belong to a cluster
-            if cluster_indices[j] == -1:
-                cluster_indices[j] = cluster_index
+            if labels[j] == -1:
+                labels[j] = cluster_index
 
             # Ignore points that have already been visited
             if not point_visited[j]:
@@ -77,6 +83,10 @@ def dbscan(X: NDArray, epsilon: float = 0.5, min_points: int = 5) -> NDArray:
                     reachable.extend(potentially_reachable)
 
         # Cluster is now complete, increment cluster index for next cluster
+        core_samples[i] = cluster_index
         cluster_index += 1
 
-    return cluster_indices
+    core_samples = np.asarray(core_samples > -1, dtype=np.uint8)
+    core_sample_indices = np.where(core_samples)[0]
+
+    return core_sample_indices, labels
