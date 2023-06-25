@@ -1,6 +1,7 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+import numpy as np
 
 
 class Eval:
@@ -30,7 +31,7 @@ class Eval:
             if true == pred:
                 correct += 1
 
-        self.accuracy = correct / total
+        self.accuracy = round(correct / total, 4)
 
     def precision_score(self):
         true_positives = 0
@@ -42,7 +43,7 @@ class Eval:
             elif pred == 1 and true == 0:
                 false_positives += 1
 
-        self.precision = true_positives / (true_positives + false_positives)
+        self.precision = round(true_positives / (true_positives + false_positives), 4)
 
     def recall_score(self):
         true_positives = 0
@@ -86,42 +87,58 @@ class Eval:
         print(self.set_type, "Confusion Matrix:")
         print('\n'.join([' '.join([str(item) for item in row]) for row in self.conf_matrix]))
 
-# Load the dataset from CSV
-data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
-data.replace("Female", 0, inplace=True)
-data.replace("Male", 1, inplace=True)
-data.replace("Other", 2, inplace=True)
-data.replace("No Info", 0, inplace=True)
-data.replace("not current", 2, inplace=True)
-data.replace("current", 1, inplace=True)
-data.replace("former", 3, inplace=True)
-data.replace("never", 4, inplace=True)
-data.replace("ever", 5, inplace=True)
 
-# Split the data into features (X) and target variable (y)
-X = data.drop('diabetes', axis=1)
-y = data['diabetes']
+def standard_scaler(data):
+    mean = np.mean(data, axis=0)
+    std = np.std(data, axis=0)
+    scaled_data = (data - mean) / std
+    return scaled_data
 
-# Split the data into training, validation, and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
-# Create an SVM classifier
-svm = SVC()
+def preprocess_data(data):
+    data.replace("Female", 0, inplace=True)
+    data.replace("Male", 1, inplace=True)
+    data.replace("Other", 2, inplace=True)
+    data.replace("No Info", 0, inplace=True)
+    data.replace("not current", 2, inplace=True)
+    data.replace("current", 1, inplace=True)
+    data.replace("former", 3, inplace=True)
+    data.replace("never", 4, inplace=True)
+    data.replace("ever", 5, inplace=True)
 
-# Train the SVM classifier
-svm.fit(X_train, y_train)
+    # Split the data into features (X) and target variable (y)
+    X = data.drop('diabetes', axis=1)
+    y = data['diabetes']
 
-# Make predictions on the validation set
-val_predictions = svm.predict(X_val)
+    # scale the data
+    X_scaled = standard_scaler(X)
+    return X_scaled, y
 
-# Calculate evaluation metrics on the validation set
-ValidEval = Eval("Validation", y_val, val_predictions)
-ValidEval.get_eval_metrics()
 
-# Make predictions on the test set
-test_predictions = svm.predict(X_test)
+if __name__ == "__main__":
+    data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
+    X_scaled, y = preprocess_data(data)
 
-# Calculate evaluation metrics on the test set
-TestEval = Eval("Test", y_test, test_predictions)
-TestEval.get_eval_metrics()
+    # Split the data into training, validation, and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
+
+    # Create an SVM classifier with best kernel based on sklearn_kernel_comparison.py
+    svm = SVC(kernel="poly")
+
+    # Train the SVM classifier
+    svm.fit(X_train, y_train)
+
+    # Make predictions on the validation set
+    val_predictions = svm.predict(X_val)
+
+    # Calculate evaluation metrics on the validation set
+    ValidEval = Eval("Validation", y_val, val_predictions)
+    ValidEval.get_eval_metrics()
+
+    # Make predictions on the test set
+    test_predictions = svm.predict(X_test)
+
+    # Calculate evaluation metrics on the test set
+    TestEval = Eval("Test", y_test, test_predictions)
+    TestEval.get_eval_metrics()
