@@ -25,8 +25,8 @@ def plot_2d(reg, show_predictands=True, show_residuals=True):
     x_data = reg.get_x_data()
     y_data = reg.get_y_data()
     predicted = reg.get_predicted_values()
-    weights = reg.get_weights()
-    def f(x): return [weights[0] + weights[1] * x_i for x_i in x]
+    coeffs = reg.get_coeffs()
+    def f(x): return [coeffs[0] + coeffs[1] * x_i for x_i in x]
 
     plt.figure("Regression")
     plt.plot(x_data, y_data, "rx", markersize=10)
