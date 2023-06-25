@@ -1,8 +1,10 @@
+import math
+
 import numpy as np
 
 
 class linear_regression:
-    weights = None
+    coeffs = None
     predicted_values = None
     x_data = None
     y_data = None
@@ -13,7 +15,7 @@ class linear_regression:
         :param data: data is a Nx(d+1) matrix with the last column being Y and X being Nxd. data[0] accesses therefor the first sample.
         :param transposed: If the data is transposed and data[0] returns a vector of the first dimension of the samples.
         """
-        global weights
+        global coeffs
         global predicted_values
         global x_data
         global y_data
@@ -25,12 +27,12 @@ class linear_regression:
         # removes y-column and ads column of ones for the bias (w0)
         x_data = np.asarray([np.insert(sample[:-1], 0, 1) for sample in data])
 
-        weights = np.linalg.pinv(np.transpose(x_data) @ x_data) @ np.transpose(x_data) @ y_data
-        predicted_values = x_data @ weights
+        coeffs = np.linalg.pinv(np.transpose(x_data) @ x_data) @ np.transpose(x_data) @ y_data
+        predicted_values = x_data @ coeffs
 
-    def get_weights(self):
-        # global weights
-        return weights
+    def get_coeffs(self):
+        # global coeffs
+        return coeffs
 
 
 
