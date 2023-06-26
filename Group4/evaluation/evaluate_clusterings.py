@@ -40,8 +40,9 @@ from sklearn import metrics
 
 
 def get_dataset(n_centers, n_samples_per_genre, n_features, random_state) -> Tuple:
-    X, labels_true = make_blobs(n_samples=n_centers * n_samples_per_genre, centers=n_centers, n_features=n_features,
-                                random_state=random_state)
+    X, labels_true = make_blobs(
+        n_samples=n_centers * n_samples_per_genre, centers=n_centers, n_features=n_features, random_state=random_state
+    )
     return X, labels_true
 
 
@@ -49,12 +50,25 @@ def get_dataset(n_centers, n_samples_per_genre, n_features, random_state) -> Tup
 # runtime with sample size 1000 => about 5 seconds
 # runtime with sample size 2000 => about 130 seconds (due to DBSCAN)
 
+
 def get_spotify_dataset(n_samples_per_genre):
-    X, y = ds.load_X_y(path='data/SpotifyFeatures.csv', sample_size=n_samples_per_genre,
-                       attribute_list=['popularity', 'acousticness', 'danceability',
-                                       # 'duration_ms',
-                                       'energy', 'instrumentalness', 'liveness', 'loudness',
-                                       'speechiness', 'tempo', 'valence'])
+    X, y = ds.load_X_y(
+        path="data/SpotifyFeatures.csv",
+        sample_size=n_samples_per_genre,
+        attribute_list=[
+            "popularity",
+            "acousticness",
+            "danceability",
+            # 'duration_ms',
+            "energy",
+            "instrumentalness",
+            "liveness",
+            "loudness",
+            "speechiness",
+            "tempo",
+            "valence",
+        ],
+    )
     y = y.flatten()
     # get 1D array from 2D array, this is need for calculating clustering metrics
     return X, y
@@ -69,9 +83,7 @@ def get_pred_k_means(X, n_clusters, random_state):
 
 def get_pred_minibatch_k_means(X, n_clusters, random_state):
     start_time = time.perf_counter()
-    kmeans = MiniBatchKMeans(n_clusters=n_clusters, random_state=random_state,
-                             batch_size=2048,
-                             n_init="auto").fit(X)
+    kmeans = MiniBatchKMeans(n_clusters=n_clusters, random_state=random_state, batch_size=2048, n_init="auto").fit(X)
     end_time = time.perf_counter()
     return kmeans.labels_, end_time - start_time
 
@@ -116,12 +128,14 @@ def get_pred_dbscan(X, min_samples):
 def get_intrinsic_metrics(X: NDArray, labels_pred: NDArray):
     """Intrinsic metrics (do not need ground-truth labels), but need the datapoints to compute
     inter-cluster distances and intra-cluster distances"""
-    silhouette_score = metrics.silhouette_score(X, labels_pred, metric='euclidean')
+    silhouette_score = metrics.silhouette_score(X, labels_pred, metric="euclidean")
     calinski_harabasz_score = metrics.calinski_harabasz_score(X, labels_pred)
     davies_bouldin_score = metrics.davies_bouldin_score(X, labels_pred)
-    return {"silhouette_score": silhouette_score,
-            "calinski_harabasz_score": calinski_harabasz_score,
-            "davies_bouldin_score": davies_bouldin_score}
+    return {
+        "silhouette_score": silhouette_score,
+        "calinski_harabasz_score": calinski_harabasz_score,
+        "davies_bouldin_score": davies_bouldin_score,
+    }
 
 
 def get_extrinsic_metrics(labels_true: NDArray, labels_pred: NDArray):
@@ -142,10 +156,17 @@ def get_extrinsic_metrics(labels_true: NDArray, labels_pred: NDArray):
     # Fowlkes-Mallows Score
     fm_score = metrics.fowlkes_mallows_score(labels_true, labels_pred)
 
-    return {"rand_index_score": ri_score, "adj_rand_index_score": ari_score,
-            "mut_info_score": mi_score, "adj_mut_info_score": ami_score, "norm_mut_info_score": nmi_score,
-            "homogeneity_score": homo_score, "completeness_score": comp_score, "v_measure": v_measure,
-            "fowlkes_mallows_score": fm_score}
+    return {
+        "rand_index_score": ri_score,
+        "adj_rand_index_score": ari_score,
+        "mut_info_score": mi_score,
+        "adj_mut_info_score": ami_score,
+        "norm_mut_info_score": nmi_score,
+        "homogeneity_score": homo_score,
+        "completeness_score": comp_score,
+        "v_measure": v_measure,
+        "fowlkes_mallows_score": fm_score,
+    }
 
 
 def main() -> None:
@@ -170,9 +191,9 @@ def main() -> None:
 
     # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.cluster.pair_confusion_matrix.html
 
-    print('Pair Confusion matrix:', metrics.cluster.pair_confusion_matrix(labels_true, labels_pred_km))
+    print("Pair Confusion matrix:", metrics.cluster.pair_confusion_matrix(labels_true, labels_pred_km))
     contingency_matrix = metrics.cluster.contingency_matrix(labels_true, labels_pred_km)
-    print('Contingency matrix:', contingency_matrix)
+    print("Contingency matrix:", contingency_matrix)
 
     labels_pred_mbkm, run_time = get_pred_minibatch_k_means(X, n_centers, random_state)
     print("MiniBatch K-Means")
@@ -186,15 +207,15 @@ def main() -> None:
     print(get_extrinsic_metrics(labels_true, labels_pred_bskm))
     # print(get_intrinsic_metrics(X, labels_pred_bskm))
 
-    labels_pred_dbs, run_time = get_pred_dbscan(X, n_samples_per_genre//2)
+    labels_pred_dbs, run_time = get_pred_dbscan(X, n_samples_per_genre // 2)
     print("DBSCAN (Scikit-Learn)")
     print(f"Runtime: {run_time:0.4f} seconds")
     print(get_extrinsic_metrics(labels_true, labels_pred_dbs))
     # print(get_intrinsic_metrics(X, labels_pred_dbs))
 
-    print('Pair Confusion matrix:', metrics.cluster.pair_confusion_matrix(labels_true, labels_pred_dbs))
+    print("Pair Confusion matrix:", metrics.cluster.pair_confusion_matrix(labels_true, labels_pred_dbs))
     contingency_matrix = metrics.cluster.contingency_matrix(labels_true, labels_pred_dbs)
-    print('Contingency matrix:', contingency_matrix)
+    print("Contingency matrix:", contingency_matrix)
 
     ####################################################
     # Only run DBSCAN (Group4) with small sample size like 100 samples per genre!
@@ -224,5 +245,5 @@ def main() -> None:
     print(f"Total runtime: {end_time - start_time:0.4f} seconds")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
