@@ -111,16 +111,16 @@ def get_pred_affinity_propagation(X, random_state):
     return clustering.labels_, end_time - start_time
 
 
-def get_pred_dbscan_gr4(X, min_points):
+def get_pred_dbscan_gr4(X, min_points, epsilon):
     start_time = time.perf_counter()
-    labels_pred = dbscan(X=X, epsilon=0.02, min_points=min_points)
+    labels_pred = dbscan(X=X, epsilon=epsilon, min_points=min_points)
     end_time = time.perf_counter()
     return labels_pred, end_time - start_time
 
 
-def get_pred_dbscan(X, min_samples):
+def get_pred_dbscan(X, min_samples, epsilon):
     start_time = time.perf_counter()
-    clustering = DBSCAN(eps=0.02, min_samples=min_samples).fit(X)
+    clustering = DBSCAN(eps=epsilon, min_samples=min_samples).fit(X)
     end_time = time.perf_counter()
     return clustering.labels_, end_time - start_time
 
@@ -171,15 +171,15 @@ def get_extrinsic_metrics(labels_true: NDArray, labels_pred: NDArray):
 
 def main() -> None:
     random_state = 42
-    n_centers = 26  # with more than 100 samples from spotify dataset, 1 genre is left out
+    n_centers = 25  # with more than 100 samples from spotify dataset, 1 genre is left out
     n_samples_per_genre = 1000
 
     # use a dataset of blobs for evaluating the clustering algorithms
-    n_features = 10
-    X, labels_true = get_dataset(n_centers, n_samples_per_genre, n_centers, random_state)
+    # n_features = 10
+    # X, labels_true = get_dataset(n_centers, n_samples_per_genre, n_features, random_state)
 
     # alternatively: use the Spotify song dataset for evaluating the clustering algorithms
-    # X, labels_true = get_spotify_dataset(n_samples_per_genre=n_samples_per_genre)
+    X, labels_true = get_spotify_dataset(n_samples_per_genre=n_samples_per_genre)
 
     start_time = time.perf_counter()
 
@@ -207,7 +207,10 @@ def main() -> None:
     print(get_extrinsic_metrics(labels_true, labels_pred_bskm))
     # print(get_intrinsic_metrics(X, labels_pred_bskm))
 
-    labels_pred_dbs, run_time = get_pred_dbscan(X, n_samples_per_genre // 2)
+    # for make_blobs
+    # labels_pred_dbs, run_time = get_pred_dbscan(X, min_samples=n_samples_per_genre//2, epsilon=6)
+    # for Spotify dataset
+    labels_pred_dbs, run_time = get_pred_dbscan(X, min_samples=n_samples_per_genre//20, epsilon=.175)
     print("DBSCAN (Scikit-Learn)")
     print(f"Runtime: {run_time:0.4f} seconds")
     print(get_extrinsic_metrics(labels_true, labels_pred_dbs))
@@ -218,9 +221,13 @@ def main() -> None:
     print("Contingency matrix:", contingency_matrix)
 
     ####################################################
-    # Only run DBSCAN (Group4) with small sample size like 100 samples per genre!
+    # Only run DBSCAN (Group4) with small sample size like 1000 samples per genre!
+    # takes about 80 seconds
     ####################################################
-    # labels_pred_dbs, run_time = get_pred_dbscan_gr4(X, n_samples_per_genre//2)
+    # for make_blobs
+    # labels_pred_dbs, run_time = get_pred_dbscan_gr4(X, min_points=n_samples_per_genre//2, epsilon=6)
+    # for Spotify dataset
+    # labels_pred_dbs, run_time = get_pred_dbscan_gr4(X, min_points=n_samples_per_genre//20, epsilon=0.175)
     # print("DBSCAN (Group 4)")
     # print(f"Runtime: {run_time:0.4f} seconds")
     # print(get_extrinsic_metrics(labels_true, labels_pred_dbs))
