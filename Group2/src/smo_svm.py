@@ -147,8 +147,7 @@ class SVM:
         
         # If weights are zero, there is no hyperplane seperating the data
         if np.all(self.weights == 0.):
-            print("Weights are zero, no hyperplane exists between the data")
-            return None
+            return ValueError("Weights are zero, no hyperplane exists between the data")
         
         # If w1 is zero and w0 is not: swap the axes
         if self.weights[1] == 0.:

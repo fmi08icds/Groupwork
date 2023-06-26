@@ -170,7 +170,7 @@ def smo_svm(X, y):
 
 
 if __name__ == "__main__":
-    data = pd.read_csv('Group2/data/diabetes_prediction_dataset.csv')
+    data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
     X, y = preprocess_data(data)
 
     #sklearn_svm(X, y)
