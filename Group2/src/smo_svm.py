@@ -91,7 +91,7 @@ class SVM:
 
                 # Calculate weights and biases from the lagrangian
                 u = y * self._alpha / 2.
-                self.weights = np.sum(np.diag(u) @ X, axis=0)
+                self.weights = np.sum(X * u[:, np.newaxis], axis=0)
                 self.bias = np.median(y - self.weights.T @ X.T)
                 
                 print(f"Iter {i1 + 1}/{n}: weights: {self.weights}  bias: {self.bias:.2f}")
