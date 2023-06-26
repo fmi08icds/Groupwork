@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 import numpy as np
+from smo_svm import SVM
 
 
 class Eval:
@@ -115,11 +116,9 @@ def preprocess_data(data):
     return X_scaled, y
 
 
-if __name__ == "__main__":
-    data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
-    X_scaled, y = preprocess_data(data)
-
+def sklearn_svm(X, y):
     # Split the data into training, validation, and test sets
+    X_scaled = standard_scaler(X)
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
 
@@ -142,3 +141,37 @@ if __name__ == "__main__":
     # Calculate evaluation metrics on the test set
     TestEval = Eval("Test", y_test, test_predictions)
     TestEval.get_eval_metrics()
+
+
+def smo_svm(X, y):
+    svm = SVM()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
+    svm.fit(X, y)
+    val_predictions = svm.predict(X_val)
+    ValidEval = Eval("Validation", y_val, val_predictions)
+    ValidEval.get_eval_metrics()
+
+    # Make predictions on the test set
+    test_predictions = svm.predict(X_test)
+
+    # Calculate evaluation metrics on the test set
+    TestEval = Eval("Test", y_test, test_predictions)
+    TestEval.get_eval_metrics()
+
+    #xs = np.linspace(1., 3.)
+    #ys = svm.hyperplane(xs)
+    #plt.plot(xs, ys)
+    #plt.show()
+
+    #new_data = np.array([[4, 3], [1, 2]])
+    #predictions = svm.predict(new_data)
+    #print(predictions)
+
+
+if __name__ == "__main__":
+    data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
+    X, y = preprocess_data(data)
+
+    #sklearn_svm(X, y)
+    smo_svm(X, y)
