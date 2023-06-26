@@ -227,7 +227,7 @@ def main() -> None:
     # # print(get_intrinsic_metrics(X, labels_pred_dbs))
 
     ####################################################
-    # Only run Affiliation Propagation with small sample size like 100 samples per genre!
+    # Only run Affinity Propagation with small sample size like 100 samples per genre!
     ####################################################
     # labels_pred_afp, run_time = get_pred_affinity_propagation(X, random_state)
     # print("Affinity Propagation (Scikit-Learn)")
