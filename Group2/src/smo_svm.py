@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import ndarray
 
+
 np.set_printoptions(precision=2)
 
 class SVM:
@@ -126,14 +127,13 @@ class SVM:
     def _kernel(self, x_i: ndarray, x_j: ndarray):
         return np.dot(x_i, x_j)
     
-    def hyperplane(self, x_0):
+    def hyperplane(self, x_0) -> ndarray:
         if not self.weights.shape[0] == 2:
             raise ValueError("Hyperplane only works for 2D")
         
         # If weights are zero, there is no hyperplane seperating the data
         if np.all(self.weights == 0.):
-            print("Weights are zero, no hyperplane exists between the data")
-            return None
+            raise ValueError("Weights are zero, no hyperplane exists between the data")
         
         # If w1 is zero and w0 is not: swap the axes
         if self.weights[1] == 0.:
@@ -156,6 +156,7 @@ if __name__ == "__main__":
     
     xs = np.linspace(1., 3.)
     ys = svm.hyperplane(xs)
+
     plt.plot(xs, ys)
     plt.show()
 
