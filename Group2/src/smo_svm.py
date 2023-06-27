@@ -33,7 +33,7 @@ class SVM:
         n = y.shape[0]
         self._alpha = np.ones(n)
 
-        for i in range(5):
+        for i in range(3):
             for i1 in range(n):
                 # Select alpha2
                 i2 = i1 - 1 if i1 == n - 1 else i1 + 1
