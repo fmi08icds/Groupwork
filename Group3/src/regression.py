@@ -26,6 +26,13 @@ class linear_regression:
         self.coeffs = np.linalg.pinv(np.transpose(self.x_data) @ self.x_data) @ np.transpose(self.x_data) @ self.y_data
         self.predicted_values = self.x_data @ self.coeffs
 
+    def f(self, x):
+        x = np.asarray([x])
+        if len(x) != len(self.coeffs) - 1:
+            raise ValueError(
+                f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.get_x_data()[0])}")
+        return sum(self.coeffs * np.insert(x, 0, 1))
+
     def get_coeffs(self):
         # global coeffs
         return self.coeffs
@@ -73,14 +80,39 @@ class lwr:
             W[i] = np.diag(w(i))
 
         def get_coeffs_i(i):
-            return np.linalg.pinv(np.transpose(self.x_data) @ W[i] @ self.x_data) @ np.transpose(self.x_data) @ W[i] @ self.y_data
+            return np.linalg.pinv(np.transpose(self.x_data) @ W[i] @ self.x_data) @ np.transpose(self.x_data) @ W[
+                i] @ self.y_data
 
-        predicted_values_0 = self.x_data @ get_coeffs_i(0)
-        predicted_values_1 = self.x_data @ get_coeffs_i(1)
-        self.predicted_values = np.asarray(
-            [predicted_values_1[i] if i < len(predicted_values_0) / 2 else predicted_values_1[i] for i in
-             range(len(predicted_values_0))])
-        self.predicted_values = np.asarray([(self.x_data @ get_coeffs_i(i))[i] for i in range(len(data))])
+        avg = np.average(self.x_data[:1])
+        x_data_left = np.empty(shape=(0, len(self.x_data[0])))
+        x_data_right = np.empty(shape=(0, len(self.x_data[0])))
+        for data in self.x_data:
+            if data[1] <= avg:
+                x_data_left = np.append(x_data_left, [data], axis=0)
+            else:
+                x_data_right = np.append(x_data_right, [data], axis=0)
+        self.centres = self.x_data[:,1]
+        self.coeffs = [get_coeffs_i(i) for i in range(len(self.x_data))]
+        self.predicted_values = np.asarray([self.f(xi) for xi in self.x_data[:, 1:]])
+
+    def f(self, x):
+        if type(x) is not np.array(()):
+            if type(x) in [int, float]:
+                x = [x]
+            x = np.asarray([x])
+        if len(x) != len(self.coeffs[0]) - 1:
+            raise ValueError(
+                f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.get_x_data()[0])}")
+
+        def gauss(centre, x, sigma=1): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
+        summed = 0
+        summed_gauss = sum([gauss(self.centres[index], x) for index in range(len(self.coeffs))])
+        for index, coeff in enumerate(self.coeffs):
+            summed += gauss(self.centres[index], x)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
+        return summed[0][0]
+
+    def get_centres(self):
+        return self.centres
 
     def get_W(self):
         return self.W
@@ -89,7 +121,6 @@ class lwr:
         return self.coeffs
 
     def get_predicted_values(self):
-        # global predicted_values
         return self.predicted_values
 
     def get_sum_of_squares(self):
@@ -98,5 +129,5 @@ class lwr:
     def get_x_data(self):
         return self.x_data[:, 1:]
 
-    def get_y_data(self):
-        return self.y_data
+    def get_y_data(lmaojustforthelols):
+        return lmaojustforthelols.y_data
