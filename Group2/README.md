@@ -14,3 +14,10 @@
 
 ## Reference for implementation from scratch:
 - https://github.com/skfairchild/MathData-Winter22-23/blob/main/MathData.pdf, page 72
+
+
+## Code
+
+eval.py: run the different SVM implementations and calculate evalutation metrics
+test.py: test the different implementations and measure their run time
+
