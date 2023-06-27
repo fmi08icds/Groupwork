@@ -1,11 +1,13 @@
-""" This class is to be used to let the user interactively change the coefficients and the intercept of a regression model. """
+""" This class is to be used to let the user interactively change the coefficients
+and the intercept of a regression model. """
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 class InteractiveRegression:
     """
-    This class is used to let the user interactively change the coefficients and the intercept of a regression model.
+    This class is used to let the user interactively change the coefficients and
+    the intercept of a regression model.
     """
 
     # init method or constructor
