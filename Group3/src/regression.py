@@ -109,7 +109,11 @@ class lwr:
         summed_gauss = sum([gauss(self.centres[index], x) for index in range(len(self.coeffs))])
         for index, coeff in enumerate(self.coeffs):
             summed += gauss(self.centres[index], x)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
-        return summed[0][0]
+        while True:
+            try:
+                summed = summed[0]
+            except IndexError:
+                return summed
 
     def get_centres(self):
         return self.centres
