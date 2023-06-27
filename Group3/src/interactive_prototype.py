@@ -137,6 +137,7 @@ def update_output_b2(value):
     ],
     [Input("b0", "value"), Input("b1", "value"), Input("b2", "value")],
 )
+
 def update_regression(b0, b1, b2):
     # update the coefficients
     reg.b0 = b0

@@ -19,19 +19,22 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 from dataclasses import dataclass
 from dash.exceptions import PreventUpdate
+
 ## constants
 
 MAX_SAMPLE_SIZE = 250
 
+
 ## init widgets with initial data
 @dataclass
 class InitVal:
-    sample_size= 25
-    sigma_X1= 1
-    mean_X1= 0
-    sigma_X2= 1
-    mean_X2= 0
-    corr=0
+    sample_size = 25
+    sigma_X1 = 1
+    mean_X1 = 0
+    sigma_X2 = 1
+    mean_X2 = 0
+    corr = 0
+
 
 init_val = InitVal()
 
@@ -79,20 +82,21 @@ future features:
 
 ## construct y.
 
+
 ## by drawing X1,X2 from multivariate normal distribution
 def generate_init_data(sigma_X1, sigma_X2, x1_x2_correlation, mean_X1, mean_X2, size):
     ## per default generate 250 (max) samples, so we never have to redraw because of sample_size changes
     ## just redraw if necessary, and that is only if, e.g., the correlation term changes.
     cov_mat = np.array(
-            [
-                [sigma_X1**2, x1_x2_correlation * sigma_X1 * sigma_X2],
-                [x1_x2_correlation * sigma_X1 * sigma_X2, sigma_X2**2],
-            ]
-        )
+        [
+            [sigma_X1**2, x1_x2_correlation * sigma_X1 * sigma_X2],
+            [x1_x2_correlation * sigma_X1 * sigma_X2, sigma_X2**2],
+        ]
+    )
     data = np.random.multivariate_normal(
-                mean=[mean_X1, mean_X2], cov=cov_mat, size=size)
-    return data 
-
+        mean=[mean_X1, mean_X2], cov=cov_mat, size=size
+    )
+    return data
 
 
 ## header
@@ -226,7 +230,17 @@ app.layout = html.Div(
         dcc.Location(id="url"),
         sidebar,
         content,
-        dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
+        dcc.Store(
+            id="initial_data",
+            data=generate_init_data(
+                init_val.sigma_X1,
+                init_val.sigma_X2,
+                init_val.corr,
+                init_val.mean_X1,
+                init_val.mean_X2,
+                MAX_SAMPLE_SIZE,
+            ),
+        ),
         dcc.Store(id="cur_data"),
     ]
 )
@@ -260,8 +274,7 @@ app.layout = html.Div(
 
 @app.callback(
     Output("cur_data", "data"),
-    Input("initial_data", "data"), ## dont ever touch initial data.
-    
+    Input("initial_data", "data"),  ## dont ever touch initial data.
     ## section 1: Data Generation
     # Synthesize the data
     ## controlling the distribution of X1 and X2
@@ -271,49 +284,49 @@ app.layout = html.Div(
     Input("sigma-X1-slider", "value"),
     Input("sigma-X2-slider", "value"),
 )
-def update_data(current_data,
-                sample_size,
-                X1_mean, X2_mean,
-                X1_sigma, X2_sigma):
+def update_data(current_data, sample_size, X1_mean, X2_mean, X1_sigma, X2_sigma):
     if ctx.triggered_id == None or ctx.triggered_id != "initial_data.data":
         current_data = np.array(current_data[:sample_size])
         sigma = np.array([X1_sigma, X2_sigma])
         updated_data = current_data * sigma + np.array([X1_mean, X2_mean])
         return updated_data
 
-@app.callback(Output('table', 'data'),Input('cur_data','data'))
+
+@app.callback(Output("table", "data"), Input("cur_data", "data"))
 def update_table(data):
-    return pd.DataFrame(data, columns=['x1','x2']).to_dict('records')
+    return pd.DataFrame(data, columns=["x1", "x2"]).to_dict("records")
 
 
-@app.callback(Output('interactive-regression', 'figure'),
-              Input('cur_data', 'data'))
+@app.callback(Output("interactive-regression", "figure"), Input("cur_data", "data"))
 def update_scatter(data):
     fig = px.scatter(data)
     return fig
 
-@app.callback(Output('initial_data', 'data'),
-              Input('sigma-X1-slider', 'value'),
-              Input('sigma-X2-slider', 'value'),
-              Input('corr-X1-X2-slider', 'value'),
-              Input('mean-X1-slider', 'value'),
-              Input('mean-X2-slider', 'value'),
-              prevent_initial_call=True)
+
+@app.callback(
+    Output("initial_data", "data"),
+    Input("sigma-X1-slider", "value"),
+    Input("sigma-X2-slider", "value"),
+    Input("corr-X1-X2-slider", "value"),
+    Input("mean-X1-slider", "value"),
+    Input("mean-X2-slider", "value"),
+    prevent_initial_call=True,
+)
 def reinit_data(sigma_X1, sigma_X2, x1_x2_correlation, mean_X1, mean_X2):
-    
     ## per default generate 250 (max) samples, so we never have to redraw because of sample_size changes
     ## just redraw if necessary, and that is only if, e.g., the correlation term changes.
     print(ctx.triggered_id)
-    if ctx.triggered_id == 'corr-X1-X2-slider':
-        print('triggered')
+    if ctx.triggered_id == "corr-X1-X2-slider":
+        print("triggered")
         cov_mat = np.array(
-                [
-                    [sigma_X1**2, x1_x2_correlation * sigma_X1 * sigma_X2],
-                    [x1_x2_correlation * sigma_X1 * sigma_X2, sigma_X2**2],
-                ]
-            )
+            [
+                [sigma_X1**2, x1_x2_correlation * sigma_X1 * sigma_X2],
+                [x1_x2_correlation * sigma_X1 * sigma_X2, sigma_X2**2],
+            ]
+        )
         data = np.random.multivariate_normal(
-                    mean=[mean_X1, mean_X2], cov=cov_mat, size=MAX_SAMPLE_SIZE)
+            mean=[mean_X1, mean_X2], cov=cov_mat, size=MAX_SAMPLE_SIZE
+        )
         return data
     else:
         raise PreventUpdate
