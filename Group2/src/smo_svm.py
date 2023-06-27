@@ -30,24 +30,12 @@ class SVM:
         https://www.youtube.com/watch?v=Mfp7HQKLSAo
         """
         n = y.shape[0]
-        self._alpha = np.zeros(n)
+        self._alpha = np.ones(n)
 
-        for _ in range(2):
+        for i in range(5):
             for i1 in range(n):
-                # Select alpha2 based on maximum violation of KKT conditions
-                E1 = y[i1] * (self.weights.T @ X[i1]) + self.bias - y[i1]
-                max_violation = 0
-                i2 = -1
-                for j in range(n):
-                    if j == i1:
-                        continue
-                    E2 = y[j] * (self.weights.T @ X[j]) + self.bias - y[j]
-                    violation = np.abs(E1 - E2)
-                    if violation > max_violation:
-                        max_violation = violation
-                        i2 = j
-                if i2 == -1:
-                    continue
+                # Select alpha2
+                i2 = i1 - 1 if i1 == n - 1 else i1 + 1
 
                 # Filter out the selected alphas
                 remaining_mask = np.ones_like(self._alpha, dtype=bool)
@@ -91,7 +79,7 @@ class SVM:
 
                 # Calculate weights and biases from the lagrangian
                 u = y * self._alpha / 2.
-                self.weights = np.sum(X * u[:, np.newaxis], axis=0)
+                self.weights = np.sum(np.diag(u) @ X, axis=0)
                 self.bias = np.median(y - self.weights.T @ X.T)
                 
                 print(f"Iter {i1 + 1}/{n}: weights: {self.weights}  bias: {self.bias:.2f}")
@@ -122,9 +110,6 @@ class SVM:
         max( sum(alpha) - (1/2 alpha * y).T @ _kernel(X) )
         with 0 \le alpha_i \le C forall i; sum(y * alpha) = 0
         """
-        d = X.shape[1]
-        self.weights = np.zeros(d)
-        self.bias = 0.
         self._smo(X, y, C)
         
 
@@ -147,7 +132,8 @@ class SVM:
         
         # If weights are zero, there is no hyperplane seperating the data
         if np.all(self.weights == 0.):
-            return ValueError("Weights are zero, no hyperplane exists between the data")
+            print("Weights are zero, no hyperplane exists between the data")
+            return None
         
         # If w1 is zero and w0 is not: swap the axes
         if self.weights[1] == 0.:
