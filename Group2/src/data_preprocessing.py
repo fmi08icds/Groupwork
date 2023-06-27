@@ -7,13 +7,14 @@ performing the following tasks:
 4. Engaging in feature engineering by inferring new features from existing ones.
 5. Splitting the data into training, validation, and test datasets.
 """
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
 
 class DataAnalyzer:
     def __init__(self, file):
@@ -44,7 +45,7 @@ class DataAnalyzer:
         print(self.df.describe())
         print("---------------------------")
         print("---------------------------")
-        # columns counter the values 
+        # columns counter the values
         print("sum data depende on it values")
         col_liste = list(self.df.columns)
         for i in col_liste:
@@ -54,45 +55,104 @@ class DataAnalyzer:
             print("---------------------------")
             print("---------------------------")
 
-    def preprocessing_and_clean_data(self):
+    def preprocessing(self):
         # delete the duplicates rows
         self.df.drop_duplicates()
 
-        """ 
-            # Converting Categorical Variables Into Numeric Values Using LabelEncoder & OneHotEncoder
-            Labelcodig as the follow:
+        """
+            # Converting Categorical Variables Into Numeric Values as the follow:
             # gender
                 0- Female
-                1- Male   
-            -----------------------    
+                1- Male
+            -----------------------
+            # Age
+               Age <= 16 , then 0
+               Age > 16 and Age <= 32 , then 1
+               Age > 32 and Age Age <= 48 , then 2
+               Age > 48 and Age <= 64 , then 3
+               Age > 64 , then 4
+            -----------------------
             # Smoking encoding
-                0- No Info
-                1- current
-                2- not current
-                3- former
-                4- never
-                5- ever
+               0- No Info
+               1- current
+               2- not current
+               3- former
+               4- never
+               5- ever
+            -----------------------
+            # BMI
+               ( 0 - 18.5) ==> 0
+               ( 18.5 - 25 ) ==> 1
+               ( 25 - 30 ) ==> 2
+               ( 30 - 35 ) ==> 3
+               ( 35 - 40 ) ==> 4
+               ( > 40 ) ==> 5
+            -----------------------
+            # HbA1c_level
+               ( 0 - 5.6 ) ==> 0
+               ( 5.6 - 6.4 ) ==> 1
+               ( 6.4 - 6.9 ) ==> 2
+               ( > 6.9 ) ==> 3
+            -----------------------
+            # blood_glucose_level
+               ( 0 - 100 ) ==> 0
+               ( 100 - 125 ) ==> 1
+               ( 125 - 150 ) ==> 2
+               ( 159 - 175 ) ==> 3
+               ( > 175 ) ==> 4
         """
-        X_cat = self.df.drop(['age', 'bmi'], axis=1)
-        X_num = self.df[['age', 'bmi']]
-        y = self.df['smoking_history']
-        le = LabelEncoder()
-        y = le.fit_transform(y)
-        for col in X_cat.columns:
-            X_cat[col] = le.fit_transform(X_cat[col])
-        X = pd.concat([X_num, X_cat], axis=1)
 
-        # Perform feature engineering
+        # Gender
+        gender_mapping = {'Male': 0, 'Female': 1}
+        self.df['gender'] = self.df['gender'].map(gender_mapping)
 
-        # 0 : 'Underweight',18.5: 'Normal',24.9: 'Overweight',29.9: 'Obese'
-        X['age_squared'] = X['age'] ** 2
-        X['bmi_category'] = pd.cut(X['bmi'], bins=[0, 18.5, 24.9, 29.9, np.inf], labels=[0, 18.5, 24.9, 29.9])
-        X['age_bmi_interaction'] = X['age'] * X['bmi']
-                
-        print(X)
-        return X
+        # Age
+        self.df.loc[self.df['age'] <= 16, 'age'] = 0
+        self.df.loc[(self.df['age'] > 16) & (self.df['age'] <= 32) , 'Age_band'] = 1
+        self.df.loc[(self.df['age'] > 32) & (self.df['age'] <= 48), 'Age_band'] = 2
+        self.df.loc[(self.df['age'] > 48) & (self.df['age'] <= 64), 'Age_band'] = 3
+        self.df.loc[self.df['age'] > 64, 'age'] = 4
 
-    
+        # Smoking history
+        mapping = {'never': 0, 'No Info': 1, 'current': 2, 'former': 3, 'ever': 4, 'not current': 5}
+        self.df['smoking_history'] = self.df['smoking_history'].replace(mapping)
+
+        # BMI
+        bins = [0, 18.5, 25, 30, 35, 40, float('inf')]
+        labels = [0, 1, 2, 3, 4, 5]
+        self.df['bmi'] = pd.cut(self.df['bmi'], bins=bins, labels=labels)
+        self.df['bmi'] = self.df['bmi'].astype(int)
+
+        # HbA1c
+        bins = [0, 5.6, 6.4, 6.9, float('inf')]
+        labels = [0, 1, 2, 3]
+        self.df['HbA1c_level'] = self.df['HbA1c_level'].astype(float)
+        self.df['HbA1c_level'] = pd.cut(self.df['HbA1c_level'], bins=bins, labels=labels)
+
+        # blood_glucose_level
+        bins = [0, 100, 125, 150, 175, float('inf')]
+        labels = [0, 1, 2, 3, 4]
+        self.df['blood_glucose_level'] = self.df['blood_glucose_level'].astype(float)
+        self.df['blood_glucose_level'] = pd.cut(self.df['blood_glucose_level'], bins=bins, labels=labels)
+
+        # Convert the columns "hypertension" and "heart_disease" into a numerical one
+        self.df['hypertension'] = self.df['hypertension'].astype(float)
+        self.df['heart_disease'] = self.df['heart_disease'].astype(float)
+
+
+        # Downsample the dataset
+        df_majority = self.df[self.df['diabetes'] == 0]
+        df_minority = self.df[self.df['diabetes'] == 1]
+        df_majority_downsampled = resample(df_majority,
+                                   replace=False,     # sampling without replacement
+                                   n_samples=len(df_minority),    # match the size of minority class
+                                   random_state=42)   # for reproducibility
+
+        self.df = pd.concat([df_majority_downsampled, df_minority])
+
+        return self.df
+
+
 
 
     def correlation(self):
@@ -101,7 +161,7 @@ class DataAnalyzer:
         sns.heatmap(self.df.corr(), annot=True)
         plt.show()
         return self.df.corr()
-    
+
 
     def correlation_analysis(self):
         # Calculate the correlation matrix
@@ -128,57 +188,13 @@ class DataAnalyzer:
 
 
     def data_split(self):
-        # Preprocess and clean the data
-        age_group_tables = self.preprocessing_and_clean_data()
-        
-        # Create an empty dictionary to store the split datasets
-        split_datasets = {}
+        X = self.df.drop('diabetes', axis=1)
+        y = self.df['diabetes']
+        X = X[['age','bmi']]
+        # Split the data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,shuffle=True,random_state=42)
+        return X_train, X_test, y_train, y_test
 
-                # Split the data for each age group
-        for age_group, data in age_group_tables.items():
-            # Convert 'data' to DataFrame if it is a Series
-            if isinstance(data, pd.Series):
-                data = pd.DataFrame(data)
+#file = "/Users/abdulnaser/Desktop/Groupwork/Group2/data/diabetes_prediction_dataset.csv"
 
-            # Check if 'diabetes' column exists
-            if 'diabetes' not in data.columns:
-                print(f"Skipping data splitting for age group '{age_group}' as 'diabetes' column is not present.")
-                continue
-
-            # Separate features and target variable
-            X = data.drop('diabetes', axis=1)
-            y = data['diabetes']
-
-            # Split the data into training, validation, and test sets
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=42)
-
-            # Store the split datasets for the age group
-            split_datasets[age_group] = {
-                'X_train': X_train,
-                'X_val': X_val,
-                'X_test': X_test,
-                'y_train': y_train,
-                'y_val': y_val,
-                'y_test': y_test
-            }
-
-        # Print the shapes of the resulting datasets for each age group
-        for age_group, datasets in split_datasets.items():
-            print(f"Age Group: {age_group}")
-            print("Training set shape:", datasets['X_train'].shape, datasets['y_train'].shape)
-            print("Validation set shape:", datasets['X_val'].shape, datasets['y_val'].shape)
-            print("Test set shape:", datasets['X_test'].shape, datasets['y_test'].shape)
-            print("---------------------------")
-        print(split_datasets)
-        # Return the split datasets
-        return split_datasets
-file = "Group2\data\diabetes_prediction_dataset.csv"  
-analyzer = DataAnalyzer(file)
-
-# analyzer.data_descriptions()
-# print(analyzer.preprocessing_and_clean_data())
-# analyzer.correlation_analysis()
-# analyzer.correlation()
-analyzer.data_split()
 #--------------------#
