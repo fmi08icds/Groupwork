@@ -13,8 +13,10 @@ class LocallyWeightedRegression:
     def __init__(self, data, transposed=False, tau=.5, sections=None):
         """
         Calculates the ordinary linear regression for the given data.
-        :param data: data is a Nx(d+1) matrix with the last column being Y and X being Nxd. data[0] accesses therefor the first sample.
-        :param transposed: If the data is transposed and data[0] returns a vector of the first dimension of the samples.
+        :param data: data is a Nx(d+1) matrix with the last column being Y and X being 
+            Nxd. data[0] accesses therefor the first sample.
+        :param transposed: If the data is transposed and data[0] returns a vector
+            of the first dimension of the samples.
         """
         self.sigma=1
         data = np.asarray(data)
