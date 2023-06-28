@@ -67,8 +67,6 @@ These tools are configured by the `pyproject.toml` file.
 │
 ├── 📃 environment.yml    <-- List of python dependencies for the conda environment
 │
-├── 📃 main.ipynb         <-- Project results, visualizations and documentation
-│
 ├── 📃 pyproject.toml     <-- Configuration file
 │
 └── 📃 README.md          <-- Project documentation
