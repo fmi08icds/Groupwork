@@ -49,6 +49,6 @@ def apply_components(data, eigenvectors):
     if data.shape[1] != eigen_matrix.shape[0]:
         eigen_matrix = eigen_matrix.transpose()
     # Transforming the data
-    transformed_data = np.dot(data, eigen_matrix)
+    transformed_data = np.matmul(data, eigen_matrix)
 
     return transformed_data
