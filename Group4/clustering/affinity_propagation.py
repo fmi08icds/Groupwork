@@ -32,7 +32,7 @@ def affinity_propagation(
                                 (Used to remove degeneracies in the similarity matrix)
 
     Returns:
-        cluster_centers_indices:    Array of indices of the points used as cluster centers (exemplars)
+        cluster_indices:            Array of indices of the points used as cluster centers (exemplars)
         labels                      Array of shape `(n, )` with each point being assigned a cluster center (exemplar)
     References:
         [1] B. J. Frey and D. Dueck. Clustering by Passing Messages Between Data Points.
@@ -106,15 +106,15 @@ def affinity_propagation(
         clusters[exemplar_indices] = np.arange(num_exemplars)
         labels = exemplar_indices[clusters]
 
-        cluster_centers_indices = np.unique(labels)
-        labels = np.searchsorted(cluster_centers_indices, labels)
+        cluster_indices = np.unique(labels)
+        labels = np.searchsorted(cluster_indices, labels)
 
     # If no exemplars were found, return an empty array for the cluster indices and -1 for labels
     else:
         labels = np.array([-1] * n)
-        cluster_centers_indices = np.empty(0)
+        cluster_indices = np.empty(0)
 
-    return cluster_centers_indices, labels
+    return cluster_indices, labels
 
 
 def update_responsibility(
