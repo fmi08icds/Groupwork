@@ -15,9 +15,9 @@ def plot_2d(reg, show_predictands=False, show_residuals=True):
     predicted = reg.predicted_values
 
     plt.figure("Regression")
-    plt.plot(x_data, y_data, "rx", markersize=10)
+    plt.plot(x_data, y_data, "rx", markersize=3)
     if show_predictands:
-        plt.plot(x_data, predicted, "bx", markersize=10)
+        plt.plot(x_data, predicted, "bx", markersize=3)
     if show_residuals:
         [plt.plot((x_data[i], x_data[i]), (y_data[i], predicted[i]), "r--") for i in range(len(predicted))]
     # division by 5 was arbitrarily chosen
@@ -25,3 +25,8 @@ def plot_2d(reg, show_predictands=False, show_residuals=True):
     linspace = np.linspace(min(x_data)-margin, max(x_data)+margin)
     plt.plot(linspace, [reg.f(xi) for xi in linspace], "k-")
     # plt.show()
+
+
+def plot_gaussians(reg, x):
+    plt.figure("Gaussians")
+    [plt.plot(x, [reg.gauss(ci, xi, reg.sigma) for xi in x]) for ci in reg.centres]

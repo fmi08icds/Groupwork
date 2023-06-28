@@ -7,6 +7,7 @@ class LocallyWeightedRegression:
     predicted_values = None
     x_data = None
     y_data = None
+    sigma = 1
     # W = None
 
     def __init__(self, data, transposed=False, tau=.5, sections=None):
@@ -15,6 +16,7 @@ class LocallyWeightedRegression:
         :param data: data is a Nx(d+1) matrix with the last column being Y and X being Nxd. data[0] accesses therefor the first sample.
         :param transposed: If the data is transposed and data[0] returns a vector of the first dimension of the samples.
         """
+        self.sigma=1
         data = np.asarray(data)
         if transposed:
             data = np.transpose(data)
@@ -54,7 +56,7 @@ class LocallyWeightedRegression:
         self.coeffs = [get_coeffs_i(i) for i in range(len(W))]
         self.predicted_values = np.asarray([self.f(xi) for xi in x_data[:, 1:]])
 
-    def gauss(self, centre, x, sigma=1): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
+    def gauss(self, centre, x, sigma): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
 
     def f(self, x):
         if type(x) is not np.array(()):
@@ -67,9 +69,9 @@ class LocallyWeightedRegression:
 
 
         summed = 0
-        summed_gauss = sum([self.gauss(self.centres[index], x) for index in range(len(self.coeffs))])
+        summed_gauss = sum([self.gauss(self.centres[index], x, self.sigma) for index in range(len(self.coeffs))])
         for index, coeff in enumerate(self.coeffs):
-            summed += self.gauss(self.centres[index], x)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
+            summed += self.gauss(self.centres[index], x, self.sigma)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
         while True:
             try:
                 summed = summed[0]
