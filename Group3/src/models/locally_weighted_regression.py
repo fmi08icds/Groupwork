@@ -7,9 +7,9 @@ class LocallyWeightedRegression:
     predicted_values = None
     x_data = None
     y_data = None
-    W = None
+    # W = None
 
-    def __init__(self, data, transposed=False, tau=.5):
+    def __init__(self, data, transposed=False, tau=.5, sections=None):
         """
         Calculates the ordinary linear regression for the given data.
         :param data: data is a Nx(d+1) matrix with the last column being Y and X being Nxd. data[0] accesses therefor the first sample.
@@ -27,19 +27,34 @@ class LocallyWeightedRegression:
         # raise Exception
         def w(i):
             return [math.e ** (-(np.linalg.norm(x_data[i] - x_j)) ** 2 / (2 * tau ** 2)) for x_j in x_data]
-
-        W = np.zeros((len(x_data), len(x_data), len(x_data)))
-        for i in range(len(W)):
-            W[i] = np.diag(w(i))
+        if sections is None:
+            W = np.zeros((len(x_data), len(x_data), len(x_data)))
+            for i in range(len(W)):
+               W[i] = np.diag(w(i))
+            self.centres = x_data[:,1]
+        else:
+            x_sorted = x_data[x_data[:,1].argsort()]
+            x_1_sorted = x_data[:,1].argsort()
+            W = np.zeros((sections, len(x_data), len(x_data)))
+            sec_len = len(x_sorted)//sections
+            prev_indices = 0
+            self.centres = []
+            for i in range(sections):
+                sec = x_sorted[i*sec_len: (1+i)*sec_len][:,1]
+                self.centres.append(np.mean(sec))
+                index = len(sec)//2 + prev_indices
+                W[i] = np.diag(w(index))
+                prev_indices += len(sec)
+            self.centres = np.asarray(self.centres)
 
         def get_coeffs_i(i):
             return np.linalg.pinv(np.transpose(x_data) @ W[i] @ x_data) @ np.transpose(x_data) @ W[
                 i] @ self.y_data
 
-        self.centres = x_data[:,1]
-        self.coeffs = [get_coeffs_i(i) for i in range(len(x_data))]
+        self.coeffs = [get_coeffs_i(i) for i in range(len(W))]
         self.predicted_values = np.asarray([self.f(xi) for xi in x_data[:, 1:]])
 
+    def gauss(self, centre, x, sigma=1): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
 
     def f(self, x):
         if type(x) is not np.array(()):
@@ -50,11 +65,11 @@ class LocallyWeightedRegression:
             raise ValueError(
                 f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.x_data[0])}")
 
-        def gauss(centre, x, sigma=1): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
+
         summed = 0
-        summed_gauss = sum([gauss(self.centres[index], x) for index in range(len(self.coeffs))])
+        summed_gauss = sum([self.gauss(self.centres[index], x) for index in range(len(self.coeffs))])
         for index, coeff in enumerate(self.coeffs):
-            summed += gauss(self.centres[index], x)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
+            summed += self.gauss(self.centres[index], x)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
         while True:
             try:
                 summed = summed[0]
