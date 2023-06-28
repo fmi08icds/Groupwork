@@ -69,8 +69,6 @@ def load_X_y(path: Optional[str] = None, attribute_list: Union[str, List[str]] =
     else:
         raise ValueError("Invalid attribute_list value.")
 
-    print(selected_columns)
-
     X = data[selected_columns]
 
     # Z-score Standardisation of X
