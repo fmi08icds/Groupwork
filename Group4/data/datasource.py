@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List, Union
+from typing import List, Union, Optional
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
 
 
@@ -21,7 +21,7 @@ def load_spotify_dataset(path=None):
     return data
 
 
-def load_X_y(path=None, attribute_list: Union[str, List[str]] = None, sample_size=None):
+def load_X_y(path: Optional[str] = None, attribute_list: Union[str, List[str]] = None, sample_size: Optional[int] = None):
     """
     Load the dataset and preprocess it for clustering. It drops all eventually existing duplicates.
     There are no NaN existing. Because 'Children's Music' is existing twice, we delete the smaller part with 5403 Records.
@@ -39,6 +39,7 @@ def load_X_y(path=None, attribute_list: Union[str, List[str]] = None, sample_siz
     Returns:
         np.ndarray: Preprocessed feature matrix X.
         np.ndarray: Encoded labeled vector y.
+        DataFrame: Sampled subset of the Spotify dataset
     """
 
     data = load_spotify_dataset(path)
@@ -61,17 +62,18 @@ def load_X_y(path=None, attribute_list: Union[str, List[str]] = None, sample_siz
         selected_columns = [
             col
             for col in data.columns
-            if col not in ["genre", "artist_name", "track_name", "track_id", "key", "mode", "time_signature"]
+            if col not in ["genre", "artist_name", "track_name", "track_id", "key", "mode", "time_signature", "popularity"]
         ]
     elif isinstance(attribute_list, list):
         selected_columns = attribute_list
     else:
         raise ValueError("Invalid attribute_list value.")
+
     X = data[selected_columns]
 
     # Z-score Standardisation of X
-    # zscore_scaler = StandardScaler()
-    # X = zscore_scaler.fit_transform(X)
+    #zscore_scaler = StandardScaler()
+    #X = zscore_scaler.fit_transform(X)
 
     # MinMaxScaler of X
     minmaxscaler = MinMaxScaler()
@@ -82,8 +84,7 @@ def load_X_y(path=None, attribute_list: Union[str, List[str]] = None, sample_siz
     data["genre_numeric"] = label_encoder.fit_transform(data["genre"])
     y = data["genre_numeric"].values.reshape(-1, 1)
 
-    return X, y
-
+    return X, y, data
 
 # load_spotify_dataset(path='./SpotifyFeatures.csv')
 # load_X_y(path='./SpotifyFeatures.csv')
