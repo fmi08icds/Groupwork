@@ -3,7 +3,11 @@ channels:
   - defaults
 dependencies:
   - python=3.11
+  - matplotlib
+  - seaborn
+  - ipykernel
   - numpy
+  - pandas
   - scikit-learn
   - black
   - pytest
