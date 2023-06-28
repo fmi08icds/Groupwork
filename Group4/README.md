@@ -54,6 +54,9 @@ These tools are configured by the `pyproject.toml` file.
 │
 ├── 📁 env                <-- Local conda environment (not part of version control)
 │
+├── 📁 notebooks          <-- Directory for Jupyter notebook files
+│   └── ...
+│
 ├── 📁 tests              <-- Unit tests scripts
 │   ├── __init__.py
 │   ├── test_dbscan.py
