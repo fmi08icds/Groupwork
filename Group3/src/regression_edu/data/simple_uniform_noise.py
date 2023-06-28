@@ -1,6 +1,6 @@
 import numpy as np
 
-def simple_uniform(f, N, range, rho): 
+def simple_uniform(f, N, range, rho):
     """
     Simple method. Given an input function, generate a dataset with a uniform fuzz. 
     
