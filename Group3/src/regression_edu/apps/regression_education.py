@@ -6,6 +6,8 @@ import numpy as np
 import plotly.graph_objects as go
 from interactive_regression import InteractiveRegression
 import dash_bootstrap_components as dbc
+import dash_daq as daq
+from regression_edu.data.simple_uniform_noise import simple_uniform
 
 app = dash.Dash(
     __name__, external_stylesheets=[dbc.themes.BOOTSTRAP]
@@ -18,9 +20,26 @@ y_data = 2 * x_data + 1 + np.random.randn(100) * 2
 reg = InteractiveRegression(x_data, y_data, 0, 0, 0)
 
 data_generation_setting = dbc.Card(
-    [dbc.CardHeader(html.H3("Data generation setting")), dbc.CardBody()]
+    [
+        dbc.CardHeader(html.H3("Data generation setting")),
+        dbc.CardBody(
+            [
+                html.H4("Function"),
+                dcc.Input(
+                    id="data_generation_function",
+                    placeholder="function",
+                ),
+                html.H4("Number of samples"),
+                daq.NumericInput(id="data_generation_samples", value=100, min=1),
+                html.H4("Lower bound"),
+                daq.NumericInput(id="data_generation_lower", value=0, min=-100, max=100),
+                html.H4("Upper bound"),
+                daq.NumericInput(id="data_generation_upper", value=100, min=0, max=100),
+            ]
+        ),
+    ]
 )
-coefficient_setting = dbc.Card(
+coefficient_setting_linear_regression = dbc.Card(
     [
         dbc.CardHeader(html.H3("Coefficient setting")),
         dbc.CardBody(
@@ -41,7 +60,7 @@ coefficient_setting = dbc.Card(
                     min=-10,
                     max=10,
                     step=0.1,
-                    value=0,
+                    value=1,
                     marks={i: str(i) for i in range(-10, 11)},
                 ),
                 html.Div(id="slider-output-b1"),
@@ -51,7 +70,7 @@ coefficient_setting = dbc.Card(
                     min=-10,
                     max=10,
                     step=0.1,
-                    value=0,
+                    value=2,
                     marks={i: str(i) for i in range(-10, 11)},
                 ),
                 html.Div(id="slider-output-b2"),
@@ -60,7 +79,9 @@ coefficient_setting = dbc.Card(
     ],
     className="my-3",
 )
-user_input = dbc.Row([dbc.Col(coefficient_setting), dbc.Col(data_generation_setting)])
+user_input = dbc.Row(
+    [dbc.Col(coefficient_setting_linear_regression), dbc.Col(data_generation_setting)]
+)
 
 equation_and_metrics = dbc.Card(
     [
@@ -81,19 +102,19 @@ equation_and_metrics = dbc.Card(
     className="my-3",
 )
 output = dbc.Row(
-        [
-            dbc.Col(
-                dcc.Loading(
-                    id="loading",
-                    type="circle",
-                    children=dcc.Graph(id="graph"),
-                )
-            ),
-            dbc.Col(
-                equation_and_metrics,
-            ),
-        ]
-    )
+    [
+        dbc.Col(
+            dcc.Loading(
+                id="loading",
+                type="circle",
+                children=dcc.Graph(id="graph"),
+            )
+        ),
+        dbc.Col(
+            equation_and_metrics,
+        ),
+    ]
+)
 
 app.layout = dbc.Container(
     [
@@ -138,15 +159,51 @@ def update_output_b2(value):
         Output("root_mean_squared_error", "children"),
         Output("regression_equation", "children"),
     ],
-    [Input("b0", "value"), Input("b1", "value"), Input("b2", "value")],
+    [
+        Input("b0", "value"),
+        Input("b1", "value"),
+        Input("b2", "value"),
+        Input("data_generation_function", "value"),
+        Input("data_generation_samples", "value"),
+        Input("data_generation_lower", "value"),
+        Input("data_generation_upper", "value"),
+    ],
 )
-def update_regression(b0, b1, b2):
-    # update the coefficients
+def update_regression(
+    b0,
+    b1,
+    b2,
+    data_generation_function,
+    data_generation_samples,
+    data_generation_lower,
+    data_generation_upper,
+
+):
+    # set default for data generation function
+    data_generation_function = (
+        data_generation_function if data_generation_function else "2 * x + 1"
+    )
+    try:
+        function = eval(f"lambda x:{data_generation_function}")
+        x, y = simple_uniform(
+            function,
+            data_generation_samples,
+            (data_generation_lower, data_generation_upper),
+            0.5
+        )
+        # update the data
+        reg.x_data = x
+        reg.y_data = y
+    except Exception:  # I will burn in hell for this
+        print('invalid function')
+    
+
+    #  update the coefficients
     reg.b0 = b0
     reg.b1 = b1
     reg.b2 = b2
 
-    # calculate the predicted values
+    # calculate the predicted value
     reg.calc_predicted_values()
 
     # calculate the residuals
@@ -167,12 +224,11 @@ def update_regression(b0, b1, b2):
     # add a scatter trace for the data
     fig.add_trace(
         go.Scatter(
-            x=x_data,
-            y=y_data,
+            x=reg.x_data,
+            y=reg.y_data,
             mode="markers",
             marker=dict(color="blue"),
             name="Data",
-            
         )
     )
 
