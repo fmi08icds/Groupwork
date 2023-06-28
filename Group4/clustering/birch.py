@@ -23,7 +23,7 @@ class Birch:
 
     ## How to use
         create Birch object -> Use fit() function to build the Tree
-        
+
         Afterwards you can access following variables:
             all_centroids (n_centroids, n_features) : generated centroids of the subclusters
             labels (n_samples,) : predicted labels regarding the given points X > 1-d numpy array
