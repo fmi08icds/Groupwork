@@ -23,7 +23,7 @@ class InteractiveRegression:
     # method for calculating the predicted values
     def calc_predicted_values(self):
         self.predicted_values = (
-            self.b0 + self.b1 * self.x_data + self.b2 * self.x_data**2
+            self.b0 + self.b1 * self.x_data + self.b2 * self.x_data
         )
         return self.predicted_values
 

@@ -30,9 +30,13 @@ data_generation_setting = dbc.Card(
                     placeholder="function",
                 ),
                 html.H4("Number of samples"),
-                daq.NumericInput(id="data_generation_samples", value=100, min=1),
+                daq.NumericInput(
+                    id="data_generation_samples", value=100, min=1, max=500
+                ),
                 html.H4("Lower bound"),
-                daq.NumericInput(id="data_generation_lower", value=0, min=-100, max=100),
+                daq.NumericInput(
+                    id="data_generation_lower", value=0, min=-100, max=100
+                ),
                 html.H4("Upper bound"),
                 daq.NumericInput(id="data_generation_upper", value=100, min=0, max=100),
             ]
@@ -79,8 +83,33 @@ coefficient_setting_linear_regression = dbc.Card(
     ],
     className="my-3",
 )
+regression_equation = dbc.Card(
+    [
+        dbc.CardHeader(html.H3("Regression equation")),
+        dbc.CardBody(
+            [
+                html.H4("Function"),
+                dcc.Input(
+                    id="data_generation_function",
+                    placeholder="function",
+                ),
+            ]
+        ),
+    ]
+)
+model_input = dbc.Card(
+    [
+        dbc.CardHeader(html.H3("Model input")),
+        dbc.CardBody([
+            regression_equation,
+            coefficient_setting_linear_regression
+        ])
+    ]
+)
+
+
 user_input = dbc.Row(
-    [dbc.Col(coefficient_setting_linear_regression), dbc.Col(data_generation_setting)]
+    [dbc.Col(model_input), dbc.Col(data_generation_setting)]
 )
 
 equation_and_metrics = dbc.Card(
@@ -123,6 +152,7 @@ app.layout = dbc.Container(
         dbc.Col([user_input, output]),
         html.Hr(),
         html.H2("Locally Weighted Regression", className="text-center my-3"),
+        html.H2("Comparison", className="text-center my-3"),
     ]
 )
 
@@ -177,7 +207,6 @@ def update_regression(
     data_generation_samples,
     data_generation_lower,
     data_generation_upper,
-
 ):
     # set default for data generation function
     data_generation_function = (
@@ -189,14 +218,13 @@ def update_regression(
             function,
             data_generation_samples,
             (data_generation_lower, data_generation_upper),
-            0.5
+            0.5,
         )
         # update the data
         reg.x_data = x
         reg.y_data = y
     except Exception:  # I will burn in hell for this
-        print('invalid function')
-    
+        print("invalid function")
 
     #  update the coefficients
     reg.b0 = b0
@@ -235,7 +263,7 @@ def update_regression(
     # add a scatter trace for the regression line
     fig.add_trace(
         go.Scatter(
-            x=x_data,
+            x=reg.x_data,
             y=reg.predicted_values,
             mode="lines",
             marker=dict(color="red"),
@@ -250,7 +278,6 @@ def update_regression(
         yaxis_title="y",
         template="plotly_white",
         height=500,
-        showlegend=True,
     )
 
     # format the regression equation
