@@ -5,9 +5,9 @@ from numpy import ndarray
 np.set_printoptions(precision=2)
 
 class SVM:
-    """ 
-    SVM implementation using Sequential Minimal Optimization 
-    
+    """
+    SVM implementation using Sequential Minimal Optimization
+
     Parameters
     ----------
     C: float
@@ -19,11 +19,11 @@ class SVM:
 
     """
     def _smo(self, X: ndarray, y: ndarray, C: float, EPSILON = 0.1):
-        """ 
+        """
         Sequential Minimal Optimization (SMO):
-        Update alpha two elements at a time to maximize 
+        Update alpha two elements at a time to maximize
         the constrained objective function
-        
+
         Reference
         ---------
         https://en.wikipedia.org/wiki/Sequential_minimal_optimization
@@ -70,7 +70,7 @@ class SVM:
                 quadratic_f = lambda alpha_i: a * alpha_i**2 + b * alpha_i + c
                 extremum = -b / (2 * a)
 
-                # Use it as alpha if it is within bounds or 
+                # Use it as alpha if it is within bounds or
                 # use the bounds themselfes instead
                 if extremum > lower_bound and extremum < upper_bound:
                     potential_maxima = np.array([extremum, lower_bound, upper_bound])
@@ -82,7 +82,7 @@ class SVM:
                 u = y * self._alpha / 2.
                 self.weights = np.sum(np.diag(u) @ X, axis=0)
                 self.bias = np.median(y - self.weights.T @ X.T)
-                
+
                 print(f"Iter {i1 + 1}/{n}: weights: {self.weights}  bias: {self.bias:.2f}")
 
                 # Stop when conditions are satisfied
@@ -91,55 +91,55 @@ class SVM:
                     val = y[i] * self.weights.T @ X[i] + self.bias
                     if self._alpha[i] == 0:
                         if not val >= 1 - EPSILON:
-                            satisfied = False 
-                            break 
+                            satisfied = False
+                            break
                     elif self._alpha[i] == C:
                         if not val <= 1 + EPSILON:
-                            satisfied = False 
-                            break 
-                    else: 
+                            satisfied = False
+                            break
+                    else:
                         if not (val >= 1 - EPSILON and val <= 1 + EPSILON):
-                            satisfied = False 
+                            satisfied = False
                             break
                 if satisfied:
                     break
 
     def fit(self, X: ndarray, y: ndarray, C = 1.):
-        """ 
+        """
         Fit the SVM by optimising for the lagrangians alpha in
-        
+
         max( sum(alpha) - (1/2 alpha * y).T @ _kernel(X) )
         with 0 \le alpha_i \le C forall i; sum(y * alpha) = 0
         """
         self._smo(X, y, C)
-        
+
 
     def predict(self, X: ndarray):
         """
         Predict the labels y for and input matrix X of shape n times d
         """
         if self.weights is None:
-            raise ValueError("Fit the SVM before predicting") 
-        
+            raise ValueError("Fit the SVM before predicting")
+
         f = lambda x_i: np.sign(self.weights.T @ x_i + self.bias)
         return np.apply_along_axis(f, 1, X)
 
     def _kernel(self, x_i: ndarray, x_j: ndarray):
         return np.dot(x_i, x_j)
-    
+
     def hyperplane(self, x_0) -> ndarray:
         if not self.weights.shape[0] == 2:
             raise ValueError("Hyperplane only works for 2D")
-        
+
         # If weights are zero, there is no hyperplane seperating the data
         if np.all(self.weights == 0.):
             raise ValueError("Weights are zero, no hyperplane exists between the data")
-        
+
         # If w1 is zero and w0 is not: swap the axes
         if self.weights[1] == 0.:
             print("w1 is zero, returning hyperplane with respect to x_1 instead")
             return - (self.weights[1] * x_0 + self.bias) / self.weights[0]
-        
+
         return - (self.weights[0] * x_0 + self.bias) / self.weights[1]
 
 if __name__ == "__main__":
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     svm = SVM()
     svm.fit(X, y)
-    
+
     xs = np.linspace(1., 3.)
     ys = svm.hyperplane(xs)
 

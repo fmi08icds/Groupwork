@@ -1,7 +1,15 @@
 from sklearn.svm import SVC as SVM_SKL
-from svm_train_hard_margin import SVM as SVM_HM
-from smo_svm import SVM as SVM_SMO
+import os
+import sys
 
+# Add the root project directory to sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
+
+# Now you can import the module using an absolute import
+#from SVM_imp import svm_train_hard_margin as SVM_HM
+from SVM_imp.svm_train_hard_margin import SVM as SVM_HM
+from SVM_imp.svm_train_soft_margin_abdulnaser_imp import SVM
 
 class Eval:
     def __init__(self, set_type, y, predictions):
@@ -87,21 +95,21 @@ class Eval:
         print('\n'.join([' '.join([str(item) for item in row]) for row in self.conf_matrix]))
 
 
-def train_svm_model(model, X_train, X_val, X_test, y_train, y_val, y_test):
+def train_svm_model(model, X_train, X_test, y_train, y_test):
     if model == "HardMargin":
         svm = SVM_HM()
         svm.fit(X_train.to_numpy(), y_train.to_numpy())
     elif model == "SMO":
-        svm = SVM_SMO()
+        svm = SVM()
         svm.fit(X_train.to_numpy(), y_train.to_numpy())
     elif model == "Sklearn":
         svm = SVM_SKL(kernel="poly") # best kernel based on sklearn_kernel_comparison.py
         svm.fit(X_train, y_train)
 
     print(model)
-    val_predictions = svm.predict(X_val)
-    ValidEval = Eval("Validation", y_val, val_predictions)
-    ValidEval.get_eval_metrics()
+    #val_predictions = svm.predict(X_val)
+    #ValidEval = Eval("Validation", y_val, val_predictions)
+    #ValidEval.get_eval_metrics()
 
     # Make predictions on the test set
     test_predictions = svm.predict(X_test)

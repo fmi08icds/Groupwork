@@ -1,12 +1,39 @@
-import pandas as pd
-from sklearn import datasets
-from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 
-# load the dataset and separate target from the rest:
 
+def eval_sklearn_imp(X_train, X_test, y_train,y_test):
+    # Hyperparameter für die Validierung festlegen
+    kernels = ['linear', 'poly', 'rbf', 'sigmoid']
+
+    best_accuracy = 0
+    best_kernel = ''
+
+    # test different kernels on vlidation set
+    for kernel in kernels:
+        # init and train model
+        svm = SVC(kernel=kernel)
+        svm.fit(X_train, y_train)
+
+        # predict on test set
+        y_test_pred = svm.predict(X_test)
+
+        # calculate accuracy on validation set
+        accuracy = accuracy_score(y_test, y_test_pred)
+        print(kernel, ": ",accuracy)
+
+        # save best kernel
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_kernel = kernel
+
+    print("Best Kernel:", best_kernel)
+    print("Test Accuracy:", best_accuracy)
+
+
+
+"""
+# load the dataset and separate target from the rest:
 data = pd.read_csv('../data/diabetes_prediction_dataset.csv')
 data.replace("Female", 0, inplace=True)
 data.replace("Male", 1, inplace=True)
@@ -43,14 +70,14 @@ for kernel in kernels:
     # init and train model
     svm = SVC(kernel=kernel)
     svm.fit(X_train, y_train)
-    
+
     # predict on validation set
     y_val_pred = svm.predict(X_val)
-    
+
     # calculate accuracy on validation set
     accuracy = accuracy_score(y_val, y_val_pred)
     print(kernel, ": ",accuracy)
-    
+
     # save best kernel
     if accuracy > best_accuracy:
         best_accuracy = accuracy
@@ -68,3 +95,5 @@ test_accuracy = accuracy_score(y_test, y_test_pred)
 
 print("Best Kernel:", best_kernel)
 print("Test Accuracy:", test_accuracy)
+
+"""

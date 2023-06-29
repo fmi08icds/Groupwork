@@ -8,13 +8,10 @@ performing the following tasks:
 5. Splitting the data into training, validation, and test datasets.
 """
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy import stats
 import seaborn as sns
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from sklearn.utils import resample
+from sklearn.model_selection import train_test_split
 
 class DataAnalyzer:
     def __init__(self, file):
@@ -145,7 +142,7 @@ class DataAnalyzer:
         df_minority = self.df[self.df['diabetes'] == 1]
         df_majority_downsampled = resample(df_majority,
                                    replace=False,     # sampling without replacement
-                                   n_samples=len(df_minority),    # match the size of minority class
+                                   n_samples=len(df_minority) * 3 ,    # match the size of minority class
                                    random_state=42)   # for reproducibility
 
         self.df = pd.concat([df_majority_downsampled, df_minority])
@@ -190,7 +187,7 @@ class DataAnalyzer:
     def data_split(self):
         X = self.df.drop('diabetes', axis=1)
         y = self.df['diabetes']
-        X = X[['age','bmi']]
+        X = X[['age','bmi','blood_glucose_level']]
         # Split the data into training and testing sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,shuffle=True,random_state=42)
         return X_train, X_test, y_train, y_test
