@@ -42,7 +42,7 @@ class Eval:
             elif pred == 1 and true == 0:
                 false_positives += 1
 
-        self.precision = round(true_positives / (true_positives + false_positives), 4)
+        self.precision = round(true_positives / (true_positives + false_positives + .1), 4)
 
     def recall_score(self):
         true_positives = 0
@@ -57,7 +57,7 @@ class Eval:
         self.recall = round(true_positives / (true_positives + false_negatives), 4)
 
     def f1_score(self):
-        self.f1 = round(2 * (self.precision * self.recall) / (self.precision + self.recall), 4)
+        self.f1 = round(2 * (self.precision * self.recall) / (self.precision + self.recall + .1), 4)
 
     def confusion_matrix(self):
         true_positives = 0
