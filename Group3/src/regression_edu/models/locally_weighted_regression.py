@@ -60,13 +60,15 @@ class LocallyWeightedRegression:
     def gauss(self, centre, x, sigma): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
 
     def f(self, x):
+        t = x
         if type(x) is not np.array(()):
             if type(x) in [int, float]:
                 x = [x]
             x = np.asarray(x)
-        if len(x) != len(self.coeffs[0]) - 1:
+        length = len(x) if np.ndim(x) != 0 else 1
+        if length != len(self.coeffs[0]) - 1:
             raise ValueError(
-                f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.x_data[0])}")
+                f"x has to have the same dimension as x_data. dim x: {length}; dim x_data: {len(self.x_data[0])}")
 
 
         summed = 0
