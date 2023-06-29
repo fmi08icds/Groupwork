@@ -8,6 +8,13 @@ from interactive_regression import InteractiveRegression
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from regression_edu.data.simple_uniform_noise import simple_uniform
+from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
+from regression_edu.models.linear_regression import LinearRegression
+
+SECTIONS = 3
+NAME_LWR = "LWR"
+NAME_LIN = "Linear Regression"
+
 
 app = dash.Dash(
     __name__, external_stylesheets=[dbc.themes.BOOTSTRAP]
@@ -18,6 +25,8 @@ x_data = np.linspace(0, 10, 100)
 y_data = 2 * x_data + 1 + np.random.randn(100) * 2
 
 reg = InteractiveRegression(x_data, y_data, 0, 0, 0)
+reg_lwr = LocallyWeightedRegression([x_data, y_data], transposed=True, name=NAME_LWR, sections=SECTIONS)
+reg_lin = LocallyWeightedRegression([x_data, y_data], transposed=True, name=NAME_LIN)
 
 data_generation_setting = dbc.Card(
     [
@@ -212,6 +221,8 @@ def update_regression(
     data_generation_function = (
         data_generation_function if data_generation_function else "2 * x + 1"
     )
+    global reg_lwr
+    global reg_lin
     try:
         function = eval(f"lambda x:{data_generation_function}")
         x, y = simple_uniform(
@@ -223,6 +234,8 @@ def update_regression(
         # update the data
         reg.x_data = x
         reg.y_data = y
+        reg_lwr = LocallyWeightedRegression([x, y], transposed=True, name=NAME_LWR, sections=SECTIONS)
+        reg_lin = LinearRegression([x, y], transposed=True, name=NAME_LIN)
     except Exception:  # I will burn in hell for this
         print("invalid function")
 
@@ -239,9 +252,13 @@ def update_regression(
 
     # calculate the sum of squares
     sum_of_squares = reg.calc_sum_of_squares()
+    sum_of_squares_lin = reg_lin.get_sum_of_squares()
+    sum_of_squares_lwr = reg_lwr.get_sum_of_squares()
 
     # calculate the mean squared error
     mean_squared_error = reg.calc_mean_squared_error()
+    mean_squared_error_lin = reg_lin.get_MSE()
+    mean_squared_error_lwr = reg_lwr.get_MSE()
 
     # calculate the root mean squared error
     root_mean_squared_error = reg.calc_root_mean_squared_error()
@@ -267,7 +284,37 @@ def update_regression(
             y=reg.predicted_values,
             mode="lines",
             marker=dict(color="red"),
-            name="Regression Line",
+            name="Regression Line (constructed)",
+        )
+    )
+
+    # add a scatter trace for the regression line
+    fig.add_trace(
+        go.Scatter(
+            x=reg_lin.get_x_column(0),
+            y=reg_lin.predicted_values,
+            mode="lines",
+            marker=dict(color="green"),
+            name="Linear Regression Line",
+        )
+    )
+    print("X_data ")
+    print(reg_lwr.get_x_column(0))
+    print("\n")
+    print("Y_data ")
+    print(reg_lwr.y_data)
+    print("\n")
+    print("Pred ")
+    print(reg_lwr.predicted_values)
+    print("\n\n")
+    # add a scatter trace for the regression line
+    fig.add_trace(
+        go.Scatter(
+            x=reg_lwr.get_x_column(0),
+            y=reg_lwr.predicted_values,
+            mode="lines",
+            marker=dict(color="purple"),
+            name="Locally Weighted Regression",
         )
     )
 

@@ -29,4 +29,5 @@ def plot_2d(reg, show_predictands=False, show_residuals=True):
 
 def plot_gaussians(reg, x):
     plt.figure("Gaussians " + reg.name)
-    [plt.plot(x, [reg.gauss(ci, xi, reg.sigma) for xi in x]) for ci in reg.centres]
+    summed_gauss = sum([reg.gauss(reg.centres[index], x, reg.sigma) for index in range(len(reg.coeffs))])
+    [plt.plot(x, [reg.gauss(ci, xi, reg.sigma)/ summed_gauss for xi in x]) for ci in reg.centres]
