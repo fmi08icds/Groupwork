@@ -14,7 +14,7 @@ def plot_2d(reg, show_predictands=False, show_residuals=True):
     y_data = reg.y_data
     predicted = reg.predicted_values
 
-    plt.figure("Regression")
+    plt.figure("Regression " + reg.name)
     plt.plot(x_data, y_data, "rx", markersize=3)
     if show_predictands:
         plt.plot(x_data, predicted, "bx", markersize=3)
@@ -28,5 +28,5 @@ def plot_2d(reg, show_predictands=False, show_residuals=True):
 
 
 def plot_gaussians(reg, x):
-    plt.figure("Gaussians")
+    plt.figure("Gaussians " + reg.name)
     [plt.plot(x, [reg.gauss(ci, xi, reg.sigma) for xi in x]) for ci in reg.centres]

@@ -8,9 +8,8 @@ class LocallyWeightedRegression:
     x_data = None
     y_data = None
     sigma = 1
-    # W = None
 
-    def __init__(self, data, transposed=False, tau=.5, sections=None):
+    def __init__(self, data, transposed=False, name="", tau=.5, sections=None):
         """
         Calculates the ordinary linear regression for the given data.
         :param data: data is a Nx(d+1) matrix with the last column being Y and X being 
@@ -18,7 +17,8 @@ class LocallyWeightedRegression:
         :param transposed: If the data is transposed and data[0] returns a vector
             of the first dimension of the samples.
         """
-        self.sigma=1
+        self.name = name
+        self.sigma = 1
         data = np.asarray(data)
         if transposed:
             data = np.transpose(data)
@@ -38,7 +38,6 @@ class LocallyWeightedRegression:
             self.centres = x_data[:,1]
         else:
             x_sorted = x_data[x_data[:,1].argsort()]
-            x_1_sorted = x_data[:,1].argsort()
             W = np.zeros((sections, len(x_data), len(x_data)))
             sec_len = len(x_sorted)//sections
             prev_indices = 0
@@ -64,7 +63,7 @@ class LocallyWeightedRegression:
         if type(x) is not np.array(()):
             if type(x) in [int, float]:
                 x = [x]
-            x = np.asarray([x])
+            x = np.asarray(x)
         if len(x) != len(self.coeffs[0]) - 1:
             raise ValueError(
                 f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.x_data[0])}")
@@ -80,6 +79,16 @@ class LocallyWeightedRegression:
             except IndexError:
                 return summed
 
+    def get_x_column(self, i):
+        return self.x_data[:,i]
 
     def get_sum_of_squares(self):
         return np.sum([(self.predicted_values[i] - self.y_data[i]) ** 2 for i in range(len(self.y_data))])
+
+
+    def get_MSE(self):
+        return self.get_sum_of_squares()/len(self.y_data)
+
+
+    def get_MAE(self):
+        return np.sum([abs(self.predicted_values[i] - self.y_data[i]) for i in range(len(self.y_data))]) / len(self.y_data)
