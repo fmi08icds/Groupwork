@@ -4,6 +4,14 @@ from numpy import ndarray
 
 np.set_printoptions(precision=2)
 
+def sample_rows(arr: ndarray, n: int):
+    """ Sample rows in a numpy array"""
+    if arr.shape[0] < n:
+        return arr
+
+    row_indices = np.random.choice(arr.shape[0], size=n, replace=False)
+    return arr[row_indices]
+
 class SVM:
     """ 
     SVM implementation using Sequential Minimal Optimization 
@@ -111,6 +119,11 @@ class SVM:
         max( sum(alpha) - (1/2 alpha * y).T @ _kernel(X) )
         with 0 \le alpha_i \le C forall i; sum(y * alpha) = 0
         """
+
+        # Trim large data sets to allow for reasonable computation times
+        X = sample_rows(X, 1000)
+        y = sample_rows(y, 1000)
+
         self._smo(X, y, C)
         
 
