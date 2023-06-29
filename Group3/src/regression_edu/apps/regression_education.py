@@ -298,20 +298,11 @@ def update_regression(
             name="Linear Regression Line",
         )
     )
-    print("X_data ")
-    print(reg_lwr.get_x_column(0))
-    print("\n")
-    print("Y_data ")
-    print(reg_lwr.y_data)
-    print("\n")
-    print("Pred ")
-    print(reg_lwr.predicted_values)
-    print("\n\n")
-    # add a scatter trace for the regression line
+    x_lin = np.linspace(min(reg_lwr.get_x_column(0)), max(reg_lwr.get_x_column(0)), 10)
     fig.add_trace(
         go.Scatter(
-            x=reg_lwr.get_x_column(0),
-            y=reg_lwr.predicted_values,
+            x=x_lin,
+            y=[reg_lwr.f(xi) for xi in x_lin],
             mode="lines",
             marker=dict(color="purple"),
             name="Locally Weighted Regression",
