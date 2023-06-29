@@ -4,8 +4,6 @@ from dash import html
 from dash.dependencies import Input, Output
 import numpy as np
 import plotly.graph_objects as go
-from interactive_regression import InteractiveRegression
-import traceback
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from regression_edu.data.simple_uniform_noise import simple_uniform
@@ -106,16 +104,28 @@ equation_and_metrics = dbc.Card(
         dbc.CardHeader(html.H3("Regression Equation and Metrics")),
         dbc.CardBody(
             [
-                html.H4("Linear Regression"),
-                html.H5("Sum of Squares"),
-                html.P(id="sum_of_squares_lin"),
-                html.H5("Mean Squared Error"),
-                html.P(id="mean_squared_error_lin"),
-                html.H4("LW-Regression"),
-                html.H5("Sum of Squares"),
-                html.P(id="sum_of_squares_lwr"),
-                html.H5("Mean Squared Error"),
-                html.P(id="mean_squared_error_lwr"),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                html.H4("Linear Regression"),
+                                html.H5("Sum of Squares"),
+                                html.P(id="sum_of_squares_lin"),
+                                html.H5("Mean Squared Error"),
+                                html.P(id="mean_squared_error_lin"),
+                            ]
+                        ),
+                        dbc.Col(
+                            [
+                                html.H4("LW-Regression"),
+                                html.H5("Sum of Squares"),
+                                html.P(id="sum_of_squares_lwr"),
+                                html.H5("Mean Squared Error"),
+                                html.P(id="mean_squared_error_lwr"),
+                            ]
+                        )
+                    ]
+                ),
             ]
         ),
     ],
@@ -139,11 +149,8 @@ output = dbc.Row(
 app.layout = dbc.Container(
     [
         html.H1("Group2: Regression", className="text-center my-3"),
-        html.H2("Linear Regression", className="text-center my-3"),
+        html.H2("LWR and Linear Regression", className="text-center my-3"),
         dbc.Col([user_input, output]),
-        html.Hr(),
-        html.H2("Locally Weighted Regression", className="text-center my-3"),
-        html.H2("Comparison", className="text-center my-3"),
     ]
 )
 
@@ -240,7 +247,7 @@ def update_regression(
             name="Linear Regression Line",
         )
     )
-    x_lin = np.linspace(min(reg_lwr.get_x_column(0)), max(reg_lwr.get_x_column(0)), 10)
+    x_lin = np.linspace(min(reg_lwr.get_x_column(0)), max(reg_lwr.get_x_column(0)), 50)
     fig.add_trace(
         go.Scatter(
             x=x_lin,
