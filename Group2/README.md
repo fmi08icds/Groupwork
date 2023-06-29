@@ -17,7 +17,7 @@
 
 
 ## Code
-
-eval.py: run the different SVM implementations and calculate evalutation metrics
-test.py: test the different implementations and measure their run time
+- eval.py: run the different SVM implementations and calculate evalutation metrics
+- test.py: test the different implementations and measure their run time
+- smo_svm.py: soft margin dual SVM implementation using Sequential Minimal Optimization
 
