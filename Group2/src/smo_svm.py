@@ -133,7 +133,7 @@ class SVM:
         if self.weights is None:
             raise ValueError("Fit the SVM before predicting") 
         
-        f = lambda x_i: np.maximum(0, -np.sign(self.weights.T @ x_i + self.bias))
+        f = lambda x_i: -np.sign(self.weights.T @ x_i + self.bias)
         return np.apply_along_axis(f, 1, X)
 
     def _kernel(self, x_i: ndarray, x_j: ndarray):

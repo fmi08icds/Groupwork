@@ -92,8 +92,14 @@ def train_svm_model(model, X_train, X_val, X_test, y_train, y_val, y_test):
         svm = SVM_HM()
         svm.fit(X_train.to_numpy(), y_train.to_numpy())
     elif model == "SMO":
+        # Change the ys from 0 to -1 
+        y_train = y_train.to_numpy()
+        y_train[y_train == 0] = -1
+        y_val = y_val.replace(0, -1)
+        y_test = y_test.replace(0, -1)
+
         svm = SVM_SMO()
-        svm.fit(X_train.to_numpy(), y_train.to_numpy())
+        svm.fit(X_train.to_numpy(), y_train)
     elif model == "Sklearn":
         svm = SVM_SKL(kernel="poly") # best kernel based on sklearn_kernel_comparison.py
         svm.fit(X_train, y_train)
