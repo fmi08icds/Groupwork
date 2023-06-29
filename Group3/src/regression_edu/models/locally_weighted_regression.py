@@ -60,19 +60,23 @@ class LocallyWeightedRegression:
     def gauss(self, centre, x, sigma): return math.e ** (-(centre - x) ** 2 / (2 * sigma ** 2))
 
     def f(self, x):
+        t = x
         if type(x) is not np.array(()):
             if type(x) in [int, float]:
                 x = [x]
             x = np.asarray(x)
-        if len(x) != len(self.coeffs[0]) - 1:
+        length = len(x) if np.ndim(x) != 0 else 1
+        if length != len(self.coeffs[0]) - 1:
             raise ValueError(
-                f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.x_data[0])}")
+                f"x has to have the same dimension as x_data. dim x: {length}; dim x_data: {len(self.x_data[0])}")
 
 
         summed = 0
         summed_gauss = sum([self.gauss(self.centres[index], x, self.sigma) for index in range(len(self.coeffs))])
         for index, coeff in enumerate(self.coeffs):
             summed += self.gauss(self.centres[index], x, self.sigma)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
+
+        #sometimes returned nested array. Should be fixed but this will extract and return the actual value
         while True:
             try:
                 summed = summed[0]
