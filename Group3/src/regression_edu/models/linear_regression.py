@@ -36,7 +36,8 @@ class LinearRegression:
             if type(x) in [int, float]:
                 x = [x]
             x = np.asarray(x)
-        if len(x) != len(self.coeffs[0]) - 1:
+        length = len(x) if np.ndim(x) != 0 else 1
+        if length != len(self.coeffs) - 1:
             raise ValueError(
                 f"x has to have the same dimension as x_data. dim x: {len(x)}; dim x_data: {len(self.x_data[0])}")
         return sum(self.coeffs * np.insert(x, 0, 1))
