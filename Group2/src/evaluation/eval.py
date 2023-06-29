@@ -8,8 +8,8 @@ sys.path.append(project_root)
 
 # Now you can import the module using an absolute import
 #from SVM_imp import svm_train_hard_margin as SVM_HM
-from SVM_imp.svm_train_hard_margin import SVM as SVM_HM
-from SVM_imp.svm_train_soft_margin_abdulnaser_imp import SVM
+from models.svm_train_hard_margin import SVM as SVM_HM
+from models.svm_train_soft_margin_abdulnaser_imp import SVM
 
 class Eval:
     def __init__(self, set_type, y, predictions):
