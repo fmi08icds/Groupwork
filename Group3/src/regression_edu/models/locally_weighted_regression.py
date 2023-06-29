@@ -73,6 +73,8 @@ class LocallyWeightedRegression:
         summed_gauss = sum([self.gauss(self.centres[index], x, self.sigma) for index in range(len(self.coeffs))])
         for index, coeff in enumerate(self.coeffs):
             summed += self.gauss(self.centres[index], x, self.sigma)/ summed_gauss * sum(coeff * np.insert(x, 0, 1))
+
+        #sometimes returned nested array. Should be fixed but this will extract and return the actual value
         while True:
             try:
                 summed = summed[0]
