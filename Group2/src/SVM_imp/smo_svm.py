@@ -4,6 +4,14 @@ from numpy import ndarray
 
 np.set_printoptions(precision=2)
 
+def sample_rows(arr: ndarray, n: int):
+    """ Sample rows in a numpy array"""
+    if arr.shape[0] < n:
+        return arr
+
+    row_indices = np.random.choice(arr.shape[0], size=n, replace=False)
+    return arr[row_indices]
+
 class SVM:
     """
     SVM implementation using Sequential Minimal Optimization
@@ -33,76 +41,75 @@ class SVM:
         n = y.shape[0]
         self._alpha = np.ones(n)
 
-        for i in range(3):
-            for i1 in range(n):
-                # Select alpha2
-                i2 = i1 - 1 if i1 == n - 1 else i1 + 1
+        for i1 in range(n):
+            # Select alpha2
+            i2 = i1 - 1 if i1 == n - 1 else i1 + 1
 
-                # Filter out the selected alphas
-                remaining_mask = np.ones_like(self._alpha, dtype=bool)
-                remaining_mask[[i1, i2]] = False
-                remaining_alpha = self._alpha[remaining_mask]
-                remaining_y = y[remaining_mask]
+            # Filter out the selected alphas
+            remaining_mask = np.ones_like(self._alpha, dtype=bool)
+            remaining_mask[[i1, i2]] = False
+            remaining_alpha = self._alpha[remaining_mask]
+            remaining_y = y[remaining_mask]
 
-                # Set alpha2 from alpha1 to satisfy constraints
-                zeta = -np.sum(remaining_alpha * remaining_y)
-                # alpha2 = (1 / y[i1]) * (zeta - alpha[i1] * y[i1])
+            # Set alpha2 from alpha1 to satisfy constraints
+            zeta = -np.sum(remaining_alpha * remaining_y)
+            # alpha2 = (1 / y[i1]) * (zeta - alpha[i1] * y[i1])
 
-                # Set lower and upper bounds for alpha1
-                if y[i1] == y[i2]:
-                    lower_bound = np.max([0., -y[i1] * (y[i2] * C - zeta)])
-                    upper_bound = np.min([C, y[i1] * zeta])
+            # Set lower and upper bounds for alpha1
+            if y[i1] == y[i2]:
+                lower_bound = np.max([0., -y[i1] * (y[i2] * C - zeta)])
+                upper_bound = np.min([C, y[i1] * zeta])
+            else:
+                lower_bound = np.max([0., y[i1] * zeta])
+                upper_bound = np.min([C, -y[i1] * (y[i2] * C - zeta)])
+
+            # Compute the extremum of alpha1
+            a11 = (y[i1]**2 * self._kernel(X[i1], X[i1])) / -2.
+            a1221 = ((y[i1]**2 + y[i2]**2) * self._kernel(X[i1], X[i2])) / 2.
+            a22 = (y[i1]**2 * self._kernel(X[i2], X[i2])) / -2.
+            b11 = 0
+            b1221 = zeta * (y[i1] + y[i2]) * self._kernel(X[i1], X[i2]) / -.2
+            b22 = y[i1] * zeta * self._kernel(X[i2], X[i2])
+            a = a11 + a1221 + a22
+            b = b11 + b1221 + b22
+            # Should not matter for extrema or maxima
+            c = 0
+            quadratic_f = lambda alpha_i: a * alpha_i**2 + b * alpha_i + c
+            extremum = -b / (2 * a)
+
+            # Use it as alpha if it is within bounds or
+            # use the bounds themselfes instead
+            if extremum > lower_bound and extremum < upper_bound:
+                potential_maxima = np.array([extremum, lower_bound, upper_bound])
+            else:
+                potential_maxima = np.array([lower_bound, upper_bound])
+            self._alpha[i1] = potential_maxima[np.argmax(quadratic_f(potential_maxima))]
+
+            # Calculate weights and biases from the lagrangian
+            u = y * self._alpha / 2.
+            self.weights = np.sum(np.diag(u) @ X, axis=0)
+            self.bias = np.median(y - self.weights.T @ X.T)
+
+            print(f"Iter {i1 + 1}/{n}: weights: {self.weights}  bias: {self.bias:.2f}")
+
+            # Stop when conditions are satisfied
+            satisfied = True
+            for i in range(n):
+                val = y[i] * self.weights.T @ X[i] + self.bias
+                if self._alpha[i] == 0:
+                    if not val >= 1 - EPSILON:
+                        satisfied = False
+                        break
+                elif self._alpha[i] == C:
+                    if not val <= 1 + EPSILON:
+                        satisfied = False
+                        break
                 else:
-                    lower_bound = np.max([0., y[i1] * zeta])
-                    upper_bound = np.min([C, -y[i1] * (y[i2] * C - zeta)])
-
-                # Compute the extremum of alpha1
-                a11 = (y[i1]**2 * self._kernel(X[i1], X[i1])) / -2.
-                a1221 = ((y[i1]**2 + y[i2]**2) * self._kernel(X[i1], X[i2])) / 2.
-                a22 = (y[i1]**2 * self._kernel(X[i2], X[i2])) / -2.
-                b11 = 0
-                b1221 = zeta * (y[i1] + y[i2]) * self._kernel(X[i1], X[i2]) / -.2
-                b22 = y[i1] * zeta * self._kernel(X[i2], X[i2])
-                a = a11 + a1221 + a22
-                b = b11 + b1221 + b22
-                # Should not matter for extrema or maxima
-                c = 0
-                quadratic_f = lambda alpha_i: a * alpha_i**2 + b * alpha_i + c
-                extremum = -b / (2 * a)
-
-                # Use it as alpha if it is within bounds or
-                # use the bounds themselfes instead
-                if extremum > lower_bound and extremum < upper_bound:
-                    potential_maxima = np.array([extremum, lower_bound, upper_bound])
-                else:
-                    potential_maxima = np.array([lower_bound, upper_bound])
-                self._alpha[i1] = potential_maxima[np.argmax(quadratic_f(potential_maxima))]
-
-                # Calculate weights and biases from the lagrangian
-                u = y * self._alpha / 2.
-                self.weights = np.sum(np.diag(u) @ X, axis=0)
-                self.bias = np.median(y - self.weights.T @ X.T)
-
-                print(f"Iter {i1 + 1}/{n}: weights: {self.weights}  bias: {self.bias:.2f}")
-
-                # Stop when conditions are satisfied
-                satisfied = True
-                for i in range(n):
-                    val = y[i] * self.weights.T @ X[i] + self.bias
-                    if self._alpha[i] == 0:
-                        if not val >= 1 - EPSILON:
-                            satisfied = False
-                            break
-                    elif self._alpha[i] == C:
-                        if not val <= 1 + EPSILON:
-                            satisfied = False
-                            break
-                    else:
-                        if not (val >= 1 - EPSILON and val <= 1 + EPSILON):
-                            satisfied = False
-                            break
-                if satisfied:
-                    break
+                    if not (val >= 1 - EPSILON and val <= 1 + EPSILON):
+                        satisfied = False
+                        break
+            if satisfied:
+                break
 
     def fit(self, X: ndarray, y: ndarray, C = 1.):
         """
@@ -111,6 +118,11 @@ class SVM:
         max( sum(alpha) - (1/2 alpha * y).T @ _kernel(X) )
         with 0 \le alpha_i \le C forall i; sum(y * alpha) = 0
         """
+
+        # Trim large data sets to allow for reasonable computation times
+        X = sample_rows(X, 1000)
+        y = sample_rows(y, 1000)
+
         self._smo(X, y, C)
 
 
@@ -121,7 +133,7 @@ class SVM:
         if self.weights is None:
             raise ValueError("Fit the SVM before predicting")
 
-        f = lambda x_i: np.sign(self.weights.T @ x_i + self.bias)
+        f = lambda x_i: -np.sign(self.weights.T @ x_i + self.bias)
         return np.apply_along_axis(f, 1, X)
 
     def _kernel(self, x_i: ndarray, x_j: ndarray):
