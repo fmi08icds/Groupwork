@@ -7,9 +7,9 @@ class LocallyWeightedRegression:
     predicted_values = None
     x_data = None
     y_data = None
-    sigma = 1
+    sigma = None
 
-    def __init__(self, data, transposed=False, name="", tau=.5, sections=None):
+    def __init__(self, data, transposed=False, name="", tau=.5, sections=None, sigma=1):
         """
         Calculates the ordinary linear regression for the given data.
         :param data: data is a Nx(d+1) matrix with the last column being Y and X being 
@@ -18,7 +18,9 @@ class LocallyWeightedRegression:
             of the first dimension of the samples.
         """
         self.name = name
-        self.sigma = 1
+        self.sigma = sigma if sigma is not None else 1
+        if tau is None:
+            tau = .5
         data = np.asarray(data)
         if transposed:
             data = np.transpose(data)
