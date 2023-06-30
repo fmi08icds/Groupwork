@@ -59,6 +59,7 @@ def main(path: str = "./data/SpotifyFeatures.csv", algorithms: Sequence[str] = N
     results = []
 
     X, y, _ = load_X_y(path=path, sample_size=sample_size)
+    print(y.shape)
 
     # Run clustering algorithms with their best parameters
     for alg_name in algorithms:

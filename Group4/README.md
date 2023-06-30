@@ -164,6 +164,22 @@ We used the adjusted rand index (ARI) to evaluate our algorithms' performance on
 | 0.0475148  | Affinity Propagation | `damping = 0.7`<br>`convergence_iter = 20`<br>`max_iter = 200`                        |           88 | 14252.2 ms |
 | 0.00756683 | DBSCAN               | `epsilon = 0.3244`<br>`min_points = 20`                                               |            3 | 873.9 ms   |
 
+
+For more details, the script `evaluation/evaluate_clusterings.py` computes more extrinsic and intrinsic clustering metrics. The numeric results are summarized in the following table.
+
+| algorithm                           |   run_time |   rand_index_score |   adj_rand_index_score |   mut_info_score |   adj_mut_info_score |   norm_mut_info_score |   homogeneity_score |   completeness_score |   v_measure |   fowlkes_mallows_score |   silhouette_score |   calinski_harabasz_score |   davies_bouldin_score |
+|:------------------------------------|-----------:|-------------------:|-----------------------:|-----------------:|---------------------:|----------------------:|--------------------:|---------------------:|------------:|------------------------:|-------------------:|--------------------------:|-----------------------:|
+| K-Means                             |  0.0184274 |           0.924967 |             0.0957199  |         0.829024 |             0.247199 |             0.261424  |           0.257551  |             0.265415 |   0.261424  |                0.135115 |          0.140786  |                   707.407 |                1.68684 |
+| MiniBatch K-Means                   |  0.103383  |           0.925506 |             0.114948   |         0.822396 |             0.245511 |             0.259789  |           0.255492  |             0.264234 |   0.259789  |                0.154242 |          0.14781   |                   673.727 |                1.80126 |
+| Bisecting K-Means                   |  0.0888502 |           0.924711 |             0.110527   |         0.791069 |             0.236146 |             0.250733  |           0.245759  |             0.255911 |   0.250733  |                0.15026  |          0.103208  |                   596.378 |                1.96981 |
+| DBSCAN (Scikit Learn)               |  0.0278918 |           0.340761 |             0.00793312 |         0.174065 |             0.087258 |             0.0908868 |           0.0540762 |             0.284659 |   0.0908868 |                0.180411 |          0.0977827 |                   245.678 |                2.39122 |
+| DBSCAN (Group 4)                    |  1.20215   |           0.340761 |             0.00793312 |         0.174065 |             0.087258 |             0.0908868 |           0.0540762 |             0.284659 |   0.0908868 |                0.180411 |          0.0977827 |                   245.678 |                2.39122 |
+| Affinity Propagation (Scikit-Learn) | 30.7863    |           0.955122 |             0.0416476  |         1.23054  |             0.220932 |             0.301585  |           0.382288  |             0.249016 |   0.301585  |                0.073386 |          0.100288  |                   209.937 |                1.68665 |
+| Affinity Propagation (Group 4)      | 56.4165    |           0.955122 |             0.0416476  |         1.23054  |             0.220932 |             0.301585  |           0.382288  |             0.249016 |   0.301585  |                0.073386 |          0.100288  |                   209.937 |                1.68665 |
+| BIRCH                               |  0.265054  |           0.895133 |             0.080145   |         0.740388 |             0.230461 |             0.246057  |           0.230014  |             0.264505 |   0.246057  |                0.137293 |          0.0931095 |                   521.584 |                1.80029 |
+| BIRCH (Group 4)                     |  0.268559  |           0.904071 |             0.0996417  |         0.798106 |             0.2478   |             0.26304   |           0.247946  |             0.280093 |   0.26304   |                0.152527 |          0.11492   |                   560.341 |                1.9178  |
+
+
 ## Members
 
 | Florian Winkler<br>(Group Leader) | Ralf König | Sebastian Schmidt | Clara Leidhold | Marcel Lehmann |

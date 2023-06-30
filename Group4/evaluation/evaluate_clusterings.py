@@ -15,6 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 # Group4 implemented clustering algorithms, these DO NOT use scikit-learn
 from clustering.affinity_propagation import affinity_propagation
 from clustering.dbscan import dbscan
+from clustering.birch import Birch as BirchGroup4
 
 # Group4 implemented datasource load of Spotify dataset
 import data.datasource as ds
@@ -47,7 +48,7 @@ def get_blob_dataset(n_centers, n_samples_per_genre, n_features, random_state) -
 
 
 def get_spotify_dataset(n_samples_per_genre):
-    X, y = ds.load_X_y(
+    X, y, _ = ds.load_X_y(
         path="data/SpotifyFeatures.csv",
         sample_size=n_samples_per_genre,
         attribute_list=[
@@ -93,7 +94,9 @@ def get_prediction_bisecting_k_means(X, n_clusters, random_state):
 def get_prediction_affinity_propagation_gr4(X, random_state):
     start_time = time.perf_counter()
     damping = 0.7
-    _, labels_pred = affinity_propagation(X=X, damping=damping, random_state=random_state)
+    convergence_iter = 20
+    max_iter = 200
+    _, labels_pred = affinity_propagation(X=X, damping=damping, max_iter=max_iter, convergence_iter=convergence_iter, random_state=random_state)
     end_time = time.perf_counter()
     return labels_pred, end_time - start_time
 
@@ -101,14 +104,16 @@ def get_prediction_affinity_propagation_gr4(X, random_state):
 def get_prediction_affinity_propagation(X, random_state):
     start_time = time.perf_counter()
     damping = 0.7
-    clustering = AffinityPropagation(damping=damping, random_state=random_state).fit(X)
+    convergence_iter = 20
+    max_iter = 200
+    clustering = AffinityPropagation(damping=damping, max_iter=max_iter, convergence_iter=convergence_iter, random_state=random_state).fit(X)
     end_time = time.perf_counter()
     return clustering.labels_, end_time - start_time
 
 
 def get_prediction_dbscan_gr4(X, min_points, epsilon):
     start_time = time.perf_counter()
-    labels_pred = dbscan(X=X, epsilon=epsilon, min_points=min_points)
+    _, labels_pred = dbscan(X=X, epsilon=epsilon, min_points=min_points)
     end_time = time.perf_counter()
     return labels_pred, end_time - start_time
 
@@ -120,11 +125,19 @@ def get_prediction_dbscan(X, min_samples, epsilon):
     return clustering.labels_, end_time - start_time
 
 
-def get_prediction_birch(X, n_clusters):
+def get_prediction_birch(X, **kwargs):
     start_time = time.perf_counter()
-    clustering = Birch(n_clusters=n_clusters, threshold=0.4).fit(X)
+    clustering = Birch(**kwargs).fit(X)
     end_time = time.perf_counter()
     return clustering.labels_, end_time - start_time
+
+
+def get_prediction_birch_gr4(X, **kwargs):
+    start_time = time.perf_counter()
+    clustering = BirchGroup4(**kwargs)
+    clustering.fit(X)
+    end_time = time.perf_counter()
+    return clustering.labels, end_time - start_time
 
 
 def get_intrinsic_metrics(X: NDArray, labels_pred: NDArray):
@@ -145,7 +158,7 @@ def get_extrinsic_metrics(labels_true: NDArray, labels_pred: NDArray):
 
     # Rand index / Adjusted Rand Index (adjusts for chance)
     ri_score = metrics.rand_score(labels_true, labels_pred)
-    ari_score = metrics.adjusted_rand_score(labels_pred, labels_true)
+    ari_score = metrics.adjusted_rand_score(labels_true, labels_pred)
 
     # Mutual information / (Adjusted) Mutual Information / Normalized Mutual Information
     mi_score = metrics.mutual_info_score(labels_true, labels_pred)
@@ -229,7 +242,7 @@ def main() -> None:
     # for make_blobs
     # labels_pred_dbs, run_time = get_pred_dbscan(X, min_samples=n_samples_per_genre//2, epsilon=6)
     # for Spotify dataset
-    labels_pred, run_time = get_prediction_dbscan(X, min_samples=n_samples_per_genre//20, epsilon=.175)
+    labels_pred, run_time = get_prediction_dbscan(X, min_samples=20, epsilon=0.3244)
     new_dict = {"algorithm": ["DBSCAN (Scikit Learn)"], "run_time": run_time}
     df_evaluation_results = add_result_entry(X, labels_true, labels_pred, new_dict, df_evaluation_results)
 
@@ -244,8 +257,8 @@ def main() -> None:
     # for make_blobs
     # labels_pred_dbs, run_time = get_pred_dbscan_gr4(X, min_points=n_samples_per_genre//2, epsilon=6)
     # for Spotify dataset
-    labels_pred, run_time = get_prediction_dbscan_gr4(X, min_points=n_samples_per_genre//20, epsilon=0.175)
-    new_dict = {"algorithm": ["DBSCAN (Group 4"], "run_time": run_time}
+    labels_pred, run_time = get_prediction_dbscan_gr4(X, min_points=20, epsilon=0.3244)
+    new_dict = {"algorithm": ["DBSCAN (Group 4)"], "run_time": run_time}
     df_evaluation_results = add_result_entry(X, labels_true, labels_pred, new_dict, df_evaluation_results)
 
     ####################################################
@@ -259,12 +272,18 @@ def main() -> None:
     new_dict = {"algorithm": ["Affinity Propagation (Group 4)"], "run_time": run_time}
     df_evaluation_results = add_result_entry(X, labels_true, labels_pred, new_dict, df_evaluation_results)
 
-    labels_pred, run_time = get_prediction_birch(X, n_clusters=n_centers)
+    labels_pred, run_time = get_prediction_birch(X, n_clusters=n_centers, branching_factor=50, threshold=0.25)
     new_dict = {"algorithm": ["BIRCH"], "run_time": run_time}
     df_evaluation_results = add_result_entry(X, labels_true, labels_pred, new_dict, df_evaluation_results)
 
+
+    labels_pred, run_time = get_prediction_birch_gr4(X, n_cluster=n_centers, branching_factor=50, threshold=0.25)
+    new_dict = {"algorithm": ["BIRCH (Group 4)"], "run_time": run_time}
+    df_evaluation_results = add_result_entry(X, labels_true, labels_pred, new_dict, df_evaluation_results)
+
     print(df_evaluation_results)
-    df_evaluation_results.to_json("clustering_evaluation.json", orient="records")
+    df_evaluation_results.to_markdown(sys.stdout, index=False)
+    print()
 
     end_time = time.perf_counter()
     print(f"Total runtime: {end_time - start_time:0.4f} seconds")
