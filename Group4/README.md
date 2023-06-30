@@ -1,9 +1,5 @@
 # Group 4 - Clustering
 
-**Abstract:**
-
-TODO
-
 **Table of contents:**
 
 1. [Getting started](#getting-started)
@@ -66,6 +62,10 @@ These tools are configured by the `pyproject.toml` file.
 │   └── ...
 │
 ├── 📁 env                <-- Local conda environment (not part of version control)
+│   └── ...
+│
+├── 📁 evaluation         <-- Evaluation of clustering algorithms with different metrics 
+│   └── ...
 │
 ├── 📁 notebooks          <-- Directory for Jupyter notebook files
 │   └── ...
@@ -80,11 +80,12 @@ These tools are configured by the `pyproject.toml` file.
 │
 ├── 📃 environment.yml    <-- List of python dependencies for the conda environment
 │
+├── 📃 main.py            <-- Compare algorithms
+│
 ├── 📃 pyproject.toml     <-- Configuration file
 │
 └── 📃 README.md          <-- Project documentation
 ```
-
 
 ## Workflow
 
@@ -164,6 +165,7 @@ We used the adjusted rand index (ARI) to evaluate our algorithms' performance on
 | 0.0475148  | Affinity Propagation | `damping = 0.7`<br>`convergence_iter = 20`<br>`max_iter = 200`                        |           88 | 14252.2 ms |
 | 0.00756683 | DBSCAN               | `epsilon = 0.3244`<br>`min_points = 20`                                               |            3 | 873.9 ms   |
 
+As can be seen, the k-Means clustering algorithms produces the best results in terms of ARI metric. It also has the fastest runtime. When using the Affinity Propagation and DBSCAN algorithms the number of clusters can not be predefined. Consequently, the number of clusters found by these algorithms are largely different from the target of 25 that corresponds with the number of genres in the ground truth. In general, the results are not good, i. e., clustering is not capable of correctly classifying the songs into genres in the given dataset. Our initial assumption, that the features are similar in the same genre and different in other genres, does not hold. We presume that the classification problem can be addressed better using supervised machine learning techniques, for example Neural Networks or Random Forests.
 
 For more details, the script `evaluation/evaluate_clusterings.py` computes more extrinsic and intrinsic clustering metrics. The numeric results are summarized in the following table.
 
