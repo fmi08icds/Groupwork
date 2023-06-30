@@ -3,11 +3,16 @@ channels:
   - defaults
 dependencies:
   - python=3.11
+  - matplotlib
+  - seaborn
+  - ipykernel
   - numpy
+  - pandas
   - scikit-learn
   - scikit-learn-intelex  # CPU acceleration for scikit-learn, see https://intel.github.io/scikit-learn-intelex/
-  - pandas  # for datasource.py and evaluate_clusterings.py
-  - black  # for formatting Python files
-  - pytest  # for test-driven development on clustering algorithms
-  - jupyter  # to run Jupyter notebooks
-  - seaborn  # for charts in notebooks
+  - jupyter
+  - black
+  - pytest
+  - tqdm
+  - tabulate  # allows exporting pandas dataframes as markdown table
+

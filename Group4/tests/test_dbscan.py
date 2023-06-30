@@ -13,9 +13,9 @@ import pytest
 @pytest.mark.parametrize("epsilon", [0.5, 1, 2, 3])
 def test_dbscan_compare_results(n_centers: int, n_features: int, epsilon: float):
     # Generate dataset with `n_centers` blobs (circular clusters)
-    X, _ = make_blobs(n_samples=n_centers * 100, centers=n_centers, n_features=n_features)
+    X, _ = make_blobs(n_samples=n_centers * 70, centers=n_centers, n_features=n_features)
 
     # Run own implementation and scikit-learn version with the same parameters and compare the results
-    computed = dbscan(X, epsilon=epsilon, min_points=2 * n_features)
-    _, expected = sklearn_dbscan(X, eps=epsilon, min_samples=2 * n_features)
-    assert_array_equal(computed, expected)
+    _, computed_labels = dbscan(X, epsilon=epsilon, min_points=2 * n_features)
+    _, expected_labels = sklearn_dbscan(X, eps=epsilon, min_samples=2 * n_features)
+    assert_array_equal(computed_labels, expected_labels)

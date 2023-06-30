@@ -1,4 +1,5 @@
-# 
+# OS X
+.DS_Store
 
 # Conda env directory
 env/
@@ -7,5 +8,6 @@ env/
 __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
-/data/SpotifyFeatures.csv
 
+# Dataset
+data/*.csv
