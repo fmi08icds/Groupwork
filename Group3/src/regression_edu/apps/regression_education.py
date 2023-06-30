@@ -44,7 +44,7 @@ CONTENT_STYLE = {
 default = "2 * x + 2"
 # dummy data
 
-data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5)
+data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform', distr_eps=None)
 reg_lwr = LocallyWeightedRegression(
     data, transposed=True, name=NAME_LWR, sections=SECTIONS
 )
@@ -61,19 +61,45 @@ data_generation_setting = dbc.Card(
                     placeholder=default,
                 ),
                 html.H4("Number of samples"),
-                daq.NumericInput(
-                    id="data_generation_samples", value=10, min=1, max=500
-                ),
-                html.H4("Noise variance"),
-                daq.NumericInput(
-                    id="noise_factor", value=0.5, min=0, max=1
-                ),
-                html.H4("Lower bound"),
-                daq.NumericInput(
-                    id="data_generation_lower", value=-100, min=-500, max=0
-                ),
-                html.H4("Upper bound"),
-                daq.NumericInput(id="data_generation_upper", value=100, min=0, max=500),
+                dcc.Slider(
+                        id="data_generation_samples",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=500,
+                        step=1,
+                        updatemode="drag",
+                        value=10,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                html.H4("Noise Level"),
+                dcc.Slider(
+                        id="noise_factor",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=1,
+                        step=0.01,
+                        updatemode="drag",
+                        value=0.5,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                html.H4("Data Range"),
+                dcc.RangeSlider(id="data_range",
+                                className="slider",  ## for css reasons
+                                min=-25, max=25, step=1, value=[-3, 3],
+                                allowCross=False,
+                                dots=False,
+                                updatemode="mouseup",
+                                marks=None,
+                                tooltip={"placement": "bottom", "always_visible": True},
+                                ),
+                html.H4("Error Distribution"),
+                dcc.Dropdown(id='error_distr',
+                             options=['Gaussian',
+                                      'Uniform',],
+                             value="Gaussian"
+                                    )
             ]
         ),
     ]
@@ -205,8 +231,7 @@ app.layout = dbc.Container(
         Input("data_generation_function", "value"),
         Input("data_generation_samples", "value"),
         Input("noise_factor", "value"),
-        Input("data_generation_lower", "value"),
-        Input("data_generation_upper", "value"),
+        Input("data_range", "value"),
         Input("regression_equation_input", "value"),
         Input("sections", "value"),
         Input("tau", "value"),
@@ -217,8 +242,7 @@ def update_regression(
     data_generation_function,
     data_generation_samples,
     noise_factor,
-    data_generation_lower,
-    data_generation_upper,
+    data_range,
     regression_equation_input,
     sections,
     tau,
@@ -236,8 +260,10 @@ def update_regression(
         x, y = simple_uniform(
             function,
             data_generation_samples,
-            (data_generation_lower, data_generation_upper),
-            noise_factor
+            data_range,
+            noise_factor,
+            distr_x="uniform",
+            distr_eps=None,
         )
         # update the data
         sections = None if sections is None or sections.strip() == "" else int(sections)

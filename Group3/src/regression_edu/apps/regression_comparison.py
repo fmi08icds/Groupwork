@@ -5,7 +5,7 @@ from regression_edu.models.linear_regression import LinearRegression
 from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
 import localreg
 
-LocallyWeightedRegression()
+#LocallyWeightedRegression()
 
 # initialise dash app
 app = Dash(__name__)
