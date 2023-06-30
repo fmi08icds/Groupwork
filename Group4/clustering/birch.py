@@ -20,13 +20,17 @@ class Birch:
         leaf_factor, int, default=None:
             The branching factor for leaf nodes
             Default = 2*branching_factor
+        predict, bool, default=True:
+            If True, the Birch object will predict the labels of the given data X
+            If you only want to build the tree, set predict=False.
+            You wont be able to acces the labels afterwards
 
     ## How to use
         create Birch object -> Use fit() function to build the Tree
 
         Afterwards you can access following variables:
             all_centroids (n_centroids, n_features) : generated centroids of the subclusters
-            labels (n_samples,) : predicted labels regarding the given points X > 1-d numpy array
+            labels (n_samples,) : predicted labels regarding the given points X: 1-d numpy array
 
     ## References:
         [1] Tian Zhang, Raghu Ramakrishnan, and Miron Livny. 1996.
@@ -36,12 +40,18 @@ class Birch:
     """
 
     def __init__(
-        self, branching_factor: int = 40, threshold: float = 0.8, n_cluster: int = None, leaf_factor: int = None
+        self,
+        branching_factor: int = 40,
+        threshold: float = 0.8,
+        n_cluster: int = None,
+        leaf_factor: int = None,
+        predict=True,
     ) -> None:
         self.bf = branching_factor
         self.threshold = threshold
         self.root: Node
         self.n_cluster = n_cluster
+        self.predict_value = predict
         if leaf_factor is None:
             self.leaf_factor = self.bf * 2
         else:
@@ -53,9 +63,6 @@ class Birch:
 
         ## Params
             X: 2-dimensional array (n_samples, n_features)
-
-        ## returns
-            self: Birch object with fittet variables
         """
         assert len(X.shape) == 2, print("X must be 2-dimensional in form of (n_samples,n_features)")
         assert self.bf > 2 and self.leaf_factor > 2, print("branching and leaf factor must be greater than 2")
@@ -92,18 +99,17 @@ class Birch:
                 f"n_clusters({self.n_cluster}) must be higher than fitted centroids ({self.all_centroids})"
             )
             self.all_centroids = self.global_clutering()
-
-        self.labels = self.predict(X)
+        if self.predict_value:
+            self.labels = self.predict(X)
 
     def global_clutering(self) -> NDArray:
         """
-        Internal.
+        Internal.\n
         Optional step, that combines the center_points to the given number of n_cluster
         ## Returns
             ndarray (n_cluster,c_feature) of new center points
         """
         global_cluster = AgglomerativeClustering(n_clusters=self.n_cluster)
-        # global_cluster.fit_predict(self.all_centroids)
         new_labels = global_cluster.fit_predict(self.all_centroids)
         new_centers = []
         for label in np.unique(new_labels):
@@ -128,10 +134,10 @@ class Birch:
 
     def get_subcluster(self) -> NDArray:
         """
-        Internal.
+        Internal.\n
         Gets all Subcluster Information: So all CFs from Leaf Nodes
         ## Returns
-            Array of leafes
+            Array of leafs
         """
         all_leafs = []
         random_leaf = self.root
@@ -213,9 +219,9 @@ class Node:
                 self.append_cf(cf)
 
                 if len(self.CFs) <= self.leaf_factor:
-                    return False  # new Cluster can be added to Node
+                    return False  # New cluster can be added to Node
                 else:
-                    return True  # New Cluster wont have enough space
+                    return True  # New cluster wont have enough space
 
         if not self.isLeaf:
             # Create recursive structure to traverse tree
@@ -234,7 +240,8 @@ class Node:
                     return True
                 return False
 
-            else:  # Easy, just update according cf
+            else:
+                # Easy, just update according cf
                 target_cf.update(cf=cf)
                 self.centers[idx] = self.CFs[idx][0].center
                 return False
@@ -275,7 +282,7 @@ class Node:
                 new_cf2.update(cf[0])
 
         if node.isLeaf:
-            # to get all cluster in fast manner, nodes get a pointer to next and previos leaf
+            # to get all cluster in fast manner, leaf nodes get a pointer to next and previos leaf
             # In summary this puts node1 and node2 in the pointer-chain and excludes the given node
             node1.prev_leaf = node.prev_leaf
             node1.next_leaf = node2
