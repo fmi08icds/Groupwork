@@ -39,7 +39,10 @@ class LocallyWeightedRegression:
                 for x_j in x_data
             ]
 
-        if sections is None:
+        if sections is None and len(data) >= 100:
+            sections = 100
+
+        if sections is None or sections <= 0:
             W = np.zeros((len(x_data), len(x_data), len(x_data)))
             for i in range(len(W)):
                 W[i] = np.diag(w(i))
