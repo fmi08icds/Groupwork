@@ -22,6 +22,7 @@ import data.datasource as ds
 
 # load CPU acceleration for scikit-learn, see https://pypi.org/project/scikit-learn-intelex/
 from sklearnex import patch_sklearn
+
 patch_sklearn()
 
 # all scikit-learn imports must be after the Intel patch to benefit from them
@@ -63,7 +64,7 @@ def get_spotify_dataset(n_samples_per_genre):
             "speechiness",
             "tempo",
             "valence",
-        ]
+        ],
     )
     # get 1D array from 2D array, this is need for calculating clustering metrics
     y = y.flatten()
@@ -96,7 +97,9 @@ def get_prediction_affinity_propagation_gr4(X, random_state):
     damping = 0.7
     convergence_iter = 20
     max_iter = 200
-    _, labels_pred = affinity_propagation(X=X, damping=damping, max_iter=max_iter, convergence_iter=convergence_iter, random_state=random_state)
+    _, labels_pred = affinity_propagation(
+        X=X, damping=damping, max_iter=max_iter, convergence_iter=convergence_iter, random_state=random_state
+    )
     end_time = time.perf_counter()
     return labels_pred, end_time - start_time
 
@@ -106,7 +109,9 @@ def get_prediction_affinity_propagation(X, random_state):
     damping = 0.7
     convergence_iter = 20
     max_iter = 200
-    clustering = AffinityPropagation(damping=damping, max_iter=max_iter, convergence_iter=convergence_iter, random_state=random_state).fit(X)
+    clustering = AffinityPropagation(
+        damping=damping, max_iter=max_iter, convergence_iter=convergence_iter, random_state=random_state
+    ).fit(X)
     end_time = time.perf_counter()
     return clustering.labels_, end_time - start_time
 
@@ -206,20 +211,24 @@ def main() -> None:
 
     start_time = time.perf_counter()
 
-    df_evaluation_results = pd.DataFrame(columns=["algorithm",
-                                            "run_time",
-                                            "rand_index_score",
-                                            "adj_rand_index_score",
-                                            "mut_info_score",
-                                            "adj_mut_info_score",
-                                            "norm_mut_info_score",
-                                            "homogeneity_score",
-                                            "completeness_score",
-                                            "v_measure",
-                                            "fowlkes_mallows_score",
-                                            "silhouette_score",
-                                            "calinski_harabasz_score",
-                                            "davies_bouldin_score"])
+    df_evaluation_results = pd.DataFrame(
+        columns=[
+            "algorithm",
+            "run_time",
+            "rand_index_score",
+            "adj_rand_index_score",
+            "mut_info_score",
+            "adj_mut_info_score",
+            "norm_mut_info_score",
+            "homogeneity_score",
+            "completeness_score",
+            "v_measure",
+            "fowlkes_mallows_score",
+            "silhouette_score",
+            "calinski_harabasz_score",
+            "davies_bouldin_score",
+        ]
+    )
 
     labels_pred, run_time = get_prediction_k_means(X, n_centers, random_state)
     new_dict = {"algorithm": ["K-Means"], "run_time": run_time}
@@ -275,7 +284,6 @@ def main() -> None:
     labels_pred, run_time = get_prediction_birch(X, n_clusters=n_centers, branching_factor=50, threshold=0.25)
     new_dict = {"algorithm": ["BIRCH"], "run_time": run_time}
     df_evaluation_results = add_result_entry(X, labels_true, labels_pred, new_dict, df_evaluation_results)
-
 
     labels_pred, run_time = get_prediction_birch_gr4(X, n_cluster=n_centers, branching_factor=50, threshold=0.25)
     new_dict = {"algorithm": ["BIRCH (Group 4)"], "run_time": run_time}
