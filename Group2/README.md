@@ -21,4 +21,6 @@
 - test.py: test the different implementations and measure their run time
 - smo_svm.py: soft margin dual SVM implementation using Sequential Minimal Optimization
 - sklearn_kernel_comparison: scikit_learn implementation of a SVM with validation on different kernels, using the best one
+- svm_train_hard_margin: hard margin implementation of the SMV
+  
 
