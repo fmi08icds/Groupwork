@@ -9,8 +9,10 @@ dependencies:
   - numpy
   - pandas
   - scikit-learn
+  - scikit-learn-intelex  # CPU acceleration for scikit-learn, see https://intel.github.io/scikit-learn-intelex/
+  - jupyter
   - black
   - pytest
   - tqdm
-  - tabulate
+  - tabulate  # allows exporting pandas dataframes as markdown table
 
