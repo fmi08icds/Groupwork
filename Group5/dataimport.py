@@ -138,35 +138,28 @@ def create_random_sample(file_name="data/test_data_random.csv",
     :param number_of_genes:
     :return: None
     """
-    # Ueberpruefen ob der File_name korrekt ist, falls nicht wird er auf den Standardwert gesetzt
+    # Check if the file_name is correct, if not it will be set to the default value
     if not file_name[-11:] == "_random.csv":
         print("Please enter a valid file_name (has to end on '_random.csv'")
         file_name = "data/test_data_random.csv"
 
-    df = get_df_merged_with_labels()  # Dataframe erhalten
+    df = get_df_merged_with_labels()  # get dataframe
     if not number_of_genes:
         number_of_genes = df.shape[1]
 
-    # TODO implement
-
     # Generate random sample
-    r = np.random.randint(low=0, high=df.shape[0],
-                          size=number_of_rows)  # erstellt number of rows int Zahlen zwischen 0
-    # und Anzahl der Zeilen, size = array länge - anzahl der reihen
+    r = np.random.randint(low=0, high=df.shape[0],size=number_of_rows)
     s = np.random.randint(low=1, high=df.shape[1], size=number_of_genes)
-    s = np.insert(s, 0,
-                  0)  # füge 0 an index 0 hinzu, um Klassen nicht zu verlieren
+    s = np.insert(s, 0,0)   # add 0 to index 0 to not lose classes
 
-    random_sample = df.iloc[
-        r, s]  # teilt das Dataframe in r reihen und s Spalten
+    random_sample = df.iloc[r, s]  # divides the dataframe into r rows and s columns
 
-    # Falls labeled = True, entferne es auf dem random Beispiel
+    # if labeled = True, remove it on the random example
     if not labeled:
         labels_column_name = 'Class'
-        random_sample = random_sample.drop(
-            columns=[labels_column_name])  # Spalte löschen
+        random_sample = random_sample.drop(columns=[labels_column_name])  # delete column
 
-        # Speicher random sample as a CSV file
+        # save random sample to CSV file
         random_sample.to_csv(file_name, index=False)
         print("random sample saved as", file_name)
 
