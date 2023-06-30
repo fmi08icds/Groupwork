@@ -5,4 +5,3 @@ setuptools.setup(
     packages=["regression_edu"],
     package_dir={"": "src"},
 )
-git
