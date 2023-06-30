@@ -10,6 +10,7 @@ import dash_daq as daq
 from regression_edu.data.simple_uniform_noise import simple_uniform
 from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
 from regression_edu.models.linear_regression import LinearRegression
+import math
 
 SECTIONS = None
 NAME_LWR = "LWR"
