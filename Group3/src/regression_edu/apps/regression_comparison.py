@@ -309,8 +309,3 @@ app.layout = html.Div(
 if __name__ == '__main__':
     app.run(debug=True,
             port=8500)
-
-# QUICK FINAL CHANGES (some optional)
-# TODO: Create flow so that graph name changes depending on dataset
-# TODO: Format the scatter plot to look nice
-# TODO: Fix callback errors when changing datasets
