@@ -65,3 +65,12 @@ def plot_gaussians(reg, x):
     plt.figure("Gaussians " + reg.name)
     summed_gauss = sum([reg.gauss(reg.centres[index], x, reg.sigma) for index in range(len(reg.coeffs))])
     [plt.plot(x, [reg.gauss(ci, xi, reg.sigma)/ summed_gauss for xi in x]) for ci in reg.centres]
+
+
+def plot_residuals(reg):
+    x_data = reg.x_data
+    y_data = reg.y_data
+    plt.figure("Residuals " + reg.name)
+    # create residual presentation
+    plt.plot(x=reg.y_data,y= reg.predicted_values, markersize=3)
+    
