@@ -1,11 +1,20 @@
+from datetime import datetime
 from importlib import import_module
+from itertools import product
+from pandas import DataFrame
+from sklearn import metrics
+from tqdm import tqdm
 from typing import Callable, Sequence
 
 from data.datasource import load_X_y
 
+aff_damping = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+aff_max_iter = [200, 400]
+aff_convergence_iter = [10, 20]
+
 CONFIG = {
-    "dbscan": [{"epsilon": 0.5, "min_points": 5}],
-    "affinity_propagation": [{"damping": 0.5, "max_iter": 200, "convergence_iter": 15}],
+    "affinity_propagation": [{"damping": x[0], "max_iter": x[1], "convergence_iter": x[2]}
+                             for x in product(aff_damping, aff_max_iter, aff_convergence_iter)],
 }
 
 
@@ -34,17 +43,21 @@ def main(path: str = "./data/SpotifyFeatures.csv", algorithms: Sequence[str] = N
     if algorithms is None:
         algorithms = CONFIG.keys()
 
-    X, y = load_X_y(path=path, sample_size=sample_size)
+    results = {'algorithm': [], 'parameters': [], 'ari_score': [], 'num_clusters': []}
+
+    X, y, _ = load_X_y(path=path, sample_size=sample_size)
     for alg_name in algorithms:
-        print("\n" + "-" * 50 + f"\n{alg_name}\n" + "-" * 50)
         param_dicts = CONFIG[alg_name]
         func = get_clustering_function(alg_name)
 
-        for param_dict in param_dicts:
+        for param_dict in tqdm(param_dicts, desc=f'Running configurations for {alg_name}'):
             center_indices, labels = func(X=X, **param_dict)
+            results['algorithm'].append(alg_name)
+            results['parameters'].append(param_dict)
+            results['ari_score'].append(metrics.adjusted_rand_score(labels_true=y[:, 0], labels_pred=labels))
+            results['num_clusters'].append(len(center_indices))
 
-            # TODO: Replace printing with evaluation;
-            #  Store results in dataframe with columns [sample_size, algorithm, parameters, score1, score2, ...]
-            print(f"- Parameters: {param_dict}")
-            print(f"- Number of clusters: {len(center_indices)}")
-            print(f"- Center Indices: \n{center_indices}\n")
+    DataFrame(results).to_csv(f'experiments_{datetime.now().strftime("%d%m_%H-%M")}.csv')
+
+if __name__ == '__main__':
+    main()
