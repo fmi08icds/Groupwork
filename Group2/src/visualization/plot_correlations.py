@@ -44,7 +44,7 @@ def plot_3d_visualization(df,x,y,z,output_file):
     ax.set_title('3D Scatter Plot with Diabetes')
 
     # Save the plot
-    plt.savefig(output_file)
+    plt.savefig(f"/Users/abdulnaser/Desktop/Groupwork/Group2/src/visualization/" + output_file)
 
     # Show the plot
     plt.show()
@@ -52,6 +52,6 @@ def plot_3d_visualization(df,x,y,z,output_file):
 
 
 
-plot_2d_visualization(df, 'age','bmi','age_vs_bmi.png')
-plot_2d_visualization(df, 'blood_glucose_level','bmi','blood_glucose_level_vs_bmi.png')
+#plot_2d_visualization(df, 'age','bmi','age_vs_bmi.png')
+#plot_2d_visualization(df, 'blood_glucose_level','bmi','blood_glucose_level_vs_bmi.png')
 plot_3d_visualization(df, 'age', 'bmi', 'blood_glucose_level','age_vs_bmi_vs_blood_glucose_level.png')
