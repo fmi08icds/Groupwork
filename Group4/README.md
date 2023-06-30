@@ -1,5 +1,18 @@
 # Group 4 - Clustering
 
+**Abstract:**
+
+TODO
+
+**Table of contents:**
+
+1. [Getting started](#getting-started)
+2. [Workflow](#workflow)
+3. [Project goal](#project-goal)
+4. [Results](#results)
+5. [Members](#members)
+
+
 ## Getting started
 
 ### Conda
@@ -43,7 +56,7 @@ pytest
 ```
 These tools are configured by the `pyproject.toml` file.
 
-## Project structure
+### Repository structure
 
 ``` plain
 ├── 📁 clustering         <-- Package that contains implementations of clustering algorithms
@@ -72,17 +85,6 @@ These tools are configured by the `pyproject.toml` file.
 └── 📃 README.md          <-- Project documentation
 ```
 
-## Project goals
-
-**Dataset:**
-
-- [Spotify Tracks DB](https://www.kaggle.com/datasets/zaheenhamidani/ultimate-spotify-tracks-db) from Kaggle
-- has 232,725 tracks from 26 different genres (~8,000 tracks per genre)
-- each sample has 18 attributes including names (e. g. track, artists, genre), confidence measures (e. g. acousticness, instrumentalness), perceptual measures (e. g. energy, loudness) and other descriptors (e. g. tempo, duration)
-
-**Goal:**
-
-Find clusters of tracks with similar audio features based on the available attributes. Our hypothesis is that songs that have the same genre should also be assigned to the same cluster by the algorithm. The accuracy will be evaluated by comparing the clustering labels with the ground truth of the genre attribute.
 
 ## Workflow
 
@@ -138,6 +140,29 @@ We should add more samples to the dataset that show cats with different colored 
 Issues are organized in a [Kanban board](https://github.com/orgs/fmi08icds/projects/4). The board consists of three columns that represent the statuses *Todo*, *Work in progress* and *Done*. The status can be changed by simply dragging the cards into another column.
 
 If you want to work on a task, look for unassigned issues in the *Todo* column. Read the description and acceptance criteria of the issue. If you feel like you are able to work on this task, assign it to yourself and change the status to *Work in progress*. In case the goal of the task is unclear, ask the creator of the issue for clarification. Once you have completed the task, congratulations, you can change the status to *Done* :+1:
+
+## Project goal
+
+**Dataset:**
+
+- [Spotify Tracks DB](https://www.kaggle.com/datasets/zaheenhamidani/ultimate-spotify-tracks-db) from Kaggle
+- has 232,725 tracks from 26 different genres (~8,000 tracks per genre)
+- each sample has 18 attributes including names (e. g. track, artists, genre), confidence measures (e. g. acousticness, instrumentalness), perceptual measures (e. g. energy, loudness) and other descriptors (e. g. tempo, duration)
+
+**Goal:**
+
+Find clusters of tracks with similar audio features based on the available attributes. Our hypothesis is that songs that have the same genre should also be assigned to the same cluster by the algorithm. The accuracy will be evaluated by comparing the clustering labels with the ground truth of the genre attribute.
+
+## Results
+
+We used the adjusted rand index (ARI) to evaluate our algorithms' performance on the dataset. Our experiments which can be reproduced by running the `main.py` script yield the following results:
+
+|      Score | Algorithm            | Parameters                                                                            |   # Clusters | Runtime    |
+|-----------:|:---------------------|:--------------------------------------------------------------------------------------|-------------:|:-----------|
+| 0.0991538  | :trophy: k-Means     | `n_clusters = 25`                                                                     |           25 | 131.2 ms   |
+| 0.0650288  | BIRCH                | `branching_factor = 50`<br>`threshold = 0.25`<br>`n_cluster = 25`<br>`predict = True` |           25 | 234.0 ms   |
+| 0.0475148  | Affinity Propagation | `damping = 0.7`<br>`convergence_iter = 20`<br>`max_iter = 200`                        |           88 | 14252.2 ms |
+| 0.00756683 | DBSCAN               | `epsilon = 0.3244`<br>`min_points = 20`                                               |            3 | 873.9 ms   |
 
 ## Members
 

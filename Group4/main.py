@@ -1,38 +1,51 @@
 from datetime import datetime
-from importlib import import_module
 from itertools import product
 from pandas import DataFrame
 from sklearn import metrics
+from sklearn.cluster import KMeans
 from tqdm import tqdm
 from typing import Callable, Sequence
 
 from data.datasource import load_X_y
+from clustering import dbscan, affinity_propagation, birch
 
-aff_damping = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-aff_max_iter = [200, 400]
-aff_convergence_iter = [10, 20]
+import numpy as np
+import sys
+import time
+
+np.random.seed(42)
+
+def birch_wrapper(X, **kwargs):
+    model = birch.Birch(**kwargs)
+    model.fit(X)
+    return None, model.labels
+
+def kmeans_wrapper(X, **kwargs):
+    model = KMeans(n_init="auto", **kwargs)
+    model.fit(X)
+    return None, model.labels_
 
 CONFIG = {
-    "affinity_propagation": [{"damping": x[0], "max_iter": x[1], "convergence_iter": x[2]}
-                             for x in product(aff_damping, aff_max_iter, aff_convergence_iter)],
+    "Affinity Propagation": {
+        "func": affinity_propagation.affinity_propagation,
+        "params": {"damping": 0.7, "convergence_iter": 20, "max_iter": 200}
+    },
+    "DBSCAN": {
+        "func": dbscan.dbscan,
+        "params": {"epsilon": 0.3244, "min_points": 20}
+    },
+    "BIRCH": {
+        "func": birch_wrapper,
+        "params": {"branching_factor": 50, "threshold": 0.25, "n_cluster": 25, "predict": True}
+    },
+    "k-Means": {
+        "func": kmeans_wrapper,
+        "params": {"n_clusters": 25}
+    }
 }
 
 
-def get_clustering_function(m_name: str = "dbscan", f_name: str = None) -> Callable:
-    """Import a clustering function by its name
-
-    Parameters:
-        m_name: Name of the clustering module
-        f_name: Name of the function in the module. If None, use m_name
-
-        Returns: The specified clustering function
-    """
-    if f_name is None:
-        f_name = m_name
-    return getattr(import_module(f"clustering.{m_name}"), f_name)
-
-
-def main(path: str = "./data/SpotifyFeatures.csv", algorithms: Sequence[str] = None, sample_size: int = 500):
+def main(path: str = "./data/SpotifyFeatures.csv", algorithms: Sequence[str] = None, sample_size: int = 100):
     """Run experiments on the different clustering algorithms using predefined parameter dictionaries
     Parameters:
         path (str): Path to the CSV file containing Spotify track data.
@@ -43,21 +56,35 @@ def main(path: str = "./data/SpotifyFeatures.csv", algorithms: Sequence[str] = N
     if algorithms is None:
         algorithms = CONFIG.keys()
 
-    results = {'algorithm': [], 'parameters': [], 'ari_score': [], 'num_clusters': []}
+    results = []
 
     X, y, _ = load_X_y(path=path, sample_size=sample_size)
+
+    # Run clustering algorithms with their best parameters
     for alg_name in algorithms:
-        param_dicts = CONFIG[alg_name]
-        func = get_clustering_function(alg_name)
+        params = CONFIG[alg_name]["params"]
+        func = CONFIG[alg_name]["func"]
 
-        for param_dict in tqdm(param_dicts, desc=f'Running configurations for {alg_name}'):
-            center_indices, labels = func(X=X, **param_dict)
-            results['algorithm'].append(alg_name)
-            results['parameters'].append(param_dict)
-            results['ari_score'].append(metrics.adjusted_rand_score(labels_true=y[:, 0], labels_pred=labels))
-            results['num_clusters'].append(len(center_indices))
+        # Measure runtime
+        start_time = time.time()
+        _, labels = func(X=X, **params)
+        duration = time.time() - start_time
 
-    DataFrame(results).to_csv(f'experiments_{datetime.now().strftime("%d%m_%H-%M")}.csv')
+        # Compute evaluation results
+        results.append({
+            "Score": metrics.adjusted_rand_score(labels_true=y[:, 0], labels_pred=labels),
+            "Algorithm": alg_name,
+            "Parameters": "<br>".join(f"`{k} = {v}`" for k, v in params.items()),
+            "# Clusters": np.max(labels) + 1,
+            "Runtime": f"{duration * 1000:.1f} ms"
+        })
 
-if __name__ == '__main__':
+    df = DataFrame(results)
+    # Rank by score
+    df.sort_values("Score", inplace=True, ascending=False)
+    # Print dataframe as a markdown table to stdout
+    df.to_markdown(sys.stdout, index=False)
+    print()
+
+if __name__ == "__main__":
     main()

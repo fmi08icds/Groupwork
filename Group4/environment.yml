@@ -11,4 +11,6 @@ dependencies:
   - scikit-learn
   - black
   - pytest
+  - tqdm
+  - tabulate
 
