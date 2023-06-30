@@ -1,0 +1,13 @@
+# OS X
+.DS_Store
+
+# Conda env directory
+env/
+
+# Cache directories
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Dataset
+data/*.csv
