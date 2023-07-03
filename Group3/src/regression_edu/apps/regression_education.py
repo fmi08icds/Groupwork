@@ -28,9 +28,7 @@ SIDEBAR_WIDTH = 25
 default = "2 * x + 2"
 # dummy data
 
-data = simple_uniform(
-    lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x="uniform", distr_eps=None
-)
+data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform', distr_eps='normal')
 reg_lwr = LocallyWeightedRegression(
     data, transposed=True, name=NAME_LWR, sections=SECTIONS
 )
@@ -49,7 +47,7 @@ data_generation_setting = dbc.Card(
                     placeholder=default,
                 ),
                 html.H4("Mode"),
-                dcc.Dropdown(id='x_dist',
+                dcc.Dropdown(id='x_distr',
                              # 
                              options=['Normal',
                                       'Uniform','Exponential'],
@@ -286,7 +284,8 @@ app.layout = dbc.Container(
         Input("sections", "value"),
         Input("tau", "value"),
         Input("sigma", "value"),
-        Input("error_distr", "value")
+        Input('x_distr', 'value'),
+        Input('error_distr', 'value'),
     ],
 )
 def update_regression(
@@ -297,8 +296,9 @@ def update_regression(
     regression_equation_input,
     sections,
     tau,
-    sigma,
-    error_distr
+    sigma, 
+    x_distr, 
+    error_distr, 
 ):
     # set default for data generation function
     global reg_lwr
@@ -314,6 +314,7 @@ def update_regression(
             data_generation_samples,
             data_range,
             noise_factor,
+            distr_x=x_distr,
             distr_eps=error_distr,
         )
         # update the data
