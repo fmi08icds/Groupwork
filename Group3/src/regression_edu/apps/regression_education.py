@@ -16,7 +16,7 @@ SECTIONS = None
 NAME_LWR = "LWR"
 NAME_LIN = "Linear Regression"
 SIGMA = 1
-TAU = 0.5
+TAU =.5
 
 
 app = dash.Dash(
@@ -26,6 +26,22 @@ app = dash.Dash(
 
 SIDEBAR_WIDTH = 25
 
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": f"{SIDEBAR_WIDTH}rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
+
+CONTENT_STYLE = {
+    "margin-left": f"{SIDEBAR_WIDTH+2}rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
 default = "2 * x + 2"
 # dummy data
 
@@ -33,9 +49,7 @@ data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform',
 reg_lwr = LocallyWeightedRegression(
     data, transposed=True, name=NAME_LWR, sections=SECTIONS
 )
-reg_lin = LocallyWeightedRegression(
-    data, transposed=True, name=NAME_LIN, tau=TAU, sigma=SIGMA
-)
+reg_lin = LocallyWeightedRegression(data, transposed=True, name=NAME_LIN, tau=TAU, sigma=SIGMA)
 
 data_generation_setting = dbc.Card(
     [
@@ -56,52 +70,54 @@ data_generation_setting = dbc.Card(
                                     ),
                 html.H4("# Samples"),
                 dcc.Slider(
-                    id="data_generation_samples",
-                    className="slider",  ## for css reasons
-                    min=0,
-                    max=500,
-                    step=1,
-                    updatemode="drag",
-                    value=10,
-                    marks=None,
-                    tooltip={"placement": "bottom", "always_visible": True},
-                ),
+                        id="data_generation_samples",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=500,
+                        step=1,
+                        updatemode="drag",
+                        value=10,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
+                html.H4("Range"),
+                dcc.RangeSlider(id="data_range",
+                                className="slider",  ## for css reasons
+                                min=-25, max=25, step=1, value=[-3, 3],
+                                allowCross=False,
+                                dots=False,
+                                updatemode="mouseup",
+                                marks=None,
+                                tooltip={"placement": "bottom", "always_visible": True},
+                                ),
                 html.H4("Noise Level"),
                 dcc.Slider(
-                    id="noise_factor",
-                    className="slider",  ## for css reasons
-                    min=0,
-                    max=1,
-                    step=0.01,
-                    updatemode="drag",
-                    value=0.5,
-                    marks=None,
-                    tooltip={"placement": "bottom", "always_visible": True},
-                ),
-                html.H4("Data Range"),
-                dcc.RangeSlider(
-                    id="data_range",
-                    className="slider",  ## for css reasons
-                    min=-25,
-                    max=25,
-                    step=1,
-                    value=[-3, 3],
-                    allowCross=False,
-                    dots=False,
-                    updatemode="mouseup",
-                    marks=None,
-                    tooltip={"placement": "bottom", "always_visible": True},
-                ),
+                        id="noise_factor",
+                        className="slider",  ## for css reasons
+                        min=0,
+                        max=1,
+                        step=0.01,
+                        updatemode="drag",
+                        value=0.5,
+                        marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
+                    ),
                 html.H4("Error Distribution"),
-                dcc.Dropdown(
-                    id="error_distr",
-                    clearable=False,
-                    options=[
-                        "Gaussian",
-                        "Uniform",
-                    ],
-                    value="Gaussian",
-                ),
+                dcc.Dropdown(id='error_distr',
+                             # 
+                             options=['Normal',
+                                      'Uniform','Exponential','Poisson','Heteroscedastic >'
+                                      'Heteroscedastic <'],
+                             value="Normal"
+                                    ),
+                ### dynamically load distribution parameters ... going to be a little bit tricky
+                html.Hr(),
+                html.Div(
+                    [
+                        dbc.Button("Regenerate Data",
+                                    n_clicks=0,
+                                    color='primary')
+                    ],className='d-grid gap-2')
             ]
         ),
     ]
@@ -130,11 +146,7 @@ model_input = dbc.Card(
 )
 
 
-user_input = dbc.Row(
-    [
-        dbc.Col(model_input),
-    ]
-)
+user_input = dbc.Row([dbc.Col(model_input), ])
 
 equation_and_metrics = dbc.Card(
     [
@@ -160,7 +172,7 @@ equation_and_metrics = dbc.Card(
                                 html.H5("Mean Squared Error"),
                                 html.P(id="mean_squared_error_lwr"),
                             ]
-                        ),
+                        )
                     ]
                 ),
             ]
@@ -228,27 +240,11 @@ sidebar = html.Div(
     [
         html.H2("Config", className="display-4"),
         html.Hr(),
-        html.P(
-            "Play around with the parameters and find out what changes",
-            className="lead",
-        ),
-        dbc.Row(
-            [
-                dbc.Col(
-                    dcc.RadioItems(
-                        className="SwitchContext",
-                        id="switch_context",
-                        options=[
-                            "Linear Regression",
-                            "Lasso Regression",
-                            "Local Regression",
-                        ],
-                    )
-                )
-            ]
-        ),
-        dbc.Row(dbc.Col(data_generation_setting)),
+            html.P("Play around with the parameters and find out what changes", className="lead"),
+            tabs,
+            dbc.Row(dbc.Col(data_generation_setting))
     ],
+    style=SIDEBAR_STYLE
 )
 
 
@@ -256,17 +252,13 @@ app.layout = dbc.Container(
     [
         html.H1("Group 3: Regression", className="text-center my-3"),
         html.H2("LWR and Linear Regression", className="text-center my-3"),
-        dbc.Row(
-            [
-                dbc.Col(sidebar,width=3),
-                dbc.Col(
-                    [user_input, output],
-                ),
-            ]
-        ),
+        html.Div([dbc.Col(sidebar),
+                 dbc.Col([user_input, output],)]
+                 ),
     ]
 )
-
+#        dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
+#       dcc.Store(id="cur_data"),
 
 @app.callback(
     [
@@ -323,12 +315,7 @@ def update_regression(
         tau = None if tau is None or tau.strip() == "" else float(tau)
         sigma = None if sigma is None or sigma.strip() == "" else float(sigma)
         reg_lwr = LocallyWeightedRegression(
-            [x, y],
-            transposed=True,
-            name=NAME_LWR,
-            sections=sections,
-            tau=tau,
-            sigma=sigma,
+            [x, y], transposed=True, name=NAME_LWR, sections=sections, tau=tau, sigma=sigma
         )
         reg_lin = LinearRegression([x, y], transposed=True, name=NAME_LIN)
     except Exception:  # I will burn in hell for this
@@ -336,12 +323,12 @@ def update_regression(
         print("invalid function")
 
     # calculate the sum of squares
-    sum_of_squares_lin = "{:,.2f}".format(reg_lin.get_sum_of_squares())
-    sum_of_squares_lwr = "{:,.2f}".format(reg_lwr.get_sum_of_squares())
+    sum_of_squares_lin = '{:,.2f}'.format(reg_lin.get_sum_of_squares())
+    sum_of_squares_lwr = '{:,.2f}'.format(reg_lwr.get_sum_of_squares())
 
     # calculate the mean squared error
-    mean_squared_error_lin = "{:,.2f}".format(reg_lin.get_MSE())
-    mean_squared_error_lwr = "{:,.2f}".format(reg_lwr.get_MSE())
+    mean_squared_error_lin = '{:,.2f}'.format(reg_lin.get_MSE())
+    mean_squared_error_lwr = '{:,.2f}'.format(reg_lwr.get_MSE())
 
     # calculate the root mean squared error
 
