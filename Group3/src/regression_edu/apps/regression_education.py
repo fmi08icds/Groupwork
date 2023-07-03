@@ -41,7 +41,7 @@ reg_lin = LocallyWeightedRegression(
 
 data_generation_setting = dbc.Card(
     [
-        dbc.CardHeader(html.H3("Data generation setting")),
+        dbc.CardHeader(html.H3("Data Setup")),
         dbc.CardBody(
             [
                 html.H4("Function"),
@@ -49,7 +49,14 @@ data_generation_setting = dbc.Card(
                     id="data_generation_function",
                     placeholder=default,
                 ),
-                html.H4("Number of samples"),
+                html.H4("Mode"),
+                dcc.Dropdown(id='x_dist',
+                             # 
+                             options=['Normal',
+                                      'Uniform','Exponential'],
+                             value="Normal"
+                                    ),
+                html.H4("# Samples"),
                 dcc.Slider(
                     id="data_generation_samples",
                     className="slider",  ## for css reasons
@@ -113,29 +120,13 @@ regression_equation = dbc.Card(
                     placeholder=default,
                 ),
             ]
-        ),
-        dbc.CardHeader(html.H3("Locally weighted regression")),
-        dbc.CardBody(
-            [
-                html.H4("Sections"),
-                dcc.Input(
-                    id="sections",
-                    placeholder=None,
-                ),
-                html.H4("Tau"),
-                dcc.Input(
-                    id="tau",
-                    placeholder=TAU,
-                ),
-                html.H4("Sigma"),
-                dcc.Input(
-                    id="sigma",
-                    placeholder=SIGMA,
-                ),
-            ]
-        ),
+        )
     ]
 )
+
+
+
+
 model_input = dbc.Card(
     [dbc.CardHeader(html.H3("Model input")), dbc.CardBody([regression_equation])]
 )
@@ -194,6 +185,47 @@ output = dbc.Row(
     ]
 )
 
+tab_lr_content = dbc.Card(
+    dbc.CardBody([
+        html.P('This is tab 1')
+    ]), class_name='mt-3'
+)
+
+tab_lasso_content = dbc.Card(
+    dbc.CardBody([
+        html.P('This is tab 2')
+    ]), class_name='mt-3'
+)
+
+tab_lwr_content = dbc.Card([
+    dbc.CardHeader(html.H3("Parameters")),
+    dbc.CardBody([
+                html.H4("Sections"),
+                dcc.Input(
+                    id="sections",
+                    placeholder=None,
+                ),
+                html.H4("Tau"),
+                dcc.Input(
+                    id="tau",
+                    placeholder=TAU,
+                ),
+                html.H4("Sigma"),
+                dcc.Input(
+                    id="sigma",
+                    placeholder=SIGMA,
+                ),
+            ]
+        )],
+        class_name='mt-3')
+
+tabs= dbc.Tabs([
+    dbc.Tab(tab_lr_content, label= "Linear Regression"),
+    dbc.Tab(tab_lasso_content, label= "Lasso Regression"),
+    dbc.Tab(tab_lwr_content, label= "Locally weighted Regression")
+])
+
+
 sidebar = html.Div(
     [
         html.H2("Config", className="display-4"),
@@ -220,6 +252,7 @@ sidebar = html.Div(
         dbc.Row(dbc.Col(data_generation_setting)),
     ],
 )
+
 
 app.layout = dbc.Container(
     [
