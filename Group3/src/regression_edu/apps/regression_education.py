@@ -26,22 +26,6 @@ app = dash.Dash(
 
 SIDEBAR_WIDTH = 25
 
-SIDEBAR_STYLE = {
-    "position": "fixed",
-    "top": 0,
-    "left": 0,
-    "bottom": 0,
-    "width": f"{SIDEBAR_WIDTH}rem",
-    "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
-}
-
-CONTENT_STYLE = {
-    "margin-left": f"{SIDEBAR_WIDTH+2}rem",
-    "margin-right": "2rem",
-    "padding": "2rem 1rem",
-}
-
 default = "2 * x + 2"
 # dummy data
 
@@ -106,6 +90,7 @@ data_generation_setting = dbc.Card(
                 html.H4("Error Distribution"),
                 dcc.Dropdown(
                     id="error_distr",
+                    clearable=False,
                     options=[
                         "Gaussian",
                         "Uniform",
@@ -234,16 +219,15 @@ sidebar = html.Div(
         ),
         dbc.Row(dbc.Col(data_generation_setting)),
     ],
-    style=SIDEBAR_STYLE,
 )
 
 app.layout = dbc.Container(
     [
         html.H1("Group 3: Regression", className="text-center my-3"),
         html.H2("LWR and Linear Regression", className="text-center my-3"),
-        html.Div(
+        dbc.Row(
             [
-                dbc.Col(sidebar),
+                dbc.Col(sidebar,width=3),
                 dbc.Col(
                     [user_input, output],
                 ),
@@ -251,8 +235,6 @@ app.layout = dbc.Container(
         ),
     ]
 )
-#        dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
-#       dcc.Store(id="cur_data"),
 
 
 @app.callback(
@@ -272,6 +254,7 @@ app.layout = dbc.Container(
         Input("sections", "value"),
         Input("tau", "value"),
         Input("sigma", "value"),
+        Input("error_distr", "value")
     ],
 )
 def update_regression(
@@ -283,6 +266,7 @@ def update_regression(
     sections,
     tau,
     sigma,
+    error_distr
 ):
     # set default for data generation function
     global reg_lwr
@@ -298,8 +282,7 @@ def update_regression(
             data_generation_samples,
             data_range,
             noise_factor,
-            distr_x="uniform",
-            distr_eps=None,
+            distr_eps=error_distr,
         )
         # update the data
         sections = None if sections is None or sections.strip() == "" else int(sections)
