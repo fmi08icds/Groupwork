@@ -1,7 +1,7 @@
 # dependencies: imports + openpyxl (for converting to excel)
 import urllib.request
-import zipfile
 import os
+import pandas as pd
 
 url_base = "./realworld/"
 
@@ -37,7 +37,6 @@ filename = url_base + "prostate.data"
 urllib.request.urlretrieve(url, filename)
 
 ## convert .data to .xlsx
-import pandas as pd
 df = pd.read_csv(url_base + "prostate.data", sep='\t')
 df.to_excel(url_base + "prostate.xlsx", index=False)
 os.remove(filename)
