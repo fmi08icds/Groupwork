@@ -9,22 +9,45 @@ from sklearn import metrics
 from regression_edu.models.linear_regression import LinearRegression
 from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
 import localreg
+from enum import Enum
 
 
 # initialise dash app
 app = Dash(__name__)
 
 #  read datasets
-df1 = pd.read_excel(io="../data/realworld/prostate.xlsx")
+df1 = pd.read_excel(io="../data/realworld/prostate.xlsx", usecols=lambda x: 'Unnamed: 0' not in x)
 df2 = pd.read_csv(
     filepath_or_buffer="../data/realworld/winequality-red.csv", delimiter=";"
 )
 df3 = pd.read_excel(io="../data/realworld/real_estate.xlsx")
 
+class Dataset(Enum):
+    PROSTATE = "Prostate"
+    WINE_QUALITY = "Wine Quality"
+    REAL_ESTATE = "RealEstate"
+
+dataset_config = {
+    Dataset.PROSTATE: {
+        "dependent_variable": df1[df1.columns[-2]],
+        "training_data": df1.drop(df1.columns[-2], axis=1)
+    },
+    Dataset.WINE_QUALITY: {
+        "dependent_variable": df2[df2.columns[-1]],
+        "training_data": df2.drop(df2.columns[-1], axis=1)
+
+    },
+    Dataset.REAL_ESTATE: {
+        "dependent_variable": df3[df3.columns[-1]],
+        "training_data": df3.drop(df3.columns[-1],axis=1)
+
+    }
+}
+
 
 # create dropdown element for selecting the dataset
 dataset_dropdown = dcc.Dropdown(
-    ["Prostate", "Wine Quality", "Real Estate"],
+    [dataset.value for dataset in Dataset],
     clearable=False,
     placeholder="Select a dataset",
     id="dataset-dropdown",
@@ -42,15 +65,14 @@ indep_dropdown_1 = dcc.Dropdown(
 
 
 # create a callback relationship linking database-dropdown to indep-dropdown
-@app.callback(Output("indep-dropdown-1", "options"), Input("dataset-dropdown", "value"))
+@app.callback(
+    Output("indep-dropdown-1", "options"),
+    Output("indep-dropdown-1", "value"),
+    Input("dataset-dropdown", "value"),
+)
 def update_indep_dropdown_1(input_database):
-    if input_database == "Prostate":
-        options = df1.columns
-    elif input_database == "Wine Quality":
-        options = df2.columns
-    elif input_database == "Real Estate":
-        options = df3.columns
-    return options
+    independent_variables = dataset_config[Dataset(input_database)]['training_data'].columns
+    return independent_variables, independent_variables[0]
 
 
 # choose which x and y will be taken, depending on dataset.
@@ -84,18 +106,12 @@ regression_type = dcc.Dropdown(
 
 # Callback function here to select database and independent variables
 def update_df(selected_dataset, selected_indep_1, regression_type):
-    if selected_dataset == "Prostate":
-        df = df1  # choose the right dataframe
-        dep = df1.columns[-2]  # choose the right dependent variable
-    elif selected_dataset == "Wine Quality":
-        df = df2
-        dep = df2.columns[-1]
-    elif selected_dataset == "Real Estate":
-        df = df3
-        dep = df3.columns[-1]
+    dataset = dataset_config[Dataset(selected_dataset)]
+    df = dataset['training_data']
+    dep = dataset['dependent_variable']
 
     X = df[selected_indep_1].values
-    y = df[dep].values
+    y = dep.values
 
     fig = go.Figure()
     # linear regression fits
