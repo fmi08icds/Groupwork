@@ -10,25 +10,35 @@ class LocallyWeightedRegression:
     y_data = None
     sigma = None
 
-    def __init__(self, data, transposed=False, name="", tau=0.5, sections=None, sigma=1):
+    def __init__(
+        self,
+        data,
+        transposed=False,
+        name="",
+        tau=0.5,
+        sections=None,
+        sigma=1,
+    ):
         """
         Calculates the ordinary linear regression for the given data.
+
         :param data: data is a Nx(d+1) matrix with the last column being Y and X being
             Nxd. data[0] accesses therefor the first sample.
         :param transposed: If the data is transposed and data[0] returns a vector
             of the first dimension of the samples.
         :param name: Optional parameter to pass a name.
-        :param tau: Parameter to control how much the points in proximity should by weighted. A higher value means
-            that more data points are considered and weighted higher.
+        :param tau: Parameter to control how much the points in proximity should by
+            weighted. A higher value means that more data points are considered and
+            weighted higher.
         :param sections: Controls how many local regressions should be controlled.
             The default is per data point a regression.
-        :param sigma: Controls what the variance of the gaussian function should be that is used to
-            smooth the functions.
+        :param sigma: Controls what the variance of the gaussian function should be that
+            is used to smooth the functions.
         """
         self.name = name
         self.sigma = sigma if sigma is not None else 1
         if tau is None:
-            tau = .5
+            tau = 0.5
         data = np.asarray(data)
         if transposed:
             data = np.transpose(data)
@@ -84,8 +94,11 @@ class LocallyWeightedRegression:
 
     def f(self, x):
         """
-        Calculates the prediction for a given datapoint. It doesn't support the input of multiple datapoints.
-        :param x: A numeric value or vector consisting of one value for each factor of the data point
+        Calculates the prediction for a given datapoint. It doesn't support the input of
+        multiple datapoints.
+
+        :param x: A numeric value or vector consisting of one value for each factor of
+            the data point
         :return: returns a float as the prediction for the given data point.
         """
         t = x

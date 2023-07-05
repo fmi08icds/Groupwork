@@ -10,9 +10,6 @@ class LinearRegression:
     y_data = None
     name = ""
 
-    # def __init__(self, data, transposed=False, name=""):
-    #     self.calc(data, transposed, name)
-
     def __init__(self, data, transposed=False, name=""):
         """
         Calculates the ordinary linear regression for the given data.
@@ -40,8 +37,11 @@ class LinearRegression:
 
     def f(self, x):
         """
-        Calculates the prediction for a given datapoint. It doesn't support the input of multiple datapoints.
-        :param x: A numeric value or vector consisting of one value for each factor of the data point
+        Calculates the prediction for a given datapoint. It doesn't support the input of
+        multiple datapoints.
+
+        :param x: A numeric value or vector consisting of one value for each factor of
+            the data point
         :return: returns a float as the prediction for the given data point.
         """
         if type(x) is not np.array(()):
