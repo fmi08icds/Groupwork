@@ -13,8 +13,8 @@ Our groups task is the implementation of one or more regression models using exi
 
 ## Structure 🏗️
 - `notes` contains general notes and brain dumps of our meetings or of the members of the group
-- `presentation` contains slide decks for presenting our progress in class
-- `regression-comparison` contains our project's source code, please take a look to the [`Readme`](regression-comparison/README.md) in this directory
+- `presentations` contains slide decks for presenting our progress in class
+- `regression-edu` contains our project's source code, please take a look to the [`Readme`](regression-edu/README.md) in this directory
 
 
 ## Members 👯

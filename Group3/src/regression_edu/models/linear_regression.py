@@ -10,9 +10,6 @@ class LinearRegression:
     y_data = None
     name = ""
 
-    # def __init__(self, data, transposed=False, name=""):
-    #     self.calc(data, transposed, name)
-
     def __init__(self, data, transposed=False, name=""):
         """
         Calculates the ordinary linear regression for the given data.
@@ -20,6 +17,7 @@ class LinearRegression:
             X being Nxd. data[0] accesses therefor the first sample.
         :param transposed: If the data is transposed and data[0] returns a
             vector of the first dimension of the samples.
+        :param name: Optional parameter to pass a name.
         """
         data = np.asarray(data)
         if transposed:
@@ -38,6 +36,14 @@ class LinearRegression:
         self.name = ""
 
     def f(self, x):
+        """
+        Calculates the prediction for a given datapoint. It doesn't support the input of
+        multiple datapoints.
+
+        :param x: A numeric value or vector consisting of one value for each factor of
+            the data point
+        :return: returns a float as the prediction for the given data point.
+        """
         if type(x) is not np.array(()):
             if type(x) in [int, float]:
                 x = [x]
