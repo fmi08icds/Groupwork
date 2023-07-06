@@ -1,5 +1,6 @@
 """This module implements the LassoRegression class"""
 import numpy as np
+
 from regression_edu.models.base_regression import BaseRegression
 
 

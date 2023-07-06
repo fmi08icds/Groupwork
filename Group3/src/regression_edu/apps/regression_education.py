@@ -1,15 +1,18 @@
 """This is our interactive app to learn about """
 # pylint: disable=W0603, W0718, W0123
+import traceback
+
 import dash
-from dash import dcc
-from dash import html
-from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
-import dash_bootstrap_components as dbc
+from dash import dcc, html
+from dash.dependencies import Input, Output
+
 from regression_edu.data.simple_uniform_noise import simple_uniform
-from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
 from regression_edu.models.linear_regression import LinearRegression
+from regression_edu.models.locally_weighted_regression import \
+    LocallyWeightedRegression
 
 SECTIONS = None
 NAME_LWR = "LWR"
