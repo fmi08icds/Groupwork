@@ -44,7 +44,7 @@ CONTENT_STYLE = {
 default = "2 * x + 2"
 # dummy data
 
-data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform', distr_eps='normal', a=-3,b=3)
+data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform', distr_eps='normal')
 reg_lwr = LocallyWeightedRegression(
     data, transposed=True, name=NAME_LWR, sections=SECTIONS
 )
@@ -179,18 +179,6 @@ equation_and_metrics = dbc.Card(
     ],
     className="my-3",
 )
-
-coefficients_content = dbc.Card(
-    [
-        dbc.CardHeader(html.H3("Model Coefficients")),
-        dbc.Row([
-        html.P(id="coefficients_lin"),
-        html.P(id="coefficients_lwr"),
-        ])
-    ]
-)
-
-
 output = dbc.Row(
     [
         dbc.Col(
@@ -264,16 +252,11 @@ app.layout = dbc.Container(
         html.H1("Group 3: Regression", className="text-center my-3"),
         html.H2("LWR and Linear Regression", className="text-center my-3"),
         html.Div([dbc.Col(sidebar),
-                 dbc.Col([user_input,
-                          output,
-                          coefficients_content],)]
+                 dbc.Col([user_input, output],)]
                  ),
-        
     ]
 )
-
-# from prototype .. one way to make presistent data that only changes when specific inputs change not just any.
-#       dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
+#        dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
 #       dcc.Store(id="cur_data"),
 
 @app.callback(
@@ -283,8 +266,6 @@ app.layout = dbc.Container(
         Output("sum_of_squares_lwr", "children"),
         Output("mean_squared_error_lin", "children"),
         Output("mean_squared_error_lwr", "children"),
-        Output("coefficients_lin",'children'),
-        Output("coefficients_lwr",'children')
     ],
     [
         Input("data_generation_function", "value"),
@@ -348,9 +329,6 @@ def update_regression(
     mean_squared_error_lin = '{:,.2f}'.format(reg_lin.get_MSE())
     mean_squared_error_lwr = '{:,.2f}'.format(reg_lwr.get_MSE())
 
-    # get coefficients for the models.
-    coefficients_lin = 'Linear Regression Coefficients: b0 = ' + '{:,.2f}'.format(reg_lin.coeffs[0]) + ', b1 = '+'{:,.2f}'.format(reg_lin.coeffs[1])
-    coefficients_lwr = 'LWR: wie kann man die analysieren, ist das sinnvoll die zu zeigen? ja nein  @phil?'
     # calculate the root mean squared error
 
     # create a figure with the data and regression line
@@ -404,8 +382,6 @@ def update_regression(
         sum_of_squares_lwr,
         mean_squared_error_lin,
         mean_squared_error_lwr,
-        coefficients_lin,
-        coefficients_lwr
     )
 
 
