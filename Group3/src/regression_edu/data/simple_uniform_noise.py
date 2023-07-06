@@ -1,6 +1,6 @@
 import numpy as np
 
-def simple_uniform(f, N, range, rho, distr_x:str="uniform", distr_eps="normal", *args):
+def simple_uniform(f, N, range, rho, distr_x:str="uniform", distr_eps:str="normal", **kwargs):
     """
     Simple method. Given an input function, generate a dataset with a uniform fuzz.
 
@@ -47,6 +47,9 @@ def simple_uniform(f, N, range, rho, distr_x:str="uniform", distr_eps="normal", 
         stretch = np.random.default_rng().choice([-1,1],N) # vector of -1's and 1's to fuzz in both directions 
         fuzz = err * stretch 
     else:
+        ## figure out direction of heteroscedaszity (< or >, meaning small in the beginning and large errors in the end, or the other way around)
+        ## work out something like noise times ~0% to ~100% and add onto sorted list of x accordingly. 
+        ## (in other words: errorterms are small in the beginning and get bigger the bigger x gets or the other way around.)
         fuzz = None
     
     

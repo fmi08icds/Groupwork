@@ -44,7 +44,7 @@ CONTENT_STYLE = {
 default = "2 * x + 2"
 # dummy data
 
-data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform', distr_eps='normal')
+data = simple_uniform(lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x='uniform', distr_eps='normal', a=-3,b=3)
 reg_lwr = LocallyWeightedRegression(
     data, transposed=True, name=NAME_LWR, sections=SECTIONS
 )
@@ -271,7 +271,9 @@ app.layout = dbc.Container(
         
     ]
 )
-#        dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
+
+# from prototype .. one way to make presistent data that only changes when specific inputs change not just any.
+#       dcc.Store(id="initial_data", data=generate_init_data(init_val.sigma_X1, init_val.sigma_X2, init_val.corr, init_val.mean_X1, init_val.mean_X2, MAX_SAMPLE_SIZE)),
 #       dcc.Store(id="cur_data"),
 
 @app.callback(
