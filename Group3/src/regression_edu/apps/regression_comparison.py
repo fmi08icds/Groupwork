@@ -1,6 +1,6 @@
+"""This is our interactive app to learn about """
 import numpy as np
-from dash import Dash, dcc, html, Input, Output, callback, ctx
-import dash_bootstrap_components as dbc
+from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -16,32 +16,39 @@ from enum import Enum
 app = Dash(__name__)
 
 #  read datasets
-df1 = pd.read_excel(io="../data/realworld/prostate.xlsx", usecols=lambda x: 'Unnamed: 0' not in x)
+df1 = pd.read_excel(
+    io="../data/realworld/prostate.xlsx", usecols=lambda x: "Unnamed: 0" not in x
+)
 df2 = pd.read_csv(
     filepath_or_buffer="../data/realworld/winequality-red.csv", delimiter=";"
 )
 df3 = pd.read_excel(io="../data/realworld/real_estate.xlsx")
 
+
 class Dataset(Enum):
+    """
+    This enum models the different options of datasets that are available for the
+    comparison.
+    """
+
     PROSTATE = "Prostate"
     WINE_QUALITY = "Wine Quality"
     REAL_ESTATE = "RealEstate"
 
+
 dataset_config = {
     Dataset.PROSTATE: {
         "dependent_variable": df1[df1.columns[-2]],
-        "training_data": df1.drop(df1.columns[-2], axis=1)
+        "training_data": df1.drop(df1.columns[-2], axis=1),
     },
     Dataset.WINE_QUALITY: {
         "dependent_variable": df2[df2.columns[-1]],
-        "training_data": df2.drop(df2.columns[-1], axis=1)
-
+        "training_data": df2.drop(df2.columns[-1], axis=1),
     },
     Dataset.REAL_ESTATE: {
         "dependent_variable": df3[df3.columns[-1]],
-        "training_data": df3.drop(df3.columns[-1],axis=1)
-
-    }
+        "training_data": df3.drop(df3.columns[-1], axis=1),
+    },
 }
 
 
@@ -70,8 +77,17 @@ indep_dropdown_1 = dcc.Dropdown(
     Output("indep-dropdown-1", "value"),
     Input("dataset-dropdown", "value"),
 )
-def update_indep_dropdown_1(input_database):
-    independent_variables = dataset_config[Dataset(input_database)]['training_data'].columns
+def update_indep_dropdown_1(input_dataset):
+    """Updates the dropdown of the independent variables, when the dataset is
+    switched
+
+    :param input_dataset: The chosen dataset
+    :return: The updates values for the dropdown of the independent variables
+    """
+
+    independent_variables = dataset_config[Dataset(input_dataset)][
+        "training_data"
+    ].columns
     return independent_variables, independent_variables[0]
 
 
@@ -103,27 +119,34 @@ regression_type = dcc.Dropdown(
         component_id="regression-dropdown", component_property="value"
     ),  # input 3 -> regression_type
 )
-
-# Callback function here to select database and independent variables
 def update_df(selected_dataset, selected_indep_1, regression_type):
-    dataset = dataset_config[Dataset(selected_dataset)]
-    df = dataset['training_data']
-    dep = dataset['dependent_variable']
+    """
+    Updates the regression models when the dataset, the choice of independent variable
+    or when the type of regression model changes
 
-    X = df[selected_indep_1].values
+    :param selected_dataset: The selcted dataset
+    :param selected_indep_1: The selected independent variable
+    :param regression_type: The selected regression type
+    :return: The updated plot
+    """
+
+    dataset = dataset_config[Dataset(selected_dataset)]
+    training_data = dataset["training_data"]
+    dep = dataset["dependent_variable"]
+
+    X = training_data[selected_indep_1].values
     y = dep.values
 
-    fig = go.Figure()
+    current_figure = go.Figure()
     # linear regression fits
     if regression_type == "Linear Regression":
         # calculate regression
         lin_reg = LinearRegression([X, y], transposed=True, name="Linear Regression")
-        y_pred = lin_reg.predicted_values
         x_range = np.linspace(min(X), max(X), 100)
-        y_range = [lin_reg.f(xi) for xi in x_range]
+        y_range = [lin_reg.predict(xi) for xi in x_range]
 
         # add to plot
-        fig = go.Figure(
+        current_figure = go.Figure(
             [
                 go.Scatter(x=X, y=y, mode="markers", name="Data"),  # dataplot
                 go.Scatter(
@@ -134,7 +157,7 @@ def update_df(selected_dataset, selected_indep_1, regression_type):
                 ),
             ]
         )
-        fig.update_layout(title="Linear Regression")
+        current_figure.update_layout(title="Linear Regression")
 
     if regression_type == "Locally Weighted Regression":
         # calcaulate regression
@@ -142,13 +165,12 @@ def update_df(selected_dataset, selected_indep_1, regression_type):
         lwr = LocallyWeightedRegression(
             [X, y], transposed=True, name="Local Weighted Regression", tau=2
         )
-        y_pred = lwr.predicted_values
         x_range = np.linspace(min(X), max(X), 50)
-        y_range = [lwr.f(xi) for xi in x_range]
+        y_range = [lwr.predict(xi) for xi in x_range]
         y_prime_range = localreg.localreg(X, y, x_range)
 
         # add to plot
-        fig = go.Figure(
+        current_figure = go.Figure(
             [
                 go.Scatter(x=X, y=y, mode="markers", name="Data"),
                 go.Scatter(
@@ -163,9 +185,9 @@ def update_df(selected_dataset, selected_indep_1, regression_type):
                 ),
             ]
         )
-        fig.update_layout(title="Local Weighted Regression ")
+        current_figure.update_layout(title="Local Weighted Regression ")
 
-    return fig
+    return current_figure
 
 
 mse_lin_reg = html.Div(
@@ -274,6 +296,14 @@ mae_lclreg = html.Div(
     Input("dataset-dropdown", "value"),
 )
 def update_linear_metrics(selected_dataset):
+    """
+    Updates the performance metrics of the locally weighted regression when the
+    dataset changes
+
+    :param selected_dataset: The selected dataset
+    :return: The performance values of our implementation and the one of sklearn
+    """
+
     if selected_dataset == "Prostate":
         df = df1  # choose the right dataframe
         X = df.iloc[:, 1:-2].to_numpy()
@@ -292,8 +322,8 @@ def update_linear_metrics(selected_dataset):
 
     # get MSE and MAE
     reg = LinearRegression(data, transposed=False, name="Linear Regression")
-    mse_linreg = reg.get_MSE()
-    mae_linreg = reg.get_MAE()
+    mse_linreg = reg.get_mse()
+    mae_linreg = reg.get_mae()
 
     skreg = linear_model.LinearRegression()
     skreg.fit(X, y)
@@ -311,6 +341,15 @@ def update_linear_metrics(selected_dataset):
     Input("dataset-dropdown", "value"),
 )
 def update_lwr_metrics(selected_dataset):
+    """
+    Updates the performance metrics of the locally weighted regression when the
+    dataset changes
+
+
+    :param selected_dataset: The selected dataset
+    :return: The performance values of our implementation and the one of local reg
+    """
+
     if selected_dataset == "Prostate":
         df = df1  # choose the right dataframe
         X = df.iloc[:, 1:-2].to_numpy()
@@ -331,8 +370,8 @@ def update_lwr_metrics(selected_dataset):
     reg = LocallyWeightedRegression(
         data, transposed=False, name="Locally Weighted Regression", tau=30
     )
-    mse_localwr = reg.get_MSE()
-    mae_localwr = reg.get_MAE()
+    mse_localwr = reg.get_mse()
+    mae_localwr = reg.get_mae()
 
     y_pred = localreg.localreg(X, y)
     mse_localreg = metrics.mean_squared_error(y, y_pred)
