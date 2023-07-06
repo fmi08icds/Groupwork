@@ -2,6 +2,7 @@
 import math
 
 import numpy as np
+
 from regression_edu.models.base_regression import BaseRegression
 
 

@@ -1,16 +1,17 @@
 """This is our interactive app to learn about """
-import numpy as np
-from dash import Dash, dcc, html, Input, Output
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
-from sklearn import linear_model
-from sklearn import metrics
-from regression_edu.models.linear_regression import LinearRegression
-from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
-import localreg
 from enum import Enum
 
+import localreg
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from dash import Dash, Input, Output, dcc, html
+from sklearn import linear_model, metrics
+
+from regression_edu.models.linear_regression import LinearRegression
+from regression_edu.models.locally_weighted_regression import \
+    LocallyWeightedRegression
 
 # initialise dash app
 app = Dash(__name__)

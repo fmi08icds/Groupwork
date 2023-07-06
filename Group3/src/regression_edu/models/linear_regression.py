@@ -1,5 +1,6 @@
 """This module contains the LinearRegression model"""
 import numpy as np
+
 from regression_edu.models.base_regression import BaseRegression
 
 
