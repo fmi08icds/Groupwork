@@ -1,27 +1,33 @@
-# dependencies: imports + openpyxl (for converting to excel)
-import urllib.request
 import os
+import urllib.request
+
 import pandas as pd
 
-base_directory = "./realworld/"
+BASE_DIR = "./realworld/"
 
-## 1. Real Estate Valuation Data Set
-url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00477/Real%20estate%20valuation%20data%20set.xlsx"
-filename = base_directory + "real_estate.xlsx"
-urllib.request.urlretrieve(url, filename)
+if not os.path.exists(BASE_DIR):
+    os.makedirs(BASE_DIR)
 
+datasets = [
+    {
+        "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00477/Real%20estate%20valuation%20data%20set.xlsx",
+        "file_path": BASE_DIR + "real_estate.xlsx",
+    },
+    {
+        "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv",
+        "file_path": BASE_DIR + "winequality-red.csv",
+    },
+    {
+        "url": "https://hastie.su.domains/ElemStatLearn/datasets/prostate.data",
+        "file_path": BASE_DIR + "prostate.csv",
+    },
+]
 
-## 2. Wine Quality Data Set
-url = "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
-filename = base_directory + "winequality-red.csv"
-urllib.request.urlretrieve(url, filename)
+for dataset in datasets:
+    urllib.request.urlretrieve(dataset["url"], dataset["file_path"])
 
-## 3. prostate
-url = "https://hastie.su.domains/ElemStatLearn/datasets/prostate.data"
-filename = base_directory + "prostate.data"
-urllib.request.urlretrieve(url, filename)
-
-## convert .data to .xlsx
-df = pd.read_csv(base_directory + "prostate.data", sep="\t")
-df.to_excel(base_directory + "prostate.xlsx", index=False)
-os.remove(filename)
+## convert .csv to .xlsx
+prostate_file_path = datasets[-1]["file_path"]
+df = pd.read_csv(prostate_file_path, sep="\t")
+df.to_excel(BASE_DIR + "prostate.xlsx", index=False)
+os.remove(prostate_file_path)
