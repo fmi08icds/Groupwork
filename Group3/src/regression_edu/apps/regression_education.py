@@ -4,6 +4,8 @@ import inspect
 import traceback
 
 import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
@@ -200,8 +202,6 @@ def conditional_content_error(condition,sample_size):
     This function dynamically loads the conditional content for the error distribution
     from the docstring of the numpy random module.
     '''
-    print(condition)
-    print(condition=='Heteroscedastic')
 
     if condition != 'Heteroscedastic':
         collect_x = getattr(np.random,str.lower(condition))
@@ -419,6 +419,8 @@ app.layout = dbc.Container(
         Input("sigma", "value"),
         Input("x_distr", "value"),
         Input("error_distr", "value"),
+        Input('sampling_x', 'children'),
+        Input('sampling_error', 'children'),
     ],
 )
 def update_regression(
@@ -432,6 +434,8 @@ def update_regression(
     sigma,
     x_distr,
     error_distr,
+    sampling_x,
+    sampling_error,
 ):
     """_summary_
 
@@ -455,8 +459,23 @@ def update_regression(
     x = y = None
     try:
         function = eval(f"lambda x:{data_generation_function}")
-        x, y = generate_x(lambda x: 2 * x + 2,size=10,loc=0,scale=1)
-        x, y = x,add_noise(y, distr_eps='normal',scale=1, size=10, loc=0)
+
+
+        ids, values = [],[]
+        for prop in sampling_x:
+            ids.append(prop['props']['children'][2]['props']['id'])
+            values.append(prop['props']['children'][2]['props']['value'])
+
+        err_ids, err_values = [],[]
+        for prop in sampling_error:
+            err_ids.append(prop['props']['children'][2]['props']['id'])
+            err_values.append(prop['props']['children'][2]['props']['value'])
+        
+        
+        x, y = generate_x(lambda x: 2 * x + 2, distr_x=x_distr, **dict(zip(ids, values)))
+        x = (x - data_range[0])/(data_range[1] - data_range[0])
+
+        x, y = x,add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))*noise_factor
         # update the data
         sections = None if sections is None or sections.strip() == "" else int(sections)
         tau = None if tau is None or tau.strip() == "" else float(tau)
