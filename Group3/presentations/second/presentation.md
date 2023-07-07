@@ -16,8 +16,25 @@ paginate: true
 3. Regression Models
 4. Applications
 ---
+# Introduction
+## A Brief Recap
 
-# 1. Introduction
+- **Initial Plan:**
+  - Focus: Linear Regression
+  - Task: Implement five regression models
+  - Validation: Compare with established implementations
+
+- **Received Feedback:**
+  - Focus on 1 or 2 models
+  - Add educational value to the project
+---
+# Introduction
+## Our New Approach
+- Chose OLS and LWR as focus models
+- Retained comparative study
+- Developed two web applications
+  - One for education
+  - One for model visualisation
 ---
 # 2. Applied software engineering principals
 ---
