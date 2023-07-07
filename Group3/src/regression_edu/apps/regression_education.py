@@ -1,3 +1,4 @@
+import inspect
 """This is our interactive app to learn about """
 # pylint: disable=W0603, W0718, W0123
 import traceback
@@ -6,13 +7,14 @@ import dash
 import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
-from dash import dcc, html
-from dash.dependencies import Input, Output
-
-from regression_edu.data.simple_uniform_noise import simple_uniform
+import traceback
+import dash_bootstrap_components as dbc
+import dash_daq as daq
+from regression_edu.data.simple_noise import generate_x, add_noise
+from regression_edu.models.locally_weighted_regression import LocallyWeightedRegression
 from regression_edu.models.linear_regression import LinearRegression
-from regression_edu.models.locally_weighted_regression import \
-    LocallyWeightedRegression
+import math
+import re
 
 SECTIONS = None
 NAME_LWR = "LWR"
@@ -21,10 +23,22 @@ SIGMA = 1
 TAU = 0.5
 
 
-app = dash.Dash(
-    __name__, external_stylesheets=[dbc.themes.BOOTSTRAP]
-)  # Bootstrap theme
+# external CSS stylesheets
+external_stylesheets = [
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
+    {
+        'href':"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css",
+        'rel': 'stylesheet',
+        'integrity': 'sha512-+7QzvzJ7yJvz3z9zJz8+JZx6v5zgjv9J5L5z3zJ9xKvZy5zJz7ZzZ6zvJZJ5zjLJ7L8yQzvJz1wzJzvzJzvzJw==',
+        'crossorigin': 'anonymous',
+        'referrerpolicy:': 'no-referrer',
+    }
+]
 
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[dbc.icons.FONT_AWESOME,dbc.themes.BOOTSTRAP],
+    )  # Bootstrap theme
 
 SIDEBAR_WIDTH = 25
 
@@ -47,15 +61,13 @@ CONTENT_STYLE = {
 default = "2 * x + 2"
 # dummy data
 
-data = simple_uniform(
-    lambda x: 2 * x + 2, 100, (-3, 3), 0.5, distr_x="uniform", distr_eps="normal"
-)
+x,y = generate_x(lambda x: 2 * x + 2,size=10,loc=0,scale=1)
+x,y = x, add_noise(y, distr_eps='normal',scale=1, size=10, loc=0)
+
 reg_lwr = LocallyWeightedRegression(
-    data, transposed=True, name=NAME_LWR, sections=SECTIONS
+    [x,y], transposed=True, name=NAME_LWR, sections=SECTIONS
 )
-reg_lin = LocallyWeightedRegression(
-    data, transposed=True, name=NAME_LIN, tau=TAU, sigma=SIGMA
-)
+reg_lin = LocallyWeightedRegression([x,y], transposed=True, name=NAME_LIN, tau=TAU, sigma=SIGMA)
 
 data_generation_setting = dbc.Card(
     [
@@ -67,13 +79,14 @@ data_generation_setting = dbc.Card(
                     id="data_generation_function",
                     placeholder=default,
                 ),
-                html.H4("Mode"),
-                dcc.Dropdown(
-                    id="x_distr",
-                    #
-                    options=["Normal", "Uniform", "Exponential"],
-                    value="Normal",
-                ),
+                html.H4("Sampling Mode for x"),
+                dcc.Dropdown(id='x_distr',
+                             # 
+                             options=['Normal',
+                                      'Uniform','Exponential'],
+                             value="Normal"
+                                    ),
+                dbc.CardBody(id="sampling_x"),
                 html.H4("# Samples"),
                 dcc.Slider(
                     id="data_generation_samples",
@@ -113,18 +126,13 @@ data_generation_setting = dbc.Card(
                     tooltip={"placement": "bottom", "always_visible": True},
                 ),
                 html.H4("Error Distribution"),
-                dcc.Dropdown(
-                    id="error_distr",
-                    #
-                    options=[
-                        "Normal",
-                        "Uniform",
-                        "Exponential",
-                        "Poisson",
-                        "Heteroscedastic > Heteroscedastic <",
-                    ],
-                    value="Normal",
-                ),
+                dcc.Dropdown(id='error_distr',
+                             # 
+                             options=['Normal',
+                                      'Uniform','Exponential','Poisson','Heteroscedastic'],
+                             value="Normal"
+                                    ),
+                dbc.CardBody(id="sampling_error"),
                 ### dynamically load distribution parameters ... going to be a little bit tricky
                 html.Hr(),
                 html.Div(
@@ -135,6 +143,116 @@ data_generation_setting = dbc.Card(
         ),
     ]
 )
+
+
+@app.callback(
+        [Output('sampling_x', 'children')],
+        [Input('x_distr', 'value'),
+         Input('data_generation_samples', 'value')]
+)
+def conditional_content_x(condition,sample_size):
+    '''
+    This function dynamically loads the conditional content for the error distribution
+    from the docstring of the numpy random module.
+    '''
+    collect_x = getattr(np.random,str.lower(condition))
+    doc_str = inspect.getdoc(collect_x)
+    keystr=re.search(r'\((.*?)\)', string=doc_str)
+    # Extract the parameter names and values
+    matches = re.findall(r'(\w+)\s*=\s*([^,]+)', string=keystr.group(1))
+    # Extract the parameter names
+    parameter_names = parameter_names = [match[0] for match in matches]
+    parameter_values = [eval(match[1]) for match in matches]
+
+    content = []
+    # dash-component factory:
+    for param,val in zip(parameter_names,parameter_values):
+        # create a dcc.Input for each parameter
+        rpattern = rf'{param}\s*: [^.]*.'
+        tooltip_text = re.search(pattern=rpattern,string=doc_str)[0]
+        rpattern = r'\n([^.\n]*)'
+        tooltip_text = re.search(pattern=rpattern,string=tooltip_text)[0]
+        if param == 'size':
+            content.append(dbc.InputGroup([dbc.InputGroupText(param,id="tooltip-target"+param,
+                                                               style={"cursor": "pointer"}),
+                                            dbc.Tooltip(tooltip_text, target="tooltip-target"+param),
+                                            dcc.Input(id=param, placeholder=param, type='number',required=False,value=sample_size,disabled=True)])
+                            )
+        else:
+            content.append(dbc.InputGroup([dbc.InputGroupText(param,id="tooltip-target"+param,
+                                                               style={"cursor": "pointer"}),
+                                            dbc.Tooltip(tooltip_text, target="tooltip-target"+param),
+                                            dcc.Input(id=param, placeholder=param, type='number',required=False,value=val)])
+            )
+
+
+
+    return [content]
+
+
+@app.callback(
+        [Output('sampling_error', 'children')],
+        [Input('error_distr', 'value'),
+         Input('data_generation_samples', 'value')]
+)
+def conditional_content_error(condition,sample_size):
+    '''
+    This function dynamically loads the conditional content for the error distribution
+    from the docstring of the numpy random module.
+    '''
+    print(condition)
+    print(condition=='Heteroscedastic')
+
+    if condition != 'Heteroscedastic':
+        collect_x = getattr(np.random,str.lower(condition))
+        doc_str = inspect.getdoc(collect_x)
+        keystr=re.search(r'\((.*?)\)', string=doc_str)
+        # Extract the parameter names and values
+        matches = re.findall(r'(\w+)\s*=\s*([^,]+)', string=keystr.group(1))
+        # Extract the parameter names
+        parameter_names = parameter_names = [match[0] for match in matches]
+        parameter_values = [eval(match[1]) for match in matches]
+
+        content = []
+        # dash-component factory:
+        for param,val in zip(parameter_names,parameter_values):
+            # create a dcc.Input for each parameter
+            rpattern = rf'{param}\s*: [^.]*.'
+            tooltip_text = re.search(pattern=rpattern,string=doc_str)[0]
+            rpattern = r'\n([^.\n]*)'
+            tooltip_text = re.search(pattern=rpattern,string=tooltip_text)[0]
+            if param == 'size':
+                content.append(dbc.InputGroup([dbc.InputGroupText(param,id="tooltip-target"+param,
+                                                                style={"cursor": "pointer"}),
+                                                dbc.Tooltip(tooltip_text, target="tooltip-target"+param),
+                                                dcc.Input(id=param, placeholder=param, type='number',required=False,value=sample_size,disabled=True)])
+                                )
+            else:
+                content.append(dbc.InputGroup([dbc.InputGroupText(param,id="tooltip-target"+param,
+                                                                style={"cursor": "pointer"}),
+                                                dbc.Tooltip(tooltip_text, target="tooltip-target"+param),
+                                                dcc.Input(id=param, placeholder=param, type='number',required=False,value=val)])
+                )
+
+
+
+        return [content]
+    else:
+        # Radiobutton for direction of heteroscedasticity:
+        content = []
+
+        # Slider for intensity
+        content.append(dcc.Slider(id='heteroscedasticity',
+                                            min=-1,
+                                            max=1,
+                                            step=0.01,
+                                            updatemode="drag",
+                                            value=0,
+                                            marks=None,
+                                        ))                                         
+
+        return [content]
+
 
 regression_equation = dbc.Card(
     [
@@ -337,14 +455,8 @@ def update_regression(
     x = y = None
     try:
         function = eval(f"lambda x:{data_generation_function}")
-        x, y = simple_uniform(
-            function,
-            data_generation_samples,
-            data_range,
-            noise_factor,
-            distr_x=x_distr,
-            distr_eps=error_distr,
-        )
+        x, y = generate_x(lambda x: 2 * x + 2,size=10,loc=0,scale=1)
+        x, y = x,add_noise(y, distr_eps='normal',scale=1, size=10, loc=0)
         # update the data
         sections = None if sections is None or sections.strip() == "" else int(sections)
         tau = None if tau is None or tau.strip() == "" else float(tau)
