@@ -24,13 +24,12 @@ def plot_2d(reg, show_predictands=False, show_residuals=True):
     if show_predictands:
         plt.plot(x_data, predicted, "bx", markersize=3)
     if show_residuals:
-        for i in enumerate(predicted):
+        for i in range(len(predicted)):
             plt.plot((x_data[i], x_data[i]), (y_data[i], predicted[i]), "r--")
     # division by 5 was arbitrarily chosen
     margin = (max(x_data) - min(x_data)) / 5
     linspace = np.linspace(min(x_data) - margin, max(x_data) + margin)
-    plt.plot(linspace, [reg.f(xi) for xi in linspace], "k-")
-    # plt.show()
+    plt.plot(linspace, [reg.predict(xi) for xi in linspace], "k-")
 
 
 def plot_3d(reg):
@@ -61,7 +60,7 @@ def plot_3d(reg):
     x_lin, y_lin = np.meshgrid(linspace_x1, linspace_x2)
     z = np.asarray(
         [
-            [reg.f([x_lin[i, j], y_lin[i, j]]) for j in range(x_lin.shape[1])]
+            [reg.predict([x_lin[i, j], y_lin[i, j]]) for j in range(x_lin.shape[1])]
             for i in range(x_lin.shape[0])
         ]
     )
@@ -72,17 +71,15 @@ def plot_3d(reg):
 
 def plot_gaussians(reg, x):
     """
-    Plots the gaussians
-
+    Plots the gaussians of a locally weighted regression. A gaussian shows how much a local regression gets weighted at a point x
+    It displays for each section (Local regression) a gaussian distribution.
     :param reg: The regression model
-    :param x: Ths point to evaluate
+    :param x: A linspace for which the values get calcluated.
     """
     plt.figure("Gaussians " + reg.name)
-    summed_gauss = sum(
-        reg.gauss(reg.centres[index], x, reg.sigma) for index in range(len(reg.coeffs))
-    )
-    for ci in reg.centres:
-        plt.plot(x, [reg.gauss(ci, xi, reg.sigma) / summed_gauss for xi in x])
+    summed_gauss = np.asarray(
+        sum([reg.gauss(reg.centres[index], x, reg.sigma) for index in range(len(reg.coeffs))]))
+    [plt.plot(x, [reg.gauss(ci, xi, reg.sigma) for xi in x] / summed_gauss) for ci in reg.centres]
 
 
 def plot_residuals(reg):
