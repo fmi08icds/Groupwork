@@ -334,14 +334,29 @@ user_input = dbc.Row(
     ]
 )
 
-output = dbc.Row(
+output = dbc.Col(
     [
-        dbc.Col(
-            dcc.Loading(
+        dbc.Row(
+            [
+                dcc.Loading(
                 id="loading",
                 type="circle",
                 children=dcc.Graph(id="graph"),
-            )
+            ),
+            html.H4(id="Residuals"),
+            dcc.Dropdown(id='residual_radio',
+                        options=[
+       {'label': 'Linear Regression', 'value': 0},
+       {'label': 'Manuell Regression', 'value': 1},
+       {'label': 'Locally Weighted Regression', 'value': 2}],
+       multi=False,
+       value=[0],
+       ),
+            dcc.Loading(
+                id="loading-2",
+                type="circle",
+                children=dcc.Graph(id="eps_graph"),
+            )]
         )
     ]
 )
@@ -745,6 +760,31 @@ def build_custom_line(coeffs, figure:go.Figure, data:list, beta0, beta1):
             return [fig,sum_of_squares_lwr,mean_sq_error_man_lin]
         else:
             raise PreventUpdate
+
+
+@app.callback([Output('eps_graph','figure')],
+                [Input('cur_data', 'data'),
+                 Input('residual_radio', 'value'),
+                 Input('pred_table', 'data')],
+                prevent_initial_call=True)
+def build_eps_graph(data,col_id,predictions):
+    if ctx.triggered_id == "cur_data" or ctx.triggered_id == "residual_radio":
+        data = pd.DataFrame(data)
+        pred = pd.DataFrame(predictions)
+        print(pd.DataFrame(predictions))
+        fig = px.scatter(x=data[1], y=data[1]-pred.iloc[:,col_id])
+        fig.update_layout(
+            title="Residuals vs. Predicted Values",
+            xaxis_title="y",
+            yaxis_title="Residuals",
+            template="plotly_white",
+            height=500)
+
+        return [fig]
+    else:
+        raise PreventUpdate
+                 
+
 
 
 # Run the app
