@@ -349,8 +349,8 @@ output = dbc.Col(
        {'label': 'Linear Regression', 'value': 0},
        {'label': 'Manuell Regression', 'value': 1},
        {'label': 'Locally Weighted Regression', 'value': 2}],
-       multi=False,
-       value=[0],
+       multi=True,
+       value=[0,2],
        ),
             dcc.Loading(
                 id="loading-2",
@@ -381,7 +381,9 @@ tab_lwr_content = dbc.Card(
                 ),
                 dcc.Input(
                     id="sections",
-                    placeholder=None,
+                    placeholder=10,
+                    debounce=False,
+                    type='number'
                 ),
                 html.H4(
                     [
@@ -396,6 +398,8 @@ tab_lwr_content = dbc.Card(
                 dcc.Input(
                     id="tau",
                     placeholder=TAU,
+                    debounce=False,
+                    type='number'
                 ),
                 html.H4(
                     [
@@ -409,6 +413,8 @@ tab_lwr_content = dbc.Card(
                 dcc.Input(
                     id="sigma",
                     placeholder=SIGMA,
+                    debounce=False,
+                    type='number'
                 ),
             ]
         ),
@@ -492,9 +498,9 @@ app.layout = dbc.Container(
 
     ],
     [
-        State("sections", "value"),
-        State("tau", "value"),
-        State("sigma", "value"),
+        Input("sections", "value"),
+        Input("tau", "value"),
+        Input("sigma", "value"),
         Input('cur_data','data')
     ],prevent_initial_call=True
 )
@@ -521,10 +527,6 @@ def update_regression(
     global reg_lin
     
     x,y = np.transpose(cur_data)
-    # update the data
-    sections = None if sections is None or sections.strip() == "" else int(sections)
-    tau = None if tau is None or tau.strip() == "" else float(tau)
-    sigma = None if sigma is None or sigma.strip() == "" else float(sigma)
 
     reg_lwr = LocallyWeightedRegression(
         [x, y],
@@ -609,7 +611,7 @@ def update_regression(
 
 
 @app.callback(
-   [Output("cur_data", "data",allow_duplicate=True)],
+   [Output("cur_data", "data")],
    [Input("initial_data", "data"),
     Input("data_generation_function", "value"),
     Input("x_distr", "value"),
@@ -633,10 +635,6 @@ def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_
         for prop in sampling_error:
             err_ids.append(prop['props']['children'][2]['props']['id'])
             err_values.append(prop['props']['children'][2]['props']['value'])
-        
-        print(f'hetero: {err_ids}')
-        print(f'hetero_vals: {err_values}')
-
 
         x, y = generate_x(f, distr_x=x_distr, **dict(zip(ids, values)))
         y = add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))
@@ -648,16 +646,6 @@ def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_
     return [current_data]
 
  
-@app.callback(
-   [Output("cur_data", "data",allow_duplicate=True)],
-   [State("initial_data", "data"), 
-    Input("data_generation_samples", "value"),
-    ],prevent_initial_call=True)
-def modify_data(current_data, N):
-    if ctx.triggered_id == "data_generation_samples":
-        return [current_data[:N]]
-    else:
-        raise PreventUpdate
 
 @app.callback(
     [Output('pred_data', 'data')],
@@ -677,20 +665,17 @@ def update_predicted_y_in_data(data,beta0,beta1):
 
 @app.callback([Output('pred_data_lwr', 'data')],
               [Input('cur_data', 'data'),
-               State("sections", "value"),
-               State("tau", "value"),
-               State("sigma", "value"),])
+               Input("sections", "value"),
+               Input("tau", "value"),
+               Input("sigma", "value")],
+               prevent_initial_call=True)
 def update_predicted_lwr_y_in_data(data,sections,tau,sigma):
-    if ctx.triggered_id == "cur_data":
+    if ctx.triggered_id == 'cur_data'\
+    or ctx.triggered_id == 'sections'\
+    or ctx.triggered_id == 'tau'\
+    or ctx.triggered_id == 'sigma':
         x,y = np.transpose(data)
-        reg_lwr = LocallyWeightedRegression(
-        [x, y],
-        transposed=True,
-        name=NAME_LWR,
-        sections=sections,
-        tau=tau,
-        sigma=sigma,
-        )
+        reg_lwr = LocallyWeightedRegression([x,y],transposed=True,name=NAME_LWR,sections=sections,tau=tau,sigma=sigma)
         pred_lwr = [reg_lwr.predict(xi) for xi in x]
         return [pred_lwr]
     else:
@@ -698,23 +683,28 @@ def update_predicted_lwr_y_in_data(data,sections,tau,sigma):
 
 
 @app.callback([Output('table', 'data')],
-              [Input('cur_data', 'data')])
-def update_table(data):
+              [Input('data_generation_samples', 'value'),
+               Input('cur_data', 'data')],
+               )
+def update_table(N,data):
     out = pd.DataFrame(data, columns=['x','y'])
     out = round(out, 3)
-    return [out.to_dict('records')]
-
+    return [out.iloc[:N,:].to_dict('records')]
+    
 @app.callback([Output('pred_table', 'data')],
               [Input('pred_data', 'data'),
-               Input('pred_data_lwr', 'data')],
-               prevent_initial_call=True)
-def update_pred_table(pred, pred_lwr):
-    if ctx.triggered_id == "pred_data" or ctx.triggered_id == "pred_data_lwr":
+               Input('pred_data_lwr', 'data'),
+               Input('data_generation_samples', 'value')],
+               prevent_initial_call=False)
+def update_pred_table(pred, pred_lwr,N):
+    if ctx.triggered_id == 'pred_data'\
+    or ctx.triggered_id == 'pred_data_lwr'\
+    or ctx.triggered_id == 'data_generation_samples':
         col1, col2 = np.transpose(pred)
         col3 = np.transpose(pred_lwr)
         out = pd.DataFrame(data=np.transpose([col1,col2,col3]), columns=['y_LinReg','y_manReg', 'y_LWReg'])
         out = round(out, 3)
-        return [out.to_dict('records')]
+        return [out.iloc[:N,:].to_dict('records')]
     else:
         raise PreventUpdate
 
@@ -763,23 +753,28 @@ def build_custom_line(coeffs, figure:go.Figure, data:list, beta0, beta1):
 
 
 @app.callback([Output('eps_graph','figure')],
-                [Input('cur_data', 'data'),
+                [State('cur_data', 'data'),
                  Input('residual_radio', 'value'),
                  Input('pred_table', 'data')],
                 prevent_initial_call=True)
 def build_eps_graph(data,col_id,predictions):
-    if ctx.triggered_id == "cur_data" or ctx.triggered_id == "residual_radio":
+    if ctx.triggered_id == "pred_table" or ctx.triggered_id == "residual_radio":
+        print(f'col_id:{col_id}')
         data = pd.DataFrame(data)
         pred = pd.DataFrame(predictions)
-        print(pd.DataFrame(predictions))
-        fig = px.scatter(x=data[1], y=data[1]-pred.iloc[:,col_id])
+        fig = go.Figure()
+        for id in col_id:
+            fig.add_trace(go.Scatter(name=pred.columns[id],
+                x=data[1], y=data[1]-pred.iloc[:,id],
+                mode='markers'))
+        
         fig.update_layout(
             title="Residuals vs. Predicted Values",
             xaxis_title="y",
             yaxis_title="Residuals",
             template="plotly_white",
             height=500)
-
+        print(fig)
         return [fig]
     else:
         raise PreventUpdate
