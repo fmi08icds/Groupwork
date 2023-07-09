@@ -44,7 +44,6 @@ class LocallyWeightedRegression(BaseRegression):
 
         # removes y-column and adds column of ones for the bias (w0)
         x_data = np.asarray([np.insert(sample, 0, 1) for sample in self.x_data])
-
         # raise Exception
         def w(i):
             return [
@@ -54,12 +53,12 @@ class LocallyWeightedRegression(BaseRegression):
 
         if sections is None and len(data) >= 100:
             sections = 100
-
         if sections is None or sections <= 0:
             weight_matrix = np.zeros((len(x_data), len(x_data), len(x_data)))
             for i in range(len(weight_matrix)):
                 weight_matrix[i] = np.diag(w(i))
             self.centres = x_data[:, 1]
+            
         else:
             x_sorted = x_data[x_data[:, 1].argsort()]
             weight_matrix = np.zeros((sections, len(x_data), len(x_data)))
@@ -84,7 +83,7 @@ class LocallyWeightedRegression(BaseRegression):
 
         self.coefficients = [get_coefficient(i) for i in range(len(weight_matrix))]
         self.predicted_values = np.asarray([self.predict(xi) for xi in x_data[:, 1:]])
-
+    
     def gauss(self, centre, x, sigma):
         """
         Calculates the corresponding value of a given x using a gaussian distribution
