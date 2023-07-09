@@ -31,21 +31,15 @@ def add_noise(y, distr_eps:str="normal", **kwargs):
 
     if distr_eps != 'Heteroscedastic':
         collect_err = getattr(np.random,str.lower(distr_eps))
-        err = collect_err(**kwargs)
-        stretch = np.random.default_rng().choice([-1,1],len(err)) # vector of -1's and 1's to fuzz in both directions 
-        fuzz = err * stretch 
+        fuzz = collect_err(**kwargs)
     else:
         # depending on the value between -1 and 1, return the noise with a quadratic magnitude
         # this is to simulate heteroscedastic noise
-
-        noise = np.random.default_rng().normal(-1,1,len(y))
-        heteroscedacity = kwargs['heteroscedacity']
-        # sort y values
-        # scale y values from 0 to 1
-        y_sorted = (y - np.min(y))/(np.max(y) - np.min(y))
-        y_sorted = np.sort(y_sorted)
-        # noise
-        fuzz = noise * (y_sorted**2)*heteroscedacity
+        size = kwargs['size']
+        sd_deviation = np.random.uniform(0, 4, size=size) + (np.array(y) / size)
+        reversed_ = True if kwargs['heteroscedacity'] < 0 else False
+        y_heteroskedastic = np.array(y) + np.random.normal(loc=0, scale = np.abs(kwargs['heteroscedacity'] * (1 +  np.array(sorted(y, reverse=reversed_)))), size=size)
+        fuzz = y_heteroskedastic
     y = y + fuzz 
 
     return y
