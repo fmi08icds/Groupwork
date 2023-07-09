@@ -313,17 +313,42 @@ tab_lwr_content = dbc.Card(
         dbc.CardHeader(html.H3("Parameters")),
         dbc.CardBody(
             [
-                html.H4("Sections"),
+                html.H4(
+                    [
+                        html.Span("Sections", id="sections_header")
+                    ]
+                ),
+                dbc.Tooltip(
+                    "The sections variable controls the number of local regressions that should be created. The default is that there is a section for each datapoint."
+                    , target="sections_header"
+                ),
                 dcc.Input(
                     id="sections",
                     placeholder=None,
                 ),
-                html.H4("Tau"),
+                html.H4(
+                    [
+                        html.Span("Tau", id="tau_header")
+                    ]
+                ),
+                dbc.Tooltip(
+                    "The tau value is responsible for how much the surrounding data points get considered when calculating x."
+                    " The higher the value the higher the weights of sections."
+                    , target="tau_header"
+                ),
                 dcc.Input(
                     id="tau",
                     placeholder=TAU,
                 ),
-                html.H4("Sigma"),
+                html.H4(
+                    [
+                        html.Span("Sigma", id="sigma_header")
+                    ]
+                ),
+                dbc.Tooltip(
+                    "Sigma describes the variance of the gaussian distribution and by default it is 1. The larger the value the smoother is the function."
+                    , target="sigma_header"
+                ),
                 dcc.Input(
                     id="sigma",
                     placeholder=SIGMA,
@@ -338,7 +363,23 @@ tabs = dbc.Tabs(
     [
         dbc.Tab(tab_lr_content, label="Linear Regression"),
         dbc.Tab(tab_lasso_content, label="Lasso Regression"),
-        dbc.Tab(tab_lwr_content, label="Locally weighted Regression"),
+        dbc.Tab(tab_lwr_content, label="Locally weighted Regression", id="LWR"),
+        dbc.Tooltip(
+            """
+                Hyperparameters:\n
+                 \t- sections, tau, sigma\n
+                Functionality:\n
+                 \t- The area gets devided in sections. By default, the number of sections equals the number of samples.\n
+                 \t- For each section, a linearly weighted regression gets composed. This is a linear regression in which each datapoint is weighted according to its importance.\n
+                 \t- The weight function for a section is w(i) = e^(-||centre - x_i||_2^2 / (2*tau^2).\n
+                 \t- the centre is determined by sorting the sectioned data along the first factor and taking the median.\n 
+                 \t- The independent local regressions get combined to one continuous regression by applying the normalised gaussian function as a smoothening function.\n
+                 \t- The gaussian function is gauss(centre, x) = e^(-(centre-x)^2/(2*sigma^2)\n
+                 \t- In order to prevent that values further away from the clusters going to zero, the values gets normalised by having the weights of the sum of gaussian functions sum up 1.\n
+                 \t- Therefore, when predicting the value x, it is calculated by iterating through the local regressions and weighting them through gauss(centre, x)/sum(gaussian functions at x)\n
+                 """
+            , target="LWR"
+        ),
     ]
 )
 
@@ -432,6 +473,8 @@ def update_regression(
 
     x = y = None
     try:
+        print(type(data_generation_function))
+        print(data_generation_function)
         function = eval(f"lambda x:{data_generation_function}")
 
 
@@ -447,6 +490,7 @@ def update_regression(
         
         
         x, y = generate_x(lambda x: 2 * x + 2, distr_x=x_distr, **dict(zip(ids, values)))
+        x, y = generate_x(function, distr_x=x_distr, **dict(zip(ids, values)))
         x, y = x,add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))
 
         # update the data
