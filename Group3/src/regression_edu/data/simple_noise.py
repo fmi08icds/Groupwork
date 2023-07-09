@@ -9,10 +9,12 @@ def generate_x(f,distr_x:str="normal", **kwargs):
     Returns:
         x (np array): array of x-values
     """
+    
     collect_x = getattr(np.random,str.lower(distr_x))
     x = collect_x(**kwargs)
     # compute function values
-    return x,f(x)
+    y = f(x) # call the lambda function with the input x to evaluate the function
+    return x,y
 
 def add_noise(y, distr_eps:str="normal", **kwargs):
     """
@@ -44,7 +46,6 @@ def add_noise(y, distr_eps:str="normal", **kwargs):
         y_sorted = np.sort(y_sorted)
         # noise
         fuzz = noise * (y_sorted**2)*heteroscedacity
-
     y = y + fuzz 
 
     return y
