@@ -61,6 +61,15 @@ SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
 }
 
+TOP_BAR_STYLE = {
+  #'position': 'sticky',
+  "top": '0px',
+  'right': '20px',
+  "width": '100%',
+  "overflow": 'hidden',
+#  'border': '3px solid #73AD21'
+}
+
 CONTENT_STYLE = {
     "margin-left": f"{SIDEBAR_WIDTH+2}rem",
     "margin-right": "2rem",
@@ -262,15 +271,7 @@ regression_equation = dbc.Card(
                                     marks=None,
                                     tooltip={"placement": "right", "always_visible": True},
                                     )]
-                        ),
-                        dbc.Row(
-                            [
-                                html.H4("Manual-Regression"),
-                                html.H5("Sum of Squares"),
-                                html.P(id="sum_of_squares_man_lin"),
-                                html.H5("Mean Squared Error"),
-                                html.P(id="mean_sq_error_man_lin"),
-                            ])]
+                        ),]
                 )])
                     ]
 )
@@ -316,7 +317,14 @@ equation_and_metrics = dbc.Card(
                                 html.P(id="sum_of_squares_lwr"),
                                 html.H5("Mean Squared Error"),
                                 html.P(id="mean_squared_error_lwr"),
-                            ]
+                        dbc.Row(
+                            [
+                                html.H4("Manual-Regression"),
+                                html.H5("Sum of Squares"),
+                                html.P(id="sum_of_squares_man_lin"),
+                                html.H5("Mean Squared Error"),
+                                html.P(id="mean_sq_error_man_lin"),
+                            ])]
                         ),
                     ]
                 ),
@@ -328,7 +336,6 @@ equation_and_metrics = dbc.Card(
 
 user_input = dbc.Row(
     [
-        dbc.Col(model_input),
         dbc.Col(equation_and_metrics),
         dbc.Row(data_output),
     ]
@@ -361,7 +368,7 @@ output = dbc.Col(
     ]
 )
 
-tab_lr_content = dbc.Card(dbc.CardBody([html.P("This is tab 1")]), class_name="mt-3")
+tab_lr_content = model_input
 
 tab_lasso_content = dbc.Card(dbc.CardBody([html.P("This is tab 2")]), class_name="mt-3")
 
@@ -465,13 +472,15 @@ init_data = np.transpose(generate_x(f=eval(f"lambda x:{default}"),distr_x='norma
 
 
 
+
+
 app.layout = dbc.Container(
     [
         dcc.Store(id="initial_data", data=init_data),
         dcc.Store(id="cur_data"),
         dcc.Store(id='pred_data'),
         dcc.Store(id='pred_data_lwr'),
-        html.H1("Group 3: Regression", className="text-center my-3"),
+        html.H1("Group 3: Regression", className="text-center my-3",style=TOP_BAR_STYLE),
         html.H2("LWR and Linear Regression", className="text-center my-3"),
         html.Div(
             [
@@ -779,8 +788,6 @@ def build_eps_graph(data,col_id,predictions):
     else:
         raise PreventUpdate
                  
-
-
 
 # Run the app
 if __name__ == "__main__":
