@@ -42,6 +42,8 @@ app = dash.Dash(
     external_stylesheets=[dbc.icons.FONT_AWESOME,dbc.themes.BOOTSTRAP],
     )  # Bootstrap theme
 
+
+
 SIDEBAR_WIDTH = 25
 
 SIDEBAR_STYLE = {
@@ -101,32 +103,6 @@ data_generation_setting = dbc.Card(
                     marks=None,
                     tooltip={"placement": "bottom", "always_visible": True},
                 ),
-                html.H4("Range"),
-                dcc.RangeSlider(
-                    id="data_range",
-                    className="slider",  ## for css reasons
-                    min=-25,
-                    max=25,
-                    step=1,
-                    value=[-3, 3],
-                    allowCross=False,
-                    dots=False,
-                    updatemode="mouseup",
-                    marks=None,
-                    tooltip={"placement": "bottom", "always_visible": True},
-                ),
-                html.H4("Noise Level"),
-                dcc.Slider(
-                    id="noise_factor",
-                    className="slider",  ## for css reasons
-                    min=0,
-                    max=1,
-                    step=0.01,
-                    updatemode="drag",
-                    value=0.5,
-                    marks=None,
-                    tooltip={"placement": "bottom", "always_visible": True},
-                ),
                 html.H4("Error Distribution"),
                 dcc.Dropdown(id='error_distr',
                              # 
@@ -138,7 +114,7 @@ data_generation_setting = dbc.Card(
                 ### dynamically load distribution parameters ... going to be a little bit tricky
                 html.Hr(),
                 html.Div(
-                    [dbc.Button("Regenerate Data", n_clicks=0, color="primary")],
+                    [dbc.Button("Regenerate Data", id="Regenerate Data", n_clicks=0, color="primary")],
                     className="d-grid gap-2",
                 ),
             ]
@@ -411,8 +387,6 @@ app.layout = dbc.Container(
     [
         Input("data_generation_function", "value"),
         Input("data_generation_samples", "value"),
-        Input("noise_factor", "value"),
-        Input("data_range", "value"),
         Input("regression_equation_input", "value"),
         Input("sections", "value"),
         Input("tau", "value"),
@@ -421,13 +395,12 @@ app.layout = dbc.Container(
         Input("error_distr", "value"),
         Input('sampling_x', 'children'),
         Input('sampling_error', 'children'),
+        Input('Regenerate Data', 'n_clicks')
     ],
 )
 def update_regression(
     data_generation_function,
     data_generation_samples,
-    noise_factor,
-    data_range,
     regression_equation_input,
     sections,
     tau,
@@ -436,6 +409,7 @@ def update_regression(
     error_distr,
     sampling_x,
     sampling_error,
+    n_clicks,
 ):
     """_summary_
 
@@ -473,13 +447,13 @@ def update_regression(
         
         
         x, y = generate_x(lambda x: 2 * x + 2, distr_x=x_distr, **dict(zip(ids, values)))
-        x = (x - data_range[0])/(data_range[1] - data_range[0])
+        x, y = x,add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))
 
-        x, y = x,add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))*noise_factor
         # update the data
         sections = None if sections is None or sections.strip() == "" else int(sections)
         tau = None if tau is None or tau.strip() == "" else float(tau)
         sigma = None if sigma is None or sigma.strip() == "" else float(sigma)
+  
         reg_lwr = LocallyWeightedRegression(
             [x, y],
             transposed=True,
@@ -488,6 +462,7 @@ def update_regression(
             tau=tau,
             sigma=sigma,
         )
+        
         reg_lin = LinearRegression([x, y], transposed=True, name=NAME_LIN)
     except Exception:  # I will burn in hell for this
         print(traceback.print_exc())
