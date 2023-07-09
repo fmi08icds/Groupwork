@@ -169,14 +169,14 @@ def conditional_content_x(condition,sample_size):
 @app.callback(
         [Output('sampling_error', 'children')],
         [Input('error_distr', 'value'),
-         Input('data_generation_samples', 'value')]
+         Input('data_generation_samples', 'value')],
 )
+
 def conditional_content_error(condition,sample_size):
     '''
     This function dynamically loads the conditional content for the error distribution
     from the docstring of the numpy random module.
     '''
-
     if condition != 'Heteroscedastic':
         collect_x = getattr(np.random,str.lower(condition))
         doc_str = inspect.getdoc(collect_x)
@@ -207,30 +207,27 @@ def conditional_content_error(condition,sample_size):
                                                 dbc.Tooltip(tooltip_text, target="tooltip-target"+param),
                                                 dcc.Input(id=param, placeholder=param, type='number',required=False,value=val)])
                 )
-
-
-
         return [content]
     else:
-        # Radiobutton for direction of heteroscedasticity:
         content = []
-
-        # Slider for intensity
-        content.append(dcc.Slider(id='heteroscedasticity',
-                                            min=-1,
-                                            max=1,
-                                            step=0.01,
-                                            updatemode="drag",
-                                            value=0,
-                                            marks=None,
-                                        ))                                         
-
+        #intensity
+        param = 'heteroscedacity'
+        content.append(dbc.InputGroup([dbc.InputGroupText(param,id="tooltip-target"+param,
+                                                                style={"cursor": "pointer"}),
+                                                dbc.Tooltip('intensity of heteroscedacity effect', target="tooltip-target"+param),
+                                                dcc.Input(id=param, placeholder=param, type='number',required=False,value=0.5,disabled=False)]))
+        
+        param = 'size'
+        content.append(dbc.InputGroup([dbc.InputGroupText(param,id="tooltip-target"+param,
+                                                               style={"cursor": "pointer"}),
+                                            dbc.Tooltip('Number of Observations', target="tooltip-target"+param),
+                                            dcc.Input(id=param, placeholder=param, type='number',required=False,value=sample_size,disabled=True)]))
         return [content]
 
 
 regression_equation = dbc.Card(
     [
-        dbc.CardHeader(html.H3("Manuel Regression")),
+        dbc.CardHeader(html.H3("Manuell Regression")),
         dbc.CardBody(
             [
                 html.H4("Function"),
@@ -246,22 +243,25 @@ regression_equation = dbc.Card(
                             [html.H5("Intercept"),
                                 dcc.Slider(
                                     id="beta0",
-                                    min=-100,
-                                    max=100,
+                                    min=-50,
+                                    max=50,
                                     step=0.1,
-                                    updatemode="drag",
+                                    updatemode="mouseup",
                                     value=0,
                                     marks=None,
+                                    tooltip={"placement": "right", "always_visible": True},
                                 ),
                                 html.H5("Beta"),
                                 dcc.Slider(
                                     id="beta1",
-                                    min=-100,
-                                    max=100,
+                                    min=-50,
+                                    max=50,
                                     step=0.1,
-                                    updatemode="drag",
+                                    updatemode="mouseup",
                                     value=0,
-                                    marks=None)]
+                                    marks=None,
+                                    tooltip={"placement": "right", "always_visible": True},
+                                    )]
                         ),
                         dbc.Row(
                             [
@@ -278,16 +278,17 @@ regression_equation = dbc.Card(
 
 model_input = dbc.CardBody([regression_equation])
 
-data_output = html.Div([dbc.CardHeader(html.H3('Data')),dash_table.DataTable(data=[{}], id="table"),])
-
-
-
-user_input = dbc.Row(
-    [
-        dbc.Col(model_input),
-        dbc.Row(data_output),
-    ]
+data_output = html.Div(
+    dbc.Row(
+        [dbc.Col([dbc.CardHeader(html.H3('Data')),
+                 dash_table.DataTable(data=[{}], id="table")]),
+        dbc.Col([
+        dbc.CardHeader(html.H3('Prediction')),
+                 dash_table.DataTable(data=[{}], id="pred_table")])
+                 ])
 )
+
+
 
 equation_and_metrics = dbc.Card(
     [
@@ -303,6 +304,9 @@ equation_and_metrics = dbc.Card(
                                 html.P(id="sum_of_squares_lin"),
                                 html.H5("Mean Squared Error"),
                                 html.P(id="mean_squared_error_lin"),
+                                html.H5("Coefficients"),
+                                html.H6('Intercept:'),html.P(id="lr_coefficients_int"),
+                                html.H6('Beta:'),html.P(id="lr_coefficients_beta"),
                             ]
                         ),
                         dbc.Col(
@@ -321,6 +325,15 @@ equation_and_metrics = dbc.Card(
     ],
     className="my-3",
 )
+
+user_input = dbc.Row(
+    [
+        dbc.Col(model_input),
+        dbc.Col(equation_and_metrics),
+        dbc.Row(data_output),
+    ]
+)
+
 output = dbc.Row(
     [
         dbc.Col(
@@ -329,10 +342,7 @@ output = dbc.Row(
                 type="circle",
                 children=dcc.Graph(id="graph"),
             )
-        ),
-        dbc.Col(
-            equation_and_metrics,
-        ),
+        )
     ]
 )
 
@@ -438,6 +448,8 @@ app.layout = dbc.Container(
     [
         dcc.Store(id="initial_data", data=init_data),
         dcc.Store(id="cur_data"),
+        dcc.Store(id='pred_data'),
+        dcc.Store(id='pred_data_lwr'),
         html.H1("Group 3: Regression", className="text-center my-3"),
         html.H2("LWR and Linear Regression", className="text-center my-3"),
         html.Div(
@@ -460,31 +472,22 @@ app.layout = dbc.Container(
         Output("sum_of_squares_lwr", "children"),
         Output("mean_squared_error_lin", "children"),
         Output("mean_squared_error_lwr", "children"),
+        Output('lr_coefficients_int','children'),
+        Output('lr_coefficients_beta','children'),
+
     ],
     [
-        Input("data_generation_function", "value"),
-        Input("data_generation_samples", "value"),
-        Input("sections", "value"),
-        Input("tau", "value"),
-        Input("sigma", "value"),
-        Input("x_distr", "value"),
-        Input("error_distr", "value"),
-        Input('sampling_x', 'children'),
-        Input('sampling_error', 'children'),
-        Input('Regenerate Data', 'n_clicks')
-    ],
+        State("sections", "value"),
+        State("tau", "value"),
+        State("sigma", "value"),
+        Input('cur_data','data')
+    ],prevent_initial_call=True
 )
 def update_regression(
-    data_generation_function,
-    data_generation_samples,
     sections,
     tau,
     sigma,
-    x_distr,
-    error_distr,
-    sampling_x,
-    sampling_error,
-    n_clicks,
+    cur_data
 ):
     """_summary_
 
@@ -501,44 +504,22 @@ def update_regression(
     # set default for data generation function
     global reg_lwr
     global reg_lin
-    data_generation_function = data_generation_function or default
-    x = y = None
-    try:
-        f = eval(f"lambda x:{data_generation_function}")
+    
+    x,y = np.transpose(cur_data)
+    # update the data
+    sections = None if sections is None or sections.strip() == "" else int(sections)
+    tau = None if tau is None or tau.strip() == "" else float(tau)
+    sigma = None if sigma is None or sigma.strip() == "" else float(sigma)
 
-        ids, values = [],[]
-        for prop in sampling_x:
-            ids.append(prop['props']['children'][2]['props']['id'])
-            values.append(prop['props']['children'][2]['props']['value'])
-
-        err_ids, err_values = [],[]
-        for prop in sampling_error:
-            err_ids.append(prop['props']['children'][2]['props']['id'])
-            err_values.append(prop['props']['children'][2]['props']['value'])
-        
-        
-        x, y = generate_x(f, distr_x=x_distr, **dict(zip(ids, values)))
-        y = add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))
-
-        # update the data
-        sections = None if sections is None or sections.strip() == "" else int(sections)
-        tau = None if tau is None or tau.strip() == "" else float(tau)
-        sigma = None if sigma is None or sigma.strip() == "" else float(sigma)
-  
-        reg_lwr = LocallyWeightedRegression(
-            [x, y],
-            transposed=True,
-            name=NAME_LWR,
-            sections=sections,
-            tau=tau,
-            sigma=sigma,
-        )
-        
-        reg_lin = LinearRegression([x, y], transposed=True, name=NAME_LIN)
-    except Exception:  # I will burn in hell for this
-        print(traceback.print_exc())
-        print("invalid function")
-
+    reg_lwr = LocallyWeightedRegression(
+        [x, y],
+        transposed=True,
+        name=NAME_LWR,
+        sections=sections,
+        tau=tau,
+        sigma=sigma,
+    )
+    reg_lin = LinearRegression([x, y], transposed=True, name=NAME_LIN)
     # calculate the sum of squares
     sum_of_squares_lin = "{:,.2f}".format(reg_lin.get_sum_of_squares())
     sum_of_squares_lwr = "{:,.2f}".format(reg_lwr.get_sum_of_squares())
@@ -607,6 +588,8 @@ def update_regression(
         sum_of_squares_lwr,
         mean_squared_error_lin,
         mean_squared_error_lwr,
+        round(reg_lin.coefficients[0],3),
+        round(reg_lin.coefficients[1],3)
     )
 
 
@@ -618,7 +601,7 @@ def update_regression(
     Input("error_distr", "value"),
     Input('Regenerate Data', 'n_clicks'),
     State('sampling_x', 'children'),
-    State('sampling_error', 'children')
+    State('sampling_error', 'children'),
     ],prevent_initial_call=True)
 def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_error):
     data_generation_function = f or default
@@ -636,7 +619,10 @@ def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_
             err_ids.append(prop['props']['children'][2]['props']['id'])
             err_values.append(prop['props']['children'][2]['props']['value'])
         
-        
+        print(f'hetero: {err_ids}')
+        print(f'hetero_vals: {err_values}')
+
+
         x, y = generate_x(f, distr_x=x_distr, **dict(zip(ids, values)))
         y = add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))
 
@@ -649,19 +635,73 @@ def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_
  
 @app.callback(
    [Output("cur_data", "data",allow_duplicate=True)],
-   [Input("initial_data", "data"), 
+   [State("initial_data", "data"), 
     Input("data_generation_samples", "value"),
     ],prevent_initial_call=True)
 def modify_data(current_data, N):
     if ctx.triggered_id == "data_generation_samples":
         return [current_data[:N]]
-    return [current_data]
+    else:
+        raise PreventUpdate
+
+@app.callback(
+    [Output('pred_data', 'data')],
+    [Input('cur_data', 'data'),
+     Input('beta0', 'value'),
+     Input('beta1', 'value'),]
+    )
+def update_predicted_y_in_data(data,beta0,beta1):
+    if data:
+        x,y = np.transpose(data)
+        lin_reg = LinearRegression([x,y], transposed=True, name=NAME_LIN)
+        man_prediction = beta0 + beta1*x
+        cur_data = np.transpose([lin_reg.predicted_values,man_prediction])
+        return [cur_data]
+    else:
+        raise PreventUpdate
+
+@app.callback([Output('pred_data_lwr', 'data')],
+              [Input('cur_data', 'data'),
+               State("sections", "value"),
+               State("tau", "value"),
+               State("sigma", "value"),])
+def update_predicted_lwr_y_in_data(data,sections,tau,sigma):
+    if ctx.triggered_id == "cur_data":
+        x,y = np.transpose(data)
+        reg_lwr = LocallyWeightedRegression(
+        [x, y],
+        transposed=True,
+        name=NAME_LWR,
+        sections=sections,
+        tau=tau,
+        sigma=sigma,
+        )
+        pred_lwr = [reg_lwr.predict(xi) for xi in x]
+        return [pred_lwr]
+    else:
+        raise PreventUpdate
+
 
 @app.callback([Output('table', 'data')],
               [Input('cur_data', 'data')])
 def update_table(data):
-    out = pd.DataFrame(data, columns=['x','y']).to_dict('records')
-    return [out] 
+    out = pd.DataFrame(data, columns=['x','y'])
+    out = round(out, 3)
+    return [out.to_dict('records')]
+
+@app.callback([Output('pred_table', 'data')],
+              [Input('pred_data', 'data'),
+               Input('pred_data_lwr', 'data')],
+               prevent_initial_call=True)
+def update_pred_table(pred, pred_lwr):
+    if ctx.triggered_id == "pred_data" or ctx.triggered_id == "pred_data_lwr":
+        col1, col2 = np.transpose(pred)
+        col3 = np.transpose(pred_lwr)
+        out = pd.DataFrame(data=np.transpose([col1,col2,col3]), columns=['y_LinReg','y_manReg', 'y_LWReg'])
+        out = round(out, 3)
+        return [out.to_dict('records')]
+    else:
+        raise PreventUpdate
 
 
 @app.callback([Output('regression_equation_input','value')],
@@ -682,27 +722,29 @@ def update_regression_equation(beta0,beta1):
               prevent_initial_call=True)
 def build_custom_line(coeffs, figure:go.Figure, data:list, beta0, beta1):
     #regression_equation_input = regression_equation_input or default
-    fig = go.Figure(figure)
-    x,y = np.transpose(data)
-    # add a scatter trace for the data    
-    predicted_values = (lambda x: beta0 + beta1*x)(x)
-    
-    sum_of_squares_lwr = np.sum((predicted_values - y) ** 2)
-    mean_sq_error_man_lin = sum_of_squares_lwr / len(y)
-    
-    
-    sum_of_squares_lwr = "{:,.2f}".format(sum_of_squares_lwr)
-    mean_sq_error_man_lin = "{:,.2f}".format(mean_sq_error_man_lin)
+    if ctx.triggered_id == "regression_equation_input":
+        fig = go.Figure(figure)
+        if data:
+            x,y = np.transpose(data)
+            # add a scatter trace for the data    
+            predicted_values = (lambda x: beta0 + beta1*x)(x)
+        
+            sum_of_squares_lwr = np.sum((predicted_values - y) ** 2)
+            mean_sq_error_man_lin = sum_of_squares_lwr / len(y)
+            
+            sum_of_squares_lwr = "{:,.2f}".format(sum_of_squares_lwr)
+            mean_sq_error_man_lin = "{:,.2f}".format(mean_sq_error_man_lin)
 
-    # add a scatter trace for the regression line
-    fig.update_traces(x=x,
-                    y=predicted_values,
-                    name="Manual Regression Line",
-                    selector=dict(name="Manual Regression Line"),
-                    overwrite=True)
-    
-    return [fig,sum_of_squares_lwr,mean_sq_error_man_lin]
-
+            # add a scatter trace for the regression line
+            fig.update_traces(x=x,
+                            y=predicted_values,
+                            name="Manual Regression Line",
+                            selector=dict(name="Manual Regression Line"),
+                            overwrite=True)
+        
+            return [fig,sum_of_squares_lwr,mean_sq_error_man_lin]
+        else:
+            raise PreventUpdate
 
 
 # Run the app
