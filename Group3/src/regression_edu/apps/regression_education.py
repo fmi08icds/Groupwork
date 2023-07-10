@@ -77,7 +77,7 @@ CONTENT_STYLE = {
     "padding": "2rem 1rem",
 }
 
-default = "2 * x + 2"
+default = "5 * x + 10"
 
 data_generation_setting = dbc.Card(
     [
@@ -627,9 +627,10 @@ def update_regression(
     State('sampling_x', 'children'),
     State('sampling_error', 'children'),
     ],prevent_initial_call=True)
-def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_error):
-    data_generation_function = f or default
+def update_data(current_data, data_generation_function, x_distr,error_distr,button,sampling_x,sampling_error):
     x = y = None
+    data_generation_function = data_generation_function or default
+    print(f'function: {data_generation_function}')
     try:
         f = eval(f"lambda x:{data_generation_function}")
 
@@ -642,6 +643,7 @@ def update_data(current_data, f, x_distr,error_distr,button,sampling_x,sampling_
         for prop in sampling_error:
             err_ids.append(prop['props']['children'][2]['props']['id'])
             err_values.append(prop['props']['children'][2]['props']['value'])
+
 
         x, y = generate_x(f, distr_x=x_distr, **dict(zip(ids, values)))
         y = add_noise(y, distr_eps=error_distr, **dict(zip(err_ids, err_values)))
