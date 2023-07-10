@@ -20,15 +20,16 @@ import math
 import re
 import pandas as pd
 import plotly.express as px
+from plotly.subplots import make_subplots
 
 SECTIONS = None
 NAME_LWR = "LWR"
 NAME_LIN = "Linear Regression"
 SIGMA = 1
 TAU = 0.5
-MAX_SAMPLE_SIZE = 200
+MAX_SAMPLE_SIZE = 100
 
-
+COLS = px.colors.qualitative.T10
 
 # external CSS stylesheets
 external_stylesheets = [
@@ -49,7 +50,7 @@ app = dash.Dash(
 
 
 
-SIDEBAR_WIDTH = 25
+SIDEBAR_WIDTH = 30
 
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -107,7 +108,7 @@ data_generation_setting = dbc.Card(
                     max=200,
                     step=1,
                     updatemode="drag",
-                    value=10,
+                    value=25,
                     marks=None,
                     tooltip={"placement": "bottom", "always_visible": True},
                 ),
@@ -169,9 +170,6 @@ def conditional_content_x(condition,sample_size):
                                             dbc.Tooltip(tooltip_text, target="tooltip-target"+param),
                                             dcc.Input(id=param, placeholder=param, type='number',required=False,value=val)])
             )
-
-
-
     return [content]
 
 
@@ -252,8 +250,8 @@ regression_equation = dbc.Card(
                             [html.H5("Intercept"),
                                 dcc.Slider(
                                     id="beta0",
-                                    min=-50,
-                                    max=50,
+                                    min=-25,
+                                    max=25,
                                     step=0.1,
                                     updatemode="mouseup",
                                     value=0,
@@ -263,8 +261,8 @@ regression_equation = dbc.Card(
                                 html.H5("Beta"),
                                 dcc.Slider(
                                     id="beta1",
-                                    min=-50,
-                                    max=50,
+                                    min=-25,
+                                    max=25,
                                     step=0.1,
                                     updatemode="mouseup",
                                     value=0,
@@ -468,7 +466,7 @@ sidebar = html.Div(
     style=SIDEBAR_STYLE,
 )
 
-init_data = np.transpose(generate_x(f=eval(f"lambda x:{default}"),distr_x='normal',loc=0,scale=1,size=MAX_SAMPLE_SIZE))
+init_data = np.transpose(generate_x(f=eval(f"lambda x:{default}"),distr_x='normal',loc=10,scale=5,size=MAX_SAMPLE_SIZE))
 
 
 
@@ -565,14 +563,14 @@ def update_regression(
             x=x,
             y=y,
             mode="markers",
-            marker=dict(color="blue"),
+            marker=dict(color=COLS[0]),
             name="Data",
         )
     )
 
     fig.add_trace(go.Scatter(
             mode="lines",
-            marker=dict(color="grey"),
+            marker=dict(color=COLS[2]),
             name="Manual Regression Line",
         ))
 
@@ -582,7 +580,7 @@ def update_regression(
             x=reg_lin.get_x_column(0),
             y=reg_lin.predicted_values,
             mode="lines",
-            marker=dict(color="green"),
+            marker=dict(color=COLS[1]),
             name="Linear Regression Line",
         )
     )
@@ -592,7 +590,7 @@ def update_regression(
             x=x_lin,
             y=[reg_lwr.predict(xi) for xi in x_lin],
             mode="lines",
-            marker=dict(color="purple"),
+            marker=dict(color=COLS[3]),
             name="Locally Weighted Regression",
         )
     )
@@ -768,22 +766,41 @@ def build_custom_line(coeffs, figure:go.Figure, data:list, beta0, beta1):
                 prevent_initial_call=True)
 def build_eps_graph(data,col_id,predictions):
     if ctx.triggered_id == "pred_table" or ctx.triggered_id == "residual_radio":
-        print(f'col_id:{col_id}')
         data = pd.DataFrame(data)
         pred = pd.DataFrame(predictions)
-        fig = go.Figure()
+        traces=[]
         for id in col_id:
-            fig.add_trace(go.Scatter(name=pred.columns[id],
+            traces.append(go.Scatter(name=pred.columns[id],
                 x=data[1], y=data[1]-pred.iloc[:,id],
-                mode='markers'))
+                mode='markers', marker=dict(color=COLS[id+1])))
+            traces.append(go.Histogram(name=pred.columns[id],
+                x=data[1]-pred.iloc[:,id],
+                histnorm='probability density',xaxis="x2",
+                yaxis="y2", marker=dict(color=COLS[id+1])))
         
+        layout = go.Layout(
+                xaxis=dict(
+                    domain=[0, 0.6]
+                ),
+                xaxis2=dict(
+                    domain=[0.65, 1]
+                ),
+                yaxis2=dict(
+                    anchor="x2"
+                )
+            )    
+
+
+        fig = go.Figure(data=traces, layout=layout)        
         fig.update_layout(
             title="Residuals vs. Predicted Values",
             xaxis_title="y",
             yaxis_title="Residuals",
             template="plotly_white",
-            height=500)
-        print(fig)
+            height=500,
+            bargap=0.2, # gap between bars of adjacent location coordinates
+            bargroupgap=0.1 # gap between bars of the same location coordinates
+            )
         return [fig]
     else:
         raise PreventUpdate
