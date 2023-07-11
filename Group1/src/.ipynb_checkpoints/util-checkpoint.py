@@ -1,9 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
-from tqdm import tqdm
-
-import model
 
 
 def select_random_image(split_data, classes_data, split_set):
@@ -43,7 +40,7 @@ def confusion_matrix(cnn, x_test, y_test):
     t_bar = tqdm(enumerate(zip(x_test, y_test)), total=len(x_test))
 
     for index, (img, img_label) in t_bar:
-        result = model.pred(cnn, img)
+        result = pred(cnn, img)
         result_idx = np.argmax(result)
         img_label_idx = np.argmax(img_label)
         if result_idx == img_label_idx:
@@ -60,7 +57,7 @@ def confusion_matrix(cnn, x_test, y_test):
     return tp, tn, fn, fp
 
 
-def accuracy(cnn, x_test, y_test):
+def accuracy(confusion_matrix)
     '''
     calculate the accuracy
     '''
@@ -69,7 +66,7 @@ def accuracy(cnn, x_test, y_test):
 
     return accuracy
 
-def precision(cnn, x_test, y_test):
+def precision(confusion_matrix)
     '''
     calculate the precision
     '''
@@ -78,7 +75,7 @@ def precision(cnn, x_test, y_test):
 
     return precision
 
-def recall(cnn, x_test, y_test):
+def recall(confusion_matrix)
     '''
     calculate the recall
     '''
