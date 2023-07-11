@@ -430,7 +430,7 @@ tab_lwr_content = dbc.Card(
 tabs = dbc.Tabs(
     [
         dbc.Tab(tab_lr_content, label="Linear Regression"),
-        dbc.Tab(tab_lasso_content, label="Lasso Regression"),
+        #dbc.Tab(tab_lasso_content, label="Lasso Regression"),
         dbc.Tab(tab_lwr_content, label="Locally weighted Regression", id="LWR"),
         dbc.Tooltip(
             """
@@ -798,6 +798,8 @@ def build_eps_graph(data,col_id,predictions):
             title="Residuals vs. Predicted Values",
             xaxis_title="y",
             yaxis_title="Residuals",
+            xaxis2_title="Residuals",
+            yaxis2_title="Frequency",
             template="plotly_white",
             height=500,
             bargap=0.2, # gap between bars of adjacent location coordinates
