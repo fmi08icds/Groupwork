@@ -798,6 +798,8 @@ def build_eps_graph(data,col_id,predictions):
             title="Residuals vs. Predicted Values",
             xaxis_title="y",
             yaxis_title="Residuals",
+            xaxis2_title="Residuals",
+            yaxis2_title="Frequency",
             template="plotly_white",
             height=500,
             bargap=0.2, # gap between bars of adjacent location coordinates
