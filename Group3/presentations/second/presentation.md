@@ -13,8 +13,9 @@ paginate: true
 # Group 3: Regression
 1. Introduction
 2. Coding
-3. Locally Weighted Regression in detail
-4. Live Demo
+3. Locally Weighted Regression in Detail
+4. Runtime Performance
+5. Live Demo
 ---
 # Introduction
 ## A Brief Recap
@@ -119,5 +120,5 @@ Hyperparameters:
 ![height:10cm](./performance_visualization/lwr_theirs.png)
 
 ---
-# 4. Live Demo
+# 5. Live Demo
 ---
