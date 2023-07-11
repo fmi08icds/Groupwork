@@ -12,9 +12,9 @@ paginate: true
 ![bg right:40% 180%](regression_intro.png)
 # Group 3: Regression
 1. Introduction
-2. Applied Software Engineering Principals
-3. Regression Models
-4. Applications
+2. Coding
+3. Locally Weighted Regression in detail
+4. Live Demo
 ---
 # Introduction
 ## A Brief Recap
@@ -34,14 +34,36 @@ paginate: true
 - Retained comparative study
 - Developed two web applications
   - One for education
-  - One for model visualisation
----
-# 2. Applied software engineering principals
----
-# 3. Regression Models 
+  - One for model visualization
 
-  - Ordinary Linear Regression
-  - Locally Weighted Regression
+--- 
+# 2. Coding
+ - Dev setup
+ - SWE principals
+
+---
+## 2.1 Coding - Dev setup
+
+- Fixed python version via pyenv (python 3.11)
+- Dependencies loaded via pip into a virtual env of the `venv` module of the standard lib
+- Code formatting with `black`
+- Linting with `pylint`
+- Reviews of pushed code
+- Usage of github issue tracker
+
+--- 
+## 2.2 SWE principals -- Separation of concerns
+
+![height:10cm](./directory_structure.png)
+
+---
+
+## 2.3 SWE principals -- Inheritance
+![height:10cm](./uml_inheritance.png)
+
+---
+
+# 3. Locally Weighted Regression (LWR) in Detail
 
 <!-- 
 ---
@@ -52,7 +74,7 @@ paginate: true
  $\Rightarrow \beta_{opt} = (X^t X)^{−1}X^t y$
 -->
 ---
-# 3. Regression Models - LWR
+# 3.1 LWR in Detail
 
 1. Divide intosections
 2. For each section, calculate the weighted regression with weight $w_i(x) = e^{-\frac{(centre_i-x)^2}{2\tau^2}}$
@@ -65,15 +87,37 @@ Hyperparameters:
  - _sigma_ 
 
 ---
-# 3. Regression Models - LWR - Influence of Tau
+# 3. LWR in Detail - Influence of Tau
 
 ![height:12cm right](tau.png)
 
 ---
-# 3. Regression Models - LWR - Influence of Sigma
+# 3. LWR in Detail - Influence of Sigma
 
 ![height:12cm right](sigma.png)
 
+
 ---
-# 4. Applications
+# 4. Runtime Performance
+
+---
+
+### 4.1 Linear Regression (ours)
+
+![height:10cm](./performance_visualization/lin_ours.png)
+
+---
+### 4.2 Linear Regression (from sklearns)
+![height:10cm](./performance_visualization/lin_theirs.png)
+
+---
+### 4.3 Linear Regression (ours)
+![height:10cm](./performance_visualization/lwr_ours.png)
+
+---
+### 4.4 Linear Regression (from localreg)
+![height:10cm](./performance_visualization/lwr_theirs.png)
+
+---
+# 4. Live Demo
 ---
