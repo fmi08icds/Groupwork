@@ -54,16 +54,30 @@ def read_training_data(data_directory, split, classes, img_size):
     classes_data = [[], [], []]
 
     for spl_index, spl in enumerate(split):
+        spl_path = os.path.join(data_directory, spl)
         for cla_index, cla in enumerate(classes):
             path = os.path.join(data_directory, spl, cla)
-            class_num = classes.index(cla)
+            if classes.index(cla) == 0:
+                class_num = np.array([[1.], [0.]])
+            else:
+                class_num = np.array([[0.], [1.]])
+            # class_num = classes.index(cla) # !!! replaced by if else statement
             for img in os.listdir(path):
                 img_array = cv.imread(os.path.join(
                     path, img), cv.IMREAD_GRAYSCALE)
                 img_array = cv.resize(img_array, (img_size, img_size))
+                img_array = np.reshape(
+                    img_array, (img_array.shape[0], img_array.shape[1], 1))
+                img_array = img_array.astype("float32") / 255
                 split_data[spl_index].append(img_array)
                 classes_data[spl_index].append(class_num)
-            print(path, '(read', len(classes_data[spl_index]), 'images)')
+        print(spl_path, '(read', len(classes_data[spl_index]), 'images)')
+
+    for i in range(0, len(split_data)):
+        comb_list = list(zip(split_data[i], classes_data[i]))
+        random.shuffle(comb_list)
+        split_data[i], classes_data[i] = zip(*comb_list)
+
     return split_data, classes_data
 
 
