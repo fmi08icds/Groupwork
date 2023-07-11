@@ -430,7 +430,7 @@ tab_lwr_content = dbc.Card(
 tabs = dbc.Tabs(
     [
         dbc.Tab(tab_lr_content, label="Linear Regression"),
-        dbc.Tab(tab_lasso_content, label="Lasso Regression"),
+        #dbc.Tab(tab_lasso_content, label="Lasso Regression"),
         dbc.Tab(tab_lwr_content, label="Locally weighted Regression", id="LWR"),
         dbc.Tooltip(
             """
