@@ -77,7 +77,7 @@ paginate: true
 ---
 # 3.1 LWR in Detail
 
-1. Divide intersections
+1. Divide into sections
 2. For each section, calculate the weighted regression with weight $w_i(x) = e^{-\frac{(centre_i-x)^2}{2\tau^2}}$
 3. Smoothen the function with $gauss_{centre}(x) = e^{-\frac{(centre-x)^2}{2\sigma^2}}$ and normalising it by dividing through $\Sigma_{centre} \ gauss_{centre}(x)$
  $f(x) = \frac{1}{\Sigma_i \ gauss_i(x)}\Sigma_{i} gauss_{i}(x)\cdot f_i(x)$ 
