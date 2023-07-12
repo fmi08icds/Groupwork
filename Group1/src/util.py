@@ -56,33 +56,42 @@ def confusion_matrix(cnn, x_test, y_test):
                 fn += 1
             else:
                 fp += 1
-    
-    return tp, tn, fn, fp
+
+    print('\nTP %s, TN %s, FN %s, FP %s' % (tp, tn, fn, fp))
+    return [tp, tn, fn, fp]
 
 
-def accuracy(cnn, x_test, y_test):
+def accuracy(confusion_matrix):
     '''
     calculate the accuracy
     '''
-    tp, tn, fn, fp = confusion_matrix(cnn, x_test, y_test)
+    tp = confusion_matrix[0]
+    tn = confusion_matrix[1]
+    fn = confusion_matrix[2]
+    fp = confusion_matrix[3]
+    
     accuracy = float((tp + tn) / (tp + fp + fn + tn))
 
     return accuracy
 
-def precision(cnn, x_test, y_test):
+def precision(confusion_matrix):
     '''
     calculate the precision
     '''
-    tp, tn, fn, fp = confusion_matrix(cnn, x_test, y_test)
+    tp = confusion_matrix[0]
+    fp = confusion_matrix[3]
+    
     precision = float(tp / (tp + fp))
 
     return precision
 
-def recall(cnn, x_test, y_test):
+def recall(confusion_matrix):
     '''
     calculate the recall
     '''
-    tp, tn, fn, fp = confusion_matrix(cnn, x_test, y_test)
+    tp = confusion_matrix[0]
+    fn = confusion_matrix[2]
+    
     recall = float(tp / (tp + fn))
 
     return recall

@@ -292,19 +292,13 @@ def test(cnn, x_test, y_test):
     '''
     Test a given network with data from x_test and y_test
     '''
-    tp = 0
-    tn = 0
-    fp = 0
-    fn = 0
-
     confusion_matrix = util.confusion_matrix(cnn, x_test, y_test)
-    print('TP %s, TN %s, FN %s, FP %s' % (tp, tn, fn, fp))
     
-    accuracy = util.accuracy(cnn, x_test, y_test)
+    accuracy = util.accuracy(confusion_matrix)
     print('Accuracy:', accuracy)
-    precision = util.precision(cnn, x_test, y_test)
+    precision = util.precision(confusion_matrix)
     print('Precision:', precision)
-    recall = util.recall(cnn, x_test, y_test)
+    recall = util.recall(confusion_matrix)
     print('Recall:', recall)
     
 
