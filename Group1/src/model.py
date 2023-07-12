@@ -392,8 +392,8 @@ def train_torch_cnn(base_torch_model, train_load, val_load, epochs, loss_func, o
         base_torch_model.eval()
         true, all = 0, 0
         with torch.no_grad():
+            print('start validation...')
             for images, labels in val_load:
-                print('start validation...')
                 images, labels = images.to(device), labels.squeeze().to(device)
                 out = base_torch_model(images)
                 _, predicted = torch.max(out.data, 1)  
