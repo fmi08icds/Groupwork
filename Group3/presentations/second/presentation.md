@@ -49,7 +49,7 @@ paginate: true
 - Dependencies loaded via pip into a virtual env of the `venv` module of the standard lib
 - Code formatting with `black`
 - Linting with `pylint`
-- Reviews of pushed code
+- Reviews of pushed code (rather informal)
 - Usage of github issue tracker
 
 --- 
@@ -103,43 +103,39 @@ Hyperparameters:
 
 Time Complexity:
   - 50 iterations
-  - 50 data points
-  - 2 independent variables
-
-Memory Consumption:
-  - 1 iteration
-  - 500 samples
-  - one independent variable 
+  - Data: 
+    - 50 data points
+    - 2 independent variables
 
 ---
 # 4. Runtime Performance - Results 
-|                                | **Time Complexity** | **Memory Consumption** |
-|--------------------------------|---------------------|------------------------|
-| **Linear Regression**          | 0.138s              | 0MiB                   |
-| **skearn.linear_model**        | 0.060s              | 0MiB                   |
-| **Locally WeightedRegression** | 56.500s             | 45.3MiB                |
-| **localreg**                   | 2.170s              | 0MiB                   |
+|                                | **Runtime in seconds** |
+|--------------------------------|---------------------|
+| **LinearRegression**          | 0.138              |
+| **skearn.linear_model**        | 0.060              |
+| **LocallyWeightedRegression** | 56.500             |
+| **localreg**                   | 2.170              |
 
 ---
 
-<!--
-### 4.1 Linear Regression (ours)
+### 4.1 LinearRegression
 
 ![height:10cm](./performance_visualization/lin_ours.png)
+flame graph generated with `snakeviz`
 
 ---
-### 4.2 Linear Regression (from sklearns)
+<!-- ### 4.2 Linear Regression (from sklearns)
 ![height:10cm](./performance_visualization/lin_theirs.png)
 
----
-### 4.3 Linear Regression (ours)
+--- -->
+### 4.2 LocallyWeightedRegression
 ![height:10cm](./performance_visualization/lwr_ours.png)
+flame graph generated with `snakeviz`
 
 ---
-### 4.4 Linear Regression (from localreg)
+<!-- ### 4.4 Linear Regression (from localreg)
 ![height:10cm](./performance_visualization/lwr_theirs.png)
--->
 
----
+
+--- -->
 # 5. Live Demo
----
