@@ -42,7 +42,7 @@ def main():
 
         profile_lin_ours.enable()
         # data = np.asarray((x1,y)).T
-        LinearRegression([x1, x2, x3, y], transposed=True)
+        LinearRegression([x1, x2, x3, y], transposed=True, name=None)
         profile_lin_ours.disable()
         print("Lin Reg done")
         profile_lin_std.enable()
@@ -52,7 +52,7 @@ def main():
         print("Std lin reg done")
 
         profile_lwr_ours.enable()
-        LocallyWeightedRegression([x1, x2, x3, y], transposed=True)
+        LocallyWeightedRegression([x1, x2, x3, y], transposed=True, name=None)
         profile_lwr_ours.disable()
         print("LWR done")
         profile_lwr_std.enable()
@@ -69,7 +69,7 @@ def main():
 
 @profile
 def mem_our_lin(x, y):
-    LinearRegression([x, y], transposed=True)
+    LinearRegression([x, y], transposed=True, name=None)
 
 
 @profile
@@ -80,7 +80,7 @@ def mem_std_lin(x, y):
 
 @profile
 def mem_our_lwr(x, y):
-    LocallyWeightedRegression([x, y], transposed=True)
+    LocallyWeightedRegression([x, y], transposed=True, name=None)
 
 
 @profile
