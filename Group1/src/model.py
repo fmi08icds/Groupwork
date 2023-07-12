@@ -55,6 +55,15 @@ class conv_layer:
                         img[h:h+self.conv_size[0], w:w+self.conv_size[1], :] * self.conv_kernels[k])
         return out_img
 
+    def backward(self, grad_output, learning_rate):
+        grad_input = np.zeros(self.in_dim)
+        for k in range(self.kernel_num):
+            for h in range(self.out_dim[0]):
+                for w in range(self.out_dim[1]):
+                    grad_input[h:h+self.conv_size[0], w:w+self.conv_size[1], :] += grad_output[h, w, k] * self.conv_kernels[k]
+                    self.conv_kernels[k] -= learning_rate * grad_output[h, w, k] * self.input[h:h+self.conv_size[0], w:w+self.conv_size[1], :]
+        return grad_input
+
     '''
     get out put dimension of this network layer
 
@@ -122,6 +131,33 @@ class max_pooling_layer:
                         img[h*pool_size_h:h*pool_size_h+pool_size_h, w*pool_size_w:w*pool_size_w+pool_size_w, d])
         return out_img
 
+    def backward(self, grad_output, learning_rate):
+            
+        grad_output = np.reshape(grad_output, (self.out_dim))
+        grad_input = np.zeros(self.in_dim)
+
+        h_overflow = True if self.in_dim[0] / self.pooling_size[0] - self.out_dim[0] > 0 else False
+        w_overflow = True if self.in_dim[1] / self.pooling_size[1] - self.out_dim[1] > 0 else False
+
+        count_grad_slice = 0
+        for d in range(self.out_dim[2]):
+            for w in range(self.out_dim[0]):
+                for h in range(self.out_dim[1]):
+                    pool_size_h = self.pooling_size[0]
+                    pool_size_w = self.pooling_size[1]
+                    if h_overflow and h == (self.out_dim[0]-1):
+                        pool_size_h = self.in_dim[0] % self.pooling_size[0]
+                    if w_overflow and w == (self.out_dim[1]-1):
+                        pool_size_w = self.in_dim[1] % self.pooling_size[1]
+
+                    grad_slice = grad_output[w, h, d]
+                    count_grad_slice += 1
+                    mask = (self.input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d] == np.max(self.input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d]))
+                    grad_input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d] = mask * grad_slice #!!! h und w vertauscht?
+                    #grad_input[h * self.pooling_size[0]:h * self.pooling_size[0] + pool_size_h, w * self.pooling_size[1]:w * self.pooling_size[1] + pool_size_w, d] += grad_output[h, w, d] * mask
+        return grad_input
+
+    
     '''
     get out put dimension of this network layer
 
@@ -256,37 +292,15 @@ def test(cnn, x_test, y_test):
     '''
     Test a given network with data from x_test and y_test
     '''
-    tp = 0
-    tn = 0
-    fp = 0
-    fn = 0
-    t_bar = tqdm(enumerate(zip(x_test, y_test)), total=len(x_test))  # !!!
-    # t_bar = enumerate(zip(x_test, y_test))
-    for index, (img, img_label) in t_bar:
-        result = pred(cnn, img)
-        result_idx = np.argmax(result)
-        img_label_idx = np.argmax(img_label)
-        if result_idx == img_label_idx:
-            if img_label_idx == 1:
-                tp += 1
-            else:
-                tn += 1
-        else:
-            if img_label_idx == 1:
-                fn += 1
-            else:
-                fp += 1
-        # print(f"pred: {result_idx}, true: {img_label_idx}")
-    print('TP %s, TN %s, FP %s, FN %s' % (tp, tn, fp, fn))
-    accuracy = (tp+tn)/(tp+tn+fp+fn)
-    print('Accuracy: %s' % (round(accuracy, 4)))
-    precision = tp/(tp+fp)
-    print('Precision: %s' % (round(precision, 4)))
-    recall = tp/(tp+fn)
-    print('Recall: %s' % (round(recall, 4)))
-    f1 = 2*((precision*recall)/(precision+recall))
-    print('F1: %s' % (round(f1, 4)))
-
+    confusion_matrix = util.confusion_matrix(cnn, x_test, y_test)
+    
+    accuracy = util.accuracy(confusion_matrix)
+    print('Accuracy:', accuracy)
+    precision = util.precision(confusion_matrix)
+    print('Precision:', precision)
+    recall = util.recall(confusion_matrix)
+    print('Recall:', recall)
+    
 
 def run_base_cnn(split_data, classes_data, epochs, learning_rate):
     '''
