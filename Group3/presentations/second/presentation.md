@@ -77,7 +77,7 @@ paginate: true
 ---
 # 3.1 LWR in Detail
 
-1. Divide intosections
+1. Divide intersections
 2. For each section, calculate the weighted regression with weight $w_i(x) = e^{-\frac{(centre_i-x)^2}{2\tau^2}}$
 3. Smoothen the function with $gauss_{centre}(x) = e^{-\frac{(centre-x)^2}{2\sigma^2}}$ and normalising it by dividing through $\Sigma_{centre} \ gauss_{centre}(x)$
  $f(x) = \frac{1}{\Sigma_i \ gauss_i(x)}\Sigma_{i} gauss_{i}(x)\cdot f_i(x)$ 
@@ -99,10 +99,30 @@ Hyperparameters:
 
 
 ---
-# 4. Runtime Performance
+# 4. Runtime Performance - Setup
+
+Time Complexity:
+  - 50 iterations
+  - 50 data points
+  - 2 independent variables
+
+Memory Consumption:
+  - 1 iteration
+  - 500 samples
+  - one independent variable 
+
+---
+# 4. Runtime Performance - Results 
+|                                | **Time Complexity** | **Memory Consumption** |
+|--------------------------------|---------------------|------------------------|
+| **Linear Regression**          | 0.138s              | 0MiB                   |
+| **skearn.linear_model**        | 0.060s              | 0MiB                   |
+| **Locally WeightedRegression** | 56.500s             | 45.3MiB                |
+| **localreg**                   | 2.170s              | 0MiB                   |
 
 ---
 
+<!--
 ### 4.1 Linear Regression (ours)
 
 ![height:10cm](./performance_visualization/lin_ours.png)
@@ -118,6 +138,7 @@ Hyperparameters:
 ---
 ### 4.4 Linear Regression (from localreg)
 ![height:10cm](./performance_visualization/lwr_theirs.png)
+-->
 
 ---
 # 5. Live Demo
