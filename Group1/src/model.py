@@ -6,6 +6,12 @@ from tqdm import tqdm
 import preparation
 import util
 
+import torch
+from torch.utils.data import random_split
+from torch import cuda, device
+from torch import nn
+from torch import optim, from_numpy, tensor
+
 
 class conv_layer:
     '''
@@ -60,8 +66,11 @@ class conv_layer:
         for k in range(self.kernel_num):
             for h in range(self.out_dim[0]):
                 for w in range(self.out_dim[1]):
-                    grad_input[h:h+self.conv_size[0], w:w+self.conv_size[1], :] += grad_output[h, w, k] * self.conv_kernels[k]
-                    self.conv_kernels[k] -= learning_rate * grad_output[h, w, k] * self.input[h:h+self.conv_size[0], w:w+self.conv_size[1], :]
+                    grad_input[h:h+self.conv_size[0], w:w+self.conv_size[1],
+                               :] += grad_output[h, w, k] * self.conv_kernels[k]
+                    self.conv_kernels[k] -= learning_rate * grad_output[h, w, k] * \
+                        self.input[h:h+self.conv_size[0],
+                                   w:w+self.conv_size[1], :]
         return grad_input
 
     '''
@@ -132,12 +141,14 @@ class max_pooling_layer:
         return out_img
 
     def backward(self, grad_output, learning_rate):
-            
+
         grad_output = np.reshape(grad_output, (self.out_dim))
         grad_input = np.zeros(self.in_dim)
 
-        h_overflow = True if self.in_dim[0] / self.pooling_size[0] - self.out_dim[0] > 0 else False
-        w_overflow = True if self.in_dim[1] / self.pooling_size[1] - self.out_dim[1] > 0 else False
+        h_overflow = True if self.in_dim[0] / \
+            self.pooling_size[0] - self.out_dim[0] > 0 else False
+        w_overflow = True if self.in_dim[1] / \
+            self.pooling_size[1] - self.out_dim[1] > 0 else False
 
         count_grad_slice = 0
         for d in range(self.out_dim[2]):
@@ -152,12 +163,13 @@ class max_pooling_layer:
 
                     grad_slice = grad_output[w, h, d]
                     count_grad_slice += 1
-                    mask = (self.input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d] == np.max(self.input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d]))
-                    grad_input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d] = mask * grad_slice #!!! h und w vertauscht?
-                    #grad_input[h * self.pooling_size[0]:h * self.pooling_size[0] + pool_size_h, w * self.pooling_size[1]:w * self.pooling_size[1] + pool_size_w, d] += grad_output[h, w, d] * mask
+                    mask = (self.input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d] == np.max(
+                        self.input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h*pool_size_w+pool_size_w, d]))
+                    grad_input[w*pool_size_h:w*pool_size_h+pool_size_h, h*pool_size_w:h *
+                               pool_size_w+pool_size_w, d] = mask * grad_slice  # !!! h und w vertauscht?
+                    # grad_input[h * self.pooling_size[0]:h * self.pooling_size[0] + pool_size_h, w * self.pooling_size[1]:w * self.pooling_size[1] + pool_size_w, d] += grad_output[h, w, d] * mask
         return grad_input
 
-    
     '''
     get out put dimension of this network layer
 
@@ -293,14 +305,14 @@ def test(cnn, x_test, y_test):
     Test a given network with data from x_test and y_test
     '''
     confusion_matrix = util.confusion_matrix(cnn, x_test, y_test)
-    
+
     accuracy = util.accuracy(confusion_matrix)
     print('Accuracy:', accuracy)
     precision = util.precision(confusion_matrix)
     print('Precision:', precision)
     recall = util.recall(confusion_matrix)
     print('Recall:', recall)
-    
+
 
 def run_base_cnn(split_data, classes_data, epochs, learning_rate):
     '''
@@ -325,11 +337,98 @@ def run_base_cnn(split_data, classes_data, epochs, learning_rate):
     test(base_cnn, split_data[2], classes_data[2])
 
 
-def run_torch_cnn(split_data, classes_data, epochs, learning_rate):
+class TorchCNN(nn.Module):
+    '''
+    '''
+
+    def __init__(self):
+        super(TorchCNN, self).__init__()
+        self.c1 = nn.Conv2d(1, 32, 3)
+        self.sig1 = nn.Sigmoid()
+        self.pool1 = nn.MaxPool2d(2)
+        self.c2 = nn.Conv2d(32, 64, 3)
+        self.sig2 = nn.Sigmoid()
+        self.pool2 = nn.MaxPool2d(2)
+        self.f1 = nn.Linear(64 * 23 * 23, 128)
+        self.sig3 = nn.Sigmoid()
+        self.f2 = nn.Linear(128, 2)
+
+    def forward(self, fw):
+        '''
+        '''
+        fw = self.c1(fw)
+        fw = self.sig1(fw)
+        fw = self.pool1(fw)
+        fw = self.c2(fw)
+        fw = self.sig2(fw)
+        fw = self.pool2(fw)
+        fw = fw.view(fw.size(0), -1)
+        fw = self.f1(fw)
+        fw = self.sig3(fw)
+        fw = self.f2(fw)
+        return fw
+
+
+def train_torch_cnn(base_torch_model, train_load, val_load, epochs, loss_func, optimizer, device):
+    for epoch in range(epochs):
+        base_torch_model.train()
+        loss_run = 0.0
+        for images, labels in train_load:
+            images, labels = images.to(device), labels.squeeze().to(device)
+            optimizer.zero_grad()
+            out = base_torch_model(images)
+            loss = loss_func(out, labels)
+            loss.backward()
+            optimizer.step()
+            loss_run += loss.item()
+        loss_res = loss_run / len(train_load)
+        print('One training loop finished...')
+        base_torch_model.eval()
+        true, all = 0, 0
+        with torch.no_grad():
+            for images, labels in val_load:
+                print('start validation...')
+                images, labels = images.to(device), labels.squeeze().to(device)
+                out = base_torch_model(images)
+                _, predicted = torch.max(out.data, 1)
+                all += labels.size(0)
+                true += (predicted == labels.squeeze()).sum().item()
+        acc = true / all
+        print('acc', acc)
+
+
+def test_torch_cnn(base_torch_model, test_load, loss_func, device):
+    base_torch_model.eval()
+    true, all = 0, 0
+    with torch.no_grad():
+        for images, labels in test_load:
+            print('start testing...')
+            images, labels = images.to(device), labels.squeeze().to(device)
+            out = base_torch_model(images)
+            _, predicted = torch.max(out.data, 1)
+            all += labels.size(0)
+            true += (predicted == labels.squeeze()).sum().item()
+    acc = true / all
+    print('acc', acc)
+
+
+def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):
     '''
     Run the cnn model from pytorch with the given data
     '''
-    pass
+    train_load, val_load, test_load = preparation.torch_cnn_prepare_data(
+        split_data, classes_data, batch_size)
+    base_torch_model = TorchCNN()
+
+    loss_func = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(base_torch_model.parameters(), lr=learning_rate)
+
+    device = torch.device("cuda" if cuda.is_available() else "cpu")
+    base_torch_model.to(device)
+
+    train_torch_cnn(base_torch_model, train_load,
+                    val_load, epochs, loss_func, optimizer, device)
+    test_torch_cnn(base_torch_model, test_load, loss_func, device)
 
 
 # class test_layers_cnn:

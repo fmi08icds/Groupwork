@@ -5,6 +5,10 @@ import random
 import numpy as np
 import cv2 as cv
 
+from torch.utils.data.dataloader import DataLoader
+from torch.utils.data import TensorDataset
+from torch import optim, from_numpy, tensor
+
 
 def data_folder_init(data_path, data_files_path, data_files_path_origin):
     '''
@@ -45,7 +49,7 @@ def data_folder_train_split(data_path, ratio_test_val, source_train_folder, targ
                 shutil.move(source_f, target_f)
 
 
-def read_training_data(data_directory, split, classes, img_size):
+def read_training_data(data_directory, split, classes, img_size, model_name):
     '''
     Read training images and classes into multi-dimensional array.
     Images are compressed to img_size x img_size.
@@ -66,8 +70,12 @@ def read_training_data(data_directory, split, classes, img_size):
                 img_array = cv.imread(os.path.join(
                     path, img), cv.IMREAD_GRAYSCALE)
                 img_array = cv.resize(img_array, (img_size, img_size))
-                img_array = np.reshape(
-                    img_array, (img_array.shape[0], img_array.shape[1], 1))
+                if model_name == 'base' or model_name == 'inspect':
+                    img_array = np.reshape(
+                        img_array, (img_array.shape[0], img_array.shape[1], 1))
+                elif model_name == 'torch':
+                    img_array = np.reshape(
+                        img_array, (1, img_array.shape[0], img_array.shape[1]))
                 img_array = img_array.astype("float32") / 255
                 split_data[spl_index].append(img_array)
                 classes_data[spl_index].append(class_num)
@@ -86,3 +94,22 @@ def reshape_img(img):
     Reshape image to 3D array with third dimension as 1.
     '''
     return np.reshape(img, (img.shape[0], img.shape[1], 1))
+
+
+def torch_cnn_prepare_data(split_data, classes_data, batch_size):
+    '''
+    '''
+    x_train, y_train = split_data[0], classes_data[0]
+    x_val, y_val = split_data[1], classes_data[1]
+    x_test, y_test = split_data[2], classes_data[2]
+
+    train_data = TensorDataset(tensor(x_train), tensor(y_train))
+    train_load = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    val_data = TensorDataset(tensor(x_val), tensor(y_val))
+    val_load = DataLoader(val_data, batch_size=batch_size, shuffle=True)
+    test_data = TensorDataset(tensor(x_test), tensor(y_test))
+    test_load = DataLoader(test_data, batch_size=batch_size, shuffle=True)
+
+    print('... created DataLoader for train, val and test.')
+
+    return train_load, val_load, test_load
