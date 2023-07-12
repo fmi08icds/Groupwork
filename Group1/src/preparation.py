@@ -103,11 +103,11 @@ def torch_cnn_prepare_data(split_data, classes_data, batch_size):
     x_val, y_val = split_data[1], classes_data[1]
     x_test, y_test = split_data[2], classes_data[2]
 
-    train_data = TensorDataset(tensor(x_train), tensor(y_train))
+    train_data = TensorDataset(tensor(np.array(x_train)), tensor(np.array(y_train)))
     train_load = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    val_data = TensorDataset(tensor(x_val), tensor(y_val))
+    val_data = TensorDataset(tensor(np.array(x_val)), tensor(np.array(y_val)))
     val_load = DataLoader(val_data, batch_size=batch_size, shuffle=True)
-    test_data = TensorDataset(tensor(x_test), tensor(y_test))
+    test_data = TensorDataset(tensor(np.array(x_test)), tensor(np.array(y_test)))
     test_load = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     print('... created DataLoader for train, val and test.')

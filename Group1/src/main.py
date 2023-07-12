@@ -35,9 +35,9 @@ class main_variables():
         self.data_directory = 'data/'
         self.split = ['train', 'val', 'test']
         self.classes = ['NORMAL', 'PNEUMONIA']
-        self.img_size = 100
+        self.img_size = 227
         self.epochs = 5
-        self.learning_rate = 0.01
+        self.learning_rate = 0.05
         self.batch_size = 64
 
 
