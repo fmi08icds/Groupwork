@@ -1,0 +1,5 @@
+.*
+!.gitignore
+*.png
+*_random.csv
+__pycache__
