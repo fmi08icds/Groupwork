@@ -36,8 +36,8 @@ class main_variables():
         self.split = ['train', 'val', 'test']
         self.classes = ['NORMAL', 'PNEUMONIA']
         self.img_size = 100
-        self.epochs = 5
-        self.learning_rate = 0.01
+        self.epochs = 10
+        self.learning_rate = 0.1
         self.batch_size = 64
 
 

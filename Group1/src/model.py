@@ -275,7 +275,7 @@ def pred(cnn, img):
     return fw
 
 
-def train(cnn, x_train, y_train, epochs, learning_rate):
+def train(cnn, x_train, y_train, x_val, y_val, epochs, learning_rate):
     '''
     Train a given network with data from x_train and y_train
     '''
@@ -297,7 +297,10 @@ def train(cnn, x_train, y_train, epochs, learning_rate):
             # t_bar.set_description('Training loss: %s'%(round(loss_end, 4)))
             t_bar.set_description('Training loss: %s' % (round(loss, 4)))
         loss_end = loss/(index+1)
-        print('Training loss: %s' % (round(loss_end, 4)))
+        print('Epoch %s/%s | Training loss: %s' %
+              (epoch, epochs, round(loss_end, 4)))
+        print('Validation:')
+        test(cnn, x_val, y_val)
 
 
 def test(cnn, x_test, y_test):
@@ -318,6 +321,21 @@ def run_base_cnn(split_data, classes_data, epochs, learning_rate):
     '''
     Run the created naive base cnn with the given data
     '''
+    # base_cnn = [
+    #     conv_layer(in_dim=preparation.reshape_img(
+    #         split_data[0][0]).shape, conv_size=(3, 3), kernel_num=2),
+    #     sigmoid_activation_layer(),
+    #     max_pooling_layer(in_dim=(98, 98, 2), pooling_size=(4, 4)),
+    #     conv_layer(in_dim=(25, 25, 2), conv_size=(3, 3), kernel_num=2),
+    #     sigmoid_activation_layer(),
+    #     max_pooling_layer(in_dim=(23, 23, 2), pooling_size=(2, 2)),
+    #     fully_connected_layer(in_dim=(12, 12, 2), out_dim=100),
+    #     sigmoid_activation_layer(),
+    #     fully_connected_layer(in_dim=(100, 1), out_dim=20),
+    #     sigmoid_activation_layer(),
+    #     fully_connected_layer(in_dim=(20, 1), out_dim=2),
+    #     sigmoid_activation_layer()
+    # ]
     base_cnn = [
         conv_layer(in_dim=preparation.reshape_img(
             split_data[0][0]).shape, conv_size=(3, 3), kernel_num=2),
@@ -331,8 +349,8 @@ def run_base_cnn(split_data, classes_data, epochs, learning_rate):
         sigmoid_activation_layer()
     ]
 
-    train(base_cnn, split_data[0], classes_data[0],
-          epochs=3, learning_rate=0.1)
+    train(base_cnn, split_data[0], classes_data[0], split_data[1], classes_data[1],
+          epochs=epochs, learning_rate=learning_rate)
 
     test(base_cnn, split_data[2], classes_data[2])
 

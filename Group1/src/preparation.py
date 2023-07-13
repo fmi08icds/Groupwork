@@ -28,7 +28,6 @@ def data_folder_train_split(data_path, ratio_test_val, source_train_folder, targ
     Split data into train, test and val (with pre-defined ratio).
     Will only be executed once.
     '''
-    random.seed(4)
 
     if not os.path.exists(os.path.join(data_path, 'test')) and not os.path.exists(os.path.join(data_path, 'val')):
         for i in range(0, len(source_train_folder)):
@@ -66,7 +65,13 @@ def read_training_data(data_directory, split, classes, img_size, model_name):
             else:
                 class_num = np.array([[0.], [1.]])
             # class_num = classes.index(cla) # !!! replaced by if else statement
+            img_read_limit = len([name for name in os.listdir(
+                os.path.join(data_directory, spl, 'NORMAL'))])
+            # img_read_limit = 200
+            img_read = 0
             for img in os.listdir(path):
+                if img_read >= img_read_limit:
+                    break
                 img_array = cv.imread(os.path.join(
                     path, img), cv.IMREAD_GRAYSCALE)
                 img_array = cv.resize(img_array, (img_size, img_size))
@@ -79,6 +84,8 @@ def read_training_data(data_directory, split, classes, img_size, model_name):
                 img_array = img_array.astype("float32") / 255
                 split_data[spl_index].append(img_array)
                 classes_data[spl_index].append(class_num)
+                img_read += 1
+
         print(spl_path, '(read', len(classes_data[spl_index]), 'images)')
 
     for i in range(0, len(split_data)):
