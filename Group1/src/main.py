@@ -37,8 +37,8 @@ class main_variables():
         self.classes = ['NORMAL', 'PNEUMONIA']
         self.img_size = 227
         self.epochs = 5
-        self.learning_rate = 0.05
-        self.batch_size = 64
+        self.learning_rate = 0.01
+        self.batch_size = 64 
 
 
 def orchestrate_preperation(model_name):

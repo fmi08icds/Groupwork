@@ -344,34 +344,46 @@ class TorchCNN(nn.Module):
     def __init__(self):
         super(TorchCNN, self).__init__()
         self.c1 = nn.Conv2d(1, 96, 11, stride=4)
+        self.act1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(3,stride=2)
         self.c2 = nn.Conv2d(96, 256, 5, padding=2)
+        self.act2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(3,stride=2)
         self.c3 = nn.Conv2d(256, 384, 3, padding=1)
+        self.act3 = nn.ReLU()
         self.c4 = nn.Conv2d(384, 256, 3, padding=1)
+        self.act4 = nn.ReLU()
         self.pool3 = nn.MaxPool2d(3,stride=2)
         self.f1 = nn.Linear(256 * 6 * 6, 4096)
+        self.act5 = nn.ReLU()
         self.f2 = nn.Linear(4096, 4096)
+        self.act6 = nn.ReLU()
         self.f3 = nn.Linear(4096, 128)
+        self.act7 = nn.ReLU()
         self.f4 = nn.Linear(128, 2)
-        self.act1 = nn.Softmax(1)
 
     def forward(self, fw):
         '''
         '''
         fw = self.c1(fw)
+        fw = self.act1(fw)
         fw = self.pool1(fw)
         fw = self.c2(fw)
+        fw = self.act2(fw)
         fw = self.pool2(fw)
         fw = self.c3(fw)
+        fw = self.act3(fw)
         fw = self.c4(fw)
+        fw = self.act4(fw)
         fw = self.pool3(fw)
         fw = fw.view(fw.size(0), -1)
         fw = self.f1(fw)
+        fw = self.act5(fw)
         fw = self.f2(fw)
+        fw = self.act6(fw)
         fw = self.f3(fw)
+        fw = self.act7(fw)
         fw = self.f4(fw)
-        fw = self.act1(fw)
         return fw
 
 
@@ -387,6 +399,7 @@ def train_torch_cnn(base_torch_model, train_load, val_load, epochs, loss_func, o
             loss.backward()
             optimizer.step()
             loss_run += loss.item()
+            loss = 0
         loss_res = loss_run / len(train_load)
         print('Epoch:', epoch, '/', epochs, 'Loss:', loss_res)
         base_torch_model.eval()
@@ -408,8 +421,8 @@ def test_torch_cnn(base_torch_model, test_load, loss_func, device):
     base_torch_model.eval()
     true, all = 0, 0
     with torch.no_grad():
+        print('start testing...')
         for images, labels in test_load:
-            print('start testing...')
             images, labels = images.to(device), labels.squeeze().to(device)
             out = base_torch_model(images)
             _, predicted = torch.max(out.data, 1)
@@ -417,7 +430,7 @@ def test_torch_cnn(base_torch_model, test_load, loss_func, device):
             all += labels.size(0)
             true += (predicted == labels_max).sum().item()
     acc = true / all
-    print('acc', acc)
+    print('Testing acc', acc)
 
 
 def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):
@@ -427,7 +440,7 @@ def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):
     train_load, val_load, test_load = preparation.torch_cnn_prepare_data(
         split_data, classes_data, batch_size)
     base_torch_model = TorchCNN()
-    loss_func = nn.CrossEntropyLoss()
+    loss_func = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(base_torch_model.parameters(), lr=learning_rate)
 
     device = torch.device("cuda" if cuda.is_available() else "cpu")
