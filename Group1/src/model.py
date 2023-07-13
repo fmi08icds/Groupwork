@@ -361,29 +361,35 @@ class TorchCNN(nn.Module):
 
     def __init__(self):
         super(TorchCNN, self).__init__()
-        self.c1 = nn.Conv2d(1, 32, 3)
-        self.sig1 = nn.Sigmoid()
-        self.pool1 = nn.MaxPool2d(2)
-        self.c2 = nn.Conv2d(32, 64, 3)
-        self.sig2 = nn.Sigmoid()
-        self.pool2 = nn.MaxPool2d(2)
-        self.f1 = nn.Linear(64 * 23 * 23, 128)
-        self.sig3 = nn.Sigmoid()
-        self.f2 = nn.Linear(128, 2)
+        self.c1 = nn.Conv2d(1, 96, 11, stride=4)
+        self.pool1 = nn.MaxPool2d(3,stride=2)
+        self.c2 = nn.Conv2d(96, 256, 5, padding=2)
+        self.pool2 = nn.MaxPool2d(3,stride=2)
+        self.c3 = nn.Conv2d(256, 384, 3, padding=1)
+        self.c4 = nn.Conv2d(384, 256, 3, padding=1)
+        self.pool3 = nn.MaxPool2d(3,stride=2)
+        self.f1 = nn.Linear(256 * 6 * 6, 4096)
+        self.f2 = nn.Linear(4096, 4096)
+        self.f3 = nn.Linear(4096, 128)
+        self.f4 = nn.Linear(128, 2)
+        self.act1 = nn.Softmax(1)
 
     def forward(self, fw):
         '''
         '''
         fw = self.c1(fw)
-        fw = self.sig1(fw)
         fw = self.pool1(fw)
         fw = self.c2(fw)
-        fw = self.sig2(fw)
         fw = self.pool2(fw)
+        fw = self.c3(fw)
+        fw = self.c4(fw)
+        fw = self.pool3(fw)
         fw = fw.view(fw.size(0), -1)
         fw = self.f1(fw)
-        fw = self.sig3(fw)
         fw = self.f2(fw)
+        fw = self.f3(fw)
+        fw = self.f4(fw)
+        fw = self.act1(fw)
         return fw
 
 
@@ -400,19 +406,20 @@ def train_torch_cnn(base_torch_model, train_load, val_load, epochs, loss_func, o
             optimizer.step()
             loss_run += loss.item()
         loss_res = loss_run / len(train_load)
-        print('One training loop finished...')
+        print('Epoch:', epoch, '/', epochs, 'Loss:', loss_res)
         base_torch_model.eval()
         true, all = 0, 0
         with torch.no_grad():
+            print('start validation...')
             for images, labels in val_load:
-                print('start validation...')
                 images, labels = images.to(device), labels.squeeze().to(device)
                 out = base_torch_model(images)
-                _, predicted = torch.max(out.data, 1)
+                _, predicted = torch.max(out.data, 1)  
+                _, labels_max = torch.max(labels, 1)
                 all += labels.size(0)
-                true += (predicted == labels.squeeze()).sum().item()
+                true += (predicted == labels_max).sum().item()
         acc = true / all
-        print('acc', acc)
+        print('Validation acc', acc)
 
 
 def test_torch_cnn(base_torch_model, test_load, loss_func, device):
@@ -424,8 +431,9 @@ def test_torch_cnn(base_torch_model, test_load, loss_func, device):
             images, labels = images.to(device), labels.squeeze().to(device)
             out = base_torch_model(images)
             _, predicted = torch.max(out.data, 1)
+            _, labels_max = torch.max(labels, 1)
             all += labels.size(0)
-            true += (predicted == labels.squeeze()).sum().item()
+            true += (predicted == labels_max).sum().item()
     acc = true / all
     print('acc', acc)
 
@@ -437,7 +445,6 @@ def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):
     train_load, val_load, test_load = preparation.torch_cnn_prepare_data(
         split_data, classes_data, batch_size)
     base_torch_model = TorchCNN()
-
     loss_func = nn.CrossEntropyLoss()
     optimizer = optim.Adam(base_torch_model.parameters(), lr=learning_rate)
 
