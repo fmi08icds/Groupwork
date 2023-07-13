@@ -679,6 +679,7 @@ def update_predicted_y_in_data(data,beta0,beta1):
                Input("sigma", "value")],
                prevent_initial_call=True)
 def update_predicted_lwr_y_in_data(data,sections,tau,sigma):
+    global reg_lwr
     if ctx.triggered_id == 'cur_data'\
     or ctx.triggered_id == 'sections'\
     or ctx.triggered_id == 'tau'\
@@ -812,4 +813,4 @@ def build_eps_graph(data,col_id,predictions):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
