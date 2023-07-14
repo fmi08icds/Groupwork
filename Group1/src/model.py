@@ -287,13 +287,10 @@ def train(cnn, x_train, y_train, x_val, y_val, epochs, learning_rate):
 
             fw = pred(cnn, img)
             fw = np.reshape(fw, (2, 1))
-            print('fw', fw)
-            print('fw', img_label)
             loss += bin_cross_entropy(img_label, fw)
             # t_bar.set_description('Training loss: %s'%(round(loss, 4)))
 
             grad = bin_cross_entropy_deriv(img_label, fw)
-            print('grad', grad)
             for layer in reversed(cnn):
                 grad = layer.backward(grad, learning_rate)
 
