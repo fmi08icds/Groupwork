@@ -465,7 +465,7 @@ def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):
     train_torch_cnn(base_torch_model, train_load,
                     val_load, epochs, loss_func, optimizer, device)
     test_torch_cnn(base_torch_model, test_load, loss_func, device)
-    torch.save(base_torch_model.state_dict(),"torch_cnn_save")
+    torch.save(base_torch_model.state_dict(),"models/base_torch_cnn")
 
 
 # class test_layers_cnn:

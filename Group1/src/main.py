@@ -40,7 +40,7 @@ class main_variables():
         elif model_name == 'torch':
             self.img_size = 227
         self.epochs = 10
-        self.learning_rate = 0.2
+        self.learning_rate = 0.01
         self.batch_size = 64
         self.balance = False
 
