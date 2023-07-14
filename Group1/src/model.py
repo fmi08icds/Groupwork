@@ -346,21 +346,14 @@ class TorchCNN(nn.Module):
         self.c1 = nn.Conv2d(1, 96, 11, stride=4)
         self.act1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(3,stride=2)
-        self.c2 = nn.Conv2d(96, 256, 5, padding=2)
+        self.c2 = nn.Conv2d(96, 256, 3, padding=2)
         self.act2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(3,stride=2)
-        self.c3 = nn.Conv2d(256, 384, 3, padding=1)
+        self.f1 = nn.Linear(50176, 4096)
         self.act3 = nn.ReLU()
-        self.c4 = nn.Conv2d(384, 256, 3, padding=1)
+        self.f2 = nn.Linear(4096, 128)
         self.act4 = nn.ReLU()
-        self.pool3 = nn.MaxPool2d(3,stride=2)
-        self.f1 = nn.Linear(256 * 6 * 6, 4096)
-        self.act5 = nn.ReLU()
-        self.f2 = nn.Linear(4096, 4096)
-        self.act6 = nn.ReLU()
-        self.f3 = nn.Linear(4096, 128)
-        self.act7 = nn.ReLU()
-        self.f4 = nn.Linear(128, 2)
+        self.f3 = nn.Linear(128, 2)
 
     def forward(self, fw):
         '''
@@ -371,19 +364,12 @@ class TorchCNN(nn.Module):
         fw = self.c2(fw)
         fw = self.act2(fw)
         fw = self.pool2(fw)
-        fw = self.c3(fw)
-        fw = self.act3(fw)
-        fw = self.c4(fw)
-        fw = self.act4(fw)
-        fw = self.pool3(fw)
         fw = fw.view(fw.size(0), -1)
         fw = self.f1(fw)
-        fw = self.act5(fw)
+        fw = self.act3(fw)
         fw = self.f2(fw)
-        fw = self.act6(fw)
+        fw = self.act4(fw)
         fw = self.f3(fw)
-        fw = self.act7(fw)
-        fw = self.f4(fw)
         return fw
 
 
@@ -401,7 +387,7 @@ def train_torch_cnn(base_torch_model, train_load, val_load, epochs, loss_func, o
             loss_run += loss.item()
             loss = 0
         loss_res = loss_run / len(train_load)
-        print('Epoch:', epoch, '/', epochs, 'Loss:', loss_res)
+        print('Epoch:', epoch + 1, '/', epochs, 'Loss:', loss_res)
         base_torch_model.eval()
         true, all = 0, 0
         with torch.no_grad():
@@ -449,6 +435,7 @@ def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):
     train_torch_cnn(base_torch_model, train_load,
                     val_load, epochs, loss_func, optimizer, device)
     test_torch_cnn(base_torch_model, test_load, loss_func, device)
+    torch.save(base_torch_model.state_dict(),"torch_cnn_save")
 
 
 # class test_layers_cnn:

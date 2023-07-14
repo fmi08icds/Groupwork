@@ -38,7 +38,7 @@ class main_variables():
         self.img_size = 227
         self.epochs = 5
         self.learning_rate = 0.01
-        self.batch_size = 64 
+        self.batch_size = 64
 
 
 def orchestrate_preperation(model_name):
