@@ -2,4 +2,4 @@
 
 conda activate icds
 
-python3 src/main.py -m naive
+python3 src/main.py -m base
