@@ -26,7 +26,7 @@ class conv_layer:
     kernel_num -> int -> number of kernels
     '''
 
-    def __init__(self, in_dim, conv_size=(3, 3), kernel_num=4, debug=False):
+    def __init__(self, in_dim, conv_size, kernel_num, debug=False):
         self.kernel_num = kernel_num
         self.conv_size = conv_size
         self.conv_kernels = [None] * self.kernel_num
@@ -102,7 +102,7 @@ class max_pooling_layer:
     pooling_size -> tuple of shape (h, w) -> size of pooling filter
     '''
 
-    def __init__(self, in_dim, pooling_size=(3, 3)):
+    def __init__(self, in_dim, pooling_size):
         self.pooling_size = pooling_size
         self.in_dim = in_dim
         h_overflow = 1 if self.in_dim[0] % self.pooling_size[0] > 0 else 0
@@ -133,7 +133,7 @@ class max_pooling_layer:
                     pool_size_w = self.pooling_size[1]
                     if h_overflow and h == (self.out_dim[0]-1):
                         pool_size_h = self.in_dim[0] % self.pooling_size[0]
-                    if h_overflow and h == (self.out_dim[0]-1):
+                    if w_overflow and w == (self.out_dim[0]-1):
                         pool_size_w = self.in_dim[1] % self.pooling_size[1]
 
                     out_img[h, w, d] = np.max(
@@ -287,10 +287,13 @@ def train(cnn, x_train, y_train, x_val, y_val, epochs, learning_rate):
 
             fw = pred(cnn, img)
             fw = np.reshape(fw, (2, 1))
+            print('fw', fw)
+            print('fw', img_label)
             loss += bin_cross_entropy(img_label, fw)
             # t_bar.set_description('Training loss: %s'%(round(loss, 4)))
 
             grad = bin_cross_entropy_deriv(img_label, fw)
+            print('grad', grad)
             for layer in reversed(cnn):
                 grad = layer.backward(grad, learning_rate)
 
@@ -321,15 +324,16 @@ def run_base_cnn(split_data, classes_data, epochs, learning_rate):
     '''
     Run the created naive base cnn with the given data
     '''
+    kernel_num = 3
     # base_cnn = [
     #     conv_layer(in_dim=preparation.reshape_img(
-    #         split_data[0][0]).shape, conv_size=(3, 3), kernel_num=2),
+    #         split_data[0][0]).shape, conv_size=(3, 3), kernel_num=kernel_num),
     #     sigmoid_activation_layer(),
-    #     max_pooling_layer(in_dim=(98, 98, 2), pooling_size=(4, 4)),
-    #     conv_layer(in_dim=(25, 25, 2), conv_size=(3, 3), kernel_num=2),
+    #     max_pooling_layer(in_dim=(98, 98, kernel_num), pooling_size=(4, 4)),
+    #     conv_layer(in_dim=(25, 25, kernel_num), conv_size=(3, 3), kernel_num=kernel_num),
     #     sigmoid_activation_layer(),
-    #     max_pooling_layer(in_dim=(23, 23, 2), pooling_size=(2, 2)),
-    #     fully_connected_layer(in_dim=(12, 12, 2), out_dim=100),
+    #     max_pooling_layer(in_dim=(23, 23, kernel_num), pooling_size=(2, 2)),
+    #     fully_connected_layer(in_dim=(12, 12, kernel_num), out_dim=100),
     #     sigmoid_activation_layer(),
     #     fully_connected_layer(in_dim=(100, 1), out_dim=20),
     #     sigmoid_activation_layer(),
@@ -338,10 +342,10 @@ def run_base_cnn(split_data, classes_data, epochs, learning_rate):
     # ]
     base_cnn = [
         conv_layer(in_dim=preparation.reshape_img(
-            split_data[0][0]).shape, conv_size=(3, 3), kernel_num=2),
-        max_pooling_layer(in_dim=(98, 98, 2), pooling_size=(3, 3)),
+            split_data[0][0]).shape, conv_size=(3, 3), kernel_num=kernel_num),
+        max_pooling_layer(in_dim=(98, 98, kernel_num), pooling_size=(3, 3)),
         sigmoid_activation_layer(),
-        fully_connected_layer(in_dim=(33, 33, 2), out_dim=200),
+        fully_connected_layer(in_dim=(33, 33, kernel_num), out_dim=200),
         sigmoid_activation_layer(),
         fully_connected_layer(in_dim=(200, 1), out_dim=20),
         sigmoid_activation_layer(),
@@ -362,12 +366,12 @@ class TorchCNN(nn.Module):
     def __init__(self):
         super(TorchCNN, self).__init__()
         self.c1 = nn.Conv2d(1, 96, 11, stride=4)
-        self.pool1 = nn.MaxPool2d(3,stride=2)
+        self.pool1 = nn.MaxPool2d(3, stride=2)
         self.c2 = nn.Conv2d(96, 256, 5, padding=2)
-        self.pool2 = nn.MaxPool2d(3,stride=2)
+        self.pool2 = nn.MaxPool2d(3, stride=2)
         self.c3 = nn.Conv2d(256, 384, 3, padding=1)
         self.c4 = nn.Conv2d(384, 256, 3, padding=1)
-        self.pool3 = nn.MaxPool2d(3,stride=2)
+        self.pool3 = nn.MaxPool2d(3, stride=2)
         self.f1 = nn.Linear(256 * 6 * 6, 4096)
         self.f2 = nn.Linear(4096, 4096)
         self.f3 = nn.Linear(4096, 128)
@@ -375,8 +379,6 @@ class TorchCNN(nn.Module):
         self.act1 = nn.Softmax(1)
 
     def forward(self, fw):
-        '''
-        '''
         fw = self.c1(fw)
         fw = self.pool1(fw)
         fw = self.c2(fw)
@@ -414,28 +416,41 @@ def train_torch_cnn(base_torch_model, train_load, val_load, epochs, loss_func, o
             for images, labels in val_load:
                 images, labels = images.to(device), labels.squeeze().to(device)
                 out = base_torch_model(images)
-                _, predicted = torch.max(out.data, 1)  
+                _, predicted = torch.max(out.data, 1)
                 _, labels_max = torch.max(labels, 1)
                 all += labels.size(0)
                 true += (predicted == labels_max).sum().item()
+
         acc = true / all
         print('Validation acc', acc)
 
 
 def test_torch_cnn(base_torch_model, test_load, loss_func, device):
     base_torch_model.eval()
-    true, all = 0, 0
+    true, all, tp, tn, fp, fn = 0, 0, 0, 0, 0, 0
     with torch.no_grad():
+        print('start testing...')
         for images, labels in test_load:
-            print('start testing...')
             images, labels = images.to(device), labels.squeeze().to(device)
             out = base_torch_model(images)
             _, predicted = torch.max(out.data, 1)
             _, labels_max = torch.max(labels, 1)
             all += labels.size(0)
             true += (predicted == labels_max).sum().item()
+            for pred, label in zip(predicted, labels_max):
+                if pred == 1 and label == 1:
+                    tp += 1
+                elif pred == 0 and label == 0:
+                    tn += 1
+                elif pred == 0 and label == 1:
+                    fn += 1
+                elif pred == 1 and label == 0:
+                    fp += 1
     acc = true / all
-    print('acc', acc)
+    print('\nTP %s, TN %s, FN %s, FP %s' % (tp, tn, fn, fp))
+    print('Accuracy:', acc)
+    print('Precision:', float(tp / (tp + fp)))
+    print('Recall:', float(tp / (tp + fn)))
 
 
 def run_torch_cnn(split_data, classes_data, epochs, learning_rate, batch_size):

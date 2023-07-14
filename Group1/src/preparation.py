@@ -48,7 +48,7 @@ def data_folder_train_split(data_path, ratio_test_val, source_train_folder, targ
                 shutil.move(source_f, target_f)
 
 
-def read_training_data(data_directory, split, classes, img_size, model_name):
+def read_training_data(data_directory, split, classes, img_size, model_name, balance):
     '''
     Read training images and classes into multi-dimensional array.
     Images are compressed to img_size x img_size.
@@ -67,10 +67,10 @@ def read_training_data(data_directory, split, classes, img_size, model_name):
             # class_num = classes.index(cla) # !!! replaced by if else statement
             img_read_limit = len([name for name in os.listdir(
                 os.path.join(data_directory, spl, 'NORMAL'))])
-            # img_read_limit = 200
+            # img_read_limit = 50
             img_read = 0
             for img in os.listdir(path):
-                if img_read >= img_read_limit:
+                if img_read >= img_read_limit and balance:
                     break
                 img_array = cv.imread(os.path.join(
                     path, img), cv.IMREAD_GRAYSCALE)
@@ -110,11 +110,13 @@ def torch_cnn_prepare_data(split_data, classes_data, batch_size):
     x_val, y_val = split_data[1], classes_data[1]
     x_test, y_test = split_data[2], classes_data[2]
 
-    train_data = TensorDataset(tensor(np.array(x_train)), tensor(np.array(y_train)))
+    train_data = TensorDataset(
+        tensor(np.array(x_train)), tensor(np.array(y_train)))
     train_load = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     val_data = TensorDataset(tensor(np.array(x_val)), tensor(np.array(y_val)))
     val_load = DataLoader(val_data, batch_size=batch_size, shuffle=True)
-    test_data = TensorDataset(tensor(np.array(x_test)), tensor(np.array(y_test)))
+    test_data = TensorDataset(tensor(np.array(x_test)),
+                              tensor(np.array(y_test)))
     test_load = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     print('... created DataLoader for train, val and test.')

@@ -35,10 +35,14 @@ class main_variables():
         self.data_directory = 'data/'
         self.split = ['train', 'val', 'test']
         self.classes = ['NORMAL', 'PNEUMONIA']
-        self.img_size = 227
-        self.epochs = 5
-        self.learning_rate = 0.05
+        if model_name == 'base':
+            self.img_size = 100
+        elif model_name == 'torch':
+            self.img_size = 227
+        self.epochs = 10
+        self.learning_rate = 0.2
         self.batch_size = 64
+        self.balance = False
 
 
 def orchestrate_preperation(model_name):
@@ -96,7 +100,7 @@ def orchestrate_model(model_name):
     args = main_variables(model_name)
 
     split_data, classes_data = preparation.read_training_data(
-        args.data_directory, args.split, args.classes, args.img_size, model_name)
+        args.data_directory, args.split, args.classes, args.img_size, model_name, args.balance)
 
     all_count_split_data = 0
     for i in split_data:
