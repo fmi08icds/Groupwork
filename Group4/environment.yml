@@ -1,0 +1,19 @@
+name: env
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - plotly
+  - matplotlib
+  - seaborn
+  - ipykernel
+  - numpy
+  - pandas
+  - scikit-learn
+  - scikit-learn-intelex  # CPU acceleration for scikit-learn, see https://intel.github.io/scikit-learn-intelex/
+  - jupyter
+  - black
+  - pytest
+  - tqdm
+  - tabulate  # allows exporting pandas dataframes as markdown table
+
