@@ -1,8 +1,8 @@
 #! /bin/bash
-
+## COMMENTS: very good :) I ran it and it works perfectly...
 python_version=`python --version`
 
-if [ "$str1" != "Python 3.11.3" ]; then
+if [ "$str1" != "Python 3.11.3" ]; then ## COMMENTS: here it always enter this condition. So please, debugg it.
     echo "Warning! You are not using the recommended python version for this app"
     echo "Recommended python version: Python 3.11.3"
     echo "Current python verison: $python_version"

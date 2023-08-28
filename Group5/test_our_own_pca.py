@@ -2,6 +2,8 @@ import our_pca
 import dataimport
 from data_cleaning import *
 
+##COMMENTS: Not a proper test file here. Please, check the Group4/tests folder for a hint.
+## Or have a look at this: https://docs.python.org/3/library/unittest.html
 
 # Get a random DataFrame
 #   with nr_r rows and nr_c columns (both will be set by user-input)

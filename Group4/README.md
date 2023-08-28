@@ -18,6 +18,7 @@ This project uses a local conda environment. It isolates the Python runtime and 
 ``` bash
 # Create a conda environment based on the `environment.yml`. It will be stored in a local folder called `env`.
 conda env create --file environment.yml --prefix ./env
+## COMMENTS: this results in a ResolvePackageNotFound: for scikit-learn-intelex...on MAC the best would have been to write a bash script.. check Group3/src or provide information of the computer on which your codes were run.
 
 # To activate the new conda environment, use
 conda activate ./env
@@ -64,7 +65,7 @@ These tools are configured by the `pyproject.toml` file.
 ├── 📁 env                <-- Local conda environment (not part of version control)
 │   └── ...
 │
-├── 📁 evaluation         <-- Evaluation of clustering algorithms with different metrics 
+├── 📁 evaluation         <-- Evaluation of clustering algorithms with different metrics
 │   └── ...
 │
 ├── 📁 notebooks          <-- Directory for Jupyter notebook files

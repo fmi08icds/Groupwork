@@ -22,7 +22,8 @@ class LinearRegression(BaseRegression):
             np.linalg.pinv(np.transpose(x_data) @ x_data)
             @ np.transpose(x_data)
             @ self.y_data
-        )
+        ) ## COMMENTS: why this computation made in the init function? I will suggest to put it in a function called fit for example.
+        ## COMMENTS: And fit method could be abstract in BaseRegression class, therefore implemented independly in LR and LWR.
         self.predicted_values = x_data @ self.coefficients
 
     def predict(self, x):

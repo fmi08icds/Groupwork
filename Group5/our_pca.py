@@ -2,7 +2,7 @@ from pandas import DataFrame
 import numpy as np
 
 
-def our_pca(data: DataFrame, n_components):
+def our_pca(data: DataFrame, n_components): ## COMMENTS: very good and simple.
     """
     Own implementation of pca.
     :param data: pandas DataFrame

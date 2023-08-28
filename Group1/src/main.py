@@ -12,7 +12,7 @@ import model
 import util
 
 
-class main_variables():
+class main_variables(): ## COMMENTS: does that really make sense to create a full class to store the main variables?
     '''
     Organize the variables for all classes
     '''

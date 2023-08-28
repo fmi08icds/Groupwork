@@ -1,6 +1,7 @@
 
 #! /bin/bash
 
+##COMMENTS: well done!
 python_version=`python --version`
 base_dir=`pwd`
 

@@ -44,7 +44,7 @@ CONFIG = {
     }
 }
 
-
+##COMMENTS: no information on how to run this script. Since it depends on ./data/SpotifyFeatures.csv whish by default it does not exist. 
 def main(path: str = "./data/SpotifyFeatures.csv", algorithms: Sequence[str] = None, sample_size: int = 100):
     """Run experiments on the different clustering algorithms using predefined parameter dictionaries
     Parameters:

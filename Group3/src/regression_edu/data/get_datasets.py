@@ -4,7 +4,7 @@ import urllib.request
 import pandas as pd
 
 BASE_DIR = "./realworld/"
-
+## COMMENTS: Seen!
 if not os.path.exists(BASE_DIR):
     os.makedirs(BASE_DIR)
 

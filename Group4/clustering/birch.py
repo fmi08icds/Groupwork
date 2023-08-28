@@ -46,7 +46,7 @@ class Birch:
         n_cluster: int = None,
         leaf_factor: int = None,
         predict=True,
-    ) -> None:
+    ) -> None: ## COMMENTS: wrong typing indication here, an __init__ should always return an instance of Class(an object) not None.
         self.bf = branching_factor
         self.threshold = threshold
         self.root: Node
@@ -155,7 +155,7 @@ class Birch:
         return all_leafs
 
 
-class Node:
+class Node: ## COMMENTS: always more readable to avoid internal classes. Create a new python file for a new class.
     """
     Internal class.
 

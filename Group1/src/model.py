@@ -11,17 +11,17 @@ from torch.utils.data import random_split
 from torch import cuda, device
 from torch import nn
 from torch import optim, from_numpy, tensor
+## COMMENTS: You mentioned in your requirement file we only need numpy to run your main. What about all other external libraries imported above??
 
-
-class conv_layer:
+class conv_layer: ## COMMENTS: as suggested in class better to name your class with capital letters to distinguish them from functions
     '''
     Convolution layer expects an input dimension (in_dim) of shape (h, w, d), where h and w
-    are hight and width of images and d the number of dimensions. 
+    are hight and width of images and d the number of dimensions.
 
-    Currently there is no padding or stride configuration. The layer operates with no paddling 
+    Currently there is no padding or stride configuration. The layer operates with no paddling
     and a stride of one.
 
-    in_dim -> tuple of shape (h,w,d) -> input image dimensions 
+    in_dim -> tuple of shape (h,w,d) -> input image dimensions
     conv_size -> tuple of shape (h, w) -> size of convolution kernel
     kernel_num -> int -> number of kernels
     '''
@@ -46,13 +46,13 @@ class conv_layer:
     perform a forward convolution on the specified image.
 
     img -> np.array of shape (h,w,d)
-    
+
     ret:
     out_img -> np.array of shape (h,w,d)
     '''
 
     def forward(self, img):
-        self.input = img
+        self.input = img ## COMMENTS: Please initialise this attribute in the constructor.
         out_img = np.zeros(self.out_dim)
         for k in range(0, self.kernel_num):
             for h in range(0, self.out_dim[0]):
@@ -68,7 +68,7 @@ class conv_layer:
                 for w in range(self.out_dim[1]):
                     grad_input[h:h+self.conv_size[0], w:w+self.conv_size[1],
                                :] += grad_output[h, w, k] * self.conv_kernels[k]
-                    self.conv_kernels[k] -= learning_rate * grad_output[h, w, k] * \
+                    self.conv_kernels[k] -= learning_rate * grad_output[h, w, k] *
                         self.input[h:h+self.conv_size[0],
                                    w:w+self.conv_size[1], :]
         return grad_input
@@ -93,12 +93,12 @@ class conv_layer:
 class max_pooling_layer:
     '''
     Max pooling layer expects an input dimension (in_dim) of shape (h, w, d), where h and w
-    are hight and width of images and d the number of dimensions. 
+    are hight and width of images and d the number of dimensions.
 
-    Currently there is no padding or stride configuration. The layer operates with no paddling 
+    Currently there is no padding or stride configuration. The layer operates with no paddling
     and a stride of one.
 
-    in_dim -> tuple of shape (h,w,d) -> input image dimensions 
+    in_dim -> tuple of shape (h,w,d) -> input image dimensions
     pooling_size -> tuple of shape (h, w) -> size of pooling filter
     '''
 
@@ -114,7 +114,7 @@ class max_pooling_layer:
     perform forward pooling on the specified image.
 
     img -> np.array of shape (h,w,d)
-    
+
     ret:
     out_img -> np.array of shape (h,w,d)
     '''
@@ -186,7 +186,7 @@ class fully_connected_layer:
     The fully connected layer transforms the input into a fully connected network
     with an output vector of out_dim.
 
-    in_dim -> tuple of shape (h,w,d) -> input image dimensions 
+    in_dim -> tuple of shape (h,w,d) -> input image dimensions
     out_dim -> int -> defines the number of output nodes
     '''
 
@@ -242,7 +242,7 @@ class sigmoid_activation_layer():
         self.fw_res = self.sigm(self.input)
         return self.fw_res
 
-    def backward(self, grad_output, learning_rate):
+    def backward(self, grad_output, learning_rate): ##COMMENTS: the two input parameters are not used in the methods.
         self.bw_res = self.sigm_deriv(self.input)
         return self.bw_res
 

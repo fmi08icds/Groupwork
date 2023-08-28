@@ -9,7 +9,9 @@
 
 # Hint:
 
-Please unzip the data.zip after cloning this repo.
+Please unzip the data.zip after cloning this repo. ##COMMENTS: With what command? more explicite guide on how to reproduce your results is important##.
+
+## Puting data.zip in a data's folder will be better organised folders.
 
 
 # Organization
@@ -17,7 +19,7 @@ Please unzip the data.zip after cloning this repo.
 - We communicate via Telegram
 - We write our code in seperate scripts, which will be merged in a final notebook in the end
 - We all push to the "Group5_dev" branch and Paul will merge it with "Group5_main" in the end   
-   
+
 
 # First Presentation
 The slides are in GitHub and were prepared by:
@@ -37,7 +39,7 @@ Paul presents for Sepideh, but she prepared her slides.
 2. Load ICMR data sets and merge raw data with label data
 3. Investigate data set for missings
 4. Descriptive statistics (distribution of cancer types, age…)
-5. Perform PCA on genetic data using own implementation 
+5. Perform PCA on genetic data using own implementation
 6. Evaluate proportion of variance explained and choose number of components
 7. Compare results & run time with PCA implementation
 8. Compare results with tSNE library results (visually)

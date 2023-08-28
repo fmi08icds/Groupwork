@@ -7,7 +7,7 @@ import inspect
 from regression_edu.models.base_regression import BaseRegression
 
 
-class LocallyWeightedRegression(BaseRegression):
+class LocallyWeightedRegression(BaseRegression): ## COMMENTS: good heritage implementation
     """
     This is class implements a locally weighted regression.
     """
@@ -58,7 +58,7 @@ class LocallyWeightedRegression(BaseRegression):
             for i in range(len(weight_matrix)):
                 weight_matrix[i] = np.diag(w(i))
             self.centres = x_data[:, 1]
-            
+
         else:
             x_sorted = x_data[x_data[:, 1].argsort()]
             weight_matrix = np.zeros((sections, len(x_data), len(x_data)))
@@ -83,7 +83,7 @@ class LocallyWeightedRegression(BaseRegression):
 
         self.coefficients = [get_coefficient(i) for i in range(len(weight_matrix))]
         self.predicted_values = np.asarray([self.predict(xi) for xi in x_data[:, 1:]])
-    
+
     def gauss(self, centre, x, sigma):
         """
         Calculates the corresponding value of a given x using a gaussian distribution
